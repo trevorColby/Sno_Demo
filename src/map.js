@@ -9,6 +9,7 @@ import Projection from 'ol/proj';
 import SourceVector from 'ol/source/vector';
 import Draw from 'ol/interaction/draw';
 import { MapControls } from './MapControls';
+import Modify from 'ol/interaction/modify';
 
 export class MainMap extends React.Component{
 
@@ -18,7 +19,7 @@ export class MainMap extends React.Component{
     this.togglePolyTool = this.togglePolyTool.bind(this)
   };
 
-  //Sets PolyOn to True which defines whether interaction is added
+//Sets PolyOn to True which defines whether interaction is added
   togglePolyTool(){
     this.setState({
       polyOn: true
@@ -27,12 +28,18 @@ export class MainMap extends React.Component{
 
   componentDidMount(){
 
-  let source = new SourceVector({wrapX: false})
-  let vector = new LayerVector({source: source});
+  let source = new SourceVector({
+    wrapX: false});
 
- // Layers
+  let vector = new LayerVector({
+    source: source
+  });
+
+
+
+  // Layers & Interaction
   let draw;
-  this.addInteraction = function() {
+  this.addInteractions = function() {
     //Creates New Drawing
     draw = new Draw({
             source: source,
@@ -72,11 +79,20 @@ export class MainMap extends React.Component{
           rotation: 2.4
         })
       });
+
+// Modifications
+    let modify = new Modify({source: source})
+    map.addInteraction(modify);
+
+
 }
+
+
+
 
   render() {
     if (this.state.polyOn){
-        this.addInteraction();
+        this.addInteractions();
     }
 
     return (
