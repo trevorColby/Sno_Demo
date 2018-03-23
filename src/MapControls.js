@@ -8,22 +8,25 @@ export class MapControls extends React.Component{
     this.handleClick = this.handleClick.bind(this)
   };
 
-  handleClick(){
-    this.props.onClick()
+  handleClick(e){
+    this.props.onClick(e.target.id)
   }
 
   render(){
     let style= {
       position: 'absolute',
-      top: 0,
+      bottom: 0,
+      left: 0,
       zIndex: 99
     }
 
     return (
       <div>
       <ButtonGroup style= {style} >
-        <Button bsStyle="primary" onClick={this.handleClick}>+Trail</Button>
-        <Button bsStyle="primary" onClick={this.handleClick}>+Hydrant</Button>
+        <Button bsStyle="primary" id='Trail' onClick={this.handleClick}>Trail</Button>
+        <Button bsStyle="primary" id='Hydrant' onClick={this.handleClick}>Hydrant</Button>
+        <Button bsStyle="primary" id='HydrantLine' onClick={this.handleClick}>Hydrant Line</Button>
+        <Button bsStyle="primary" id='HydrantTrail' onClick={this.handleClick}>Hydrant Trail</Button>
         <Button bsStyle="success" onClick={this.handleClick}>Save</Button>
       </ButtonGroup>
       </div>

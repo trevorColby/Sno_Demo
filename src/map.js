@@ -10,46 +10,56 @@ import SourceVector from 'ol/source/vector';
 import Draw from 'ol/interaction/draw';
 import { MapControls } from './MapControls';
 import Modify from 'ol/interaction/modify';
+import {TrailList} from './TrailList';
 
 export class MainMap extends React.Component{
-
   constructor(props){
     super(props);
-    this.state = {polyOn: false};
+    this.state = {DrawType: false};
     this.togglePolyTool = this.togglePolyTool.bind(this)
   };
 
+//Defines Types Of Interactions to Add
+ drawTypes = {
+    "Trail": ['Polygon'],
+    "Hydrant": ['Point'],
+    "HydrantLine": ['LineString', 'Point'],
+    "HydrantTrail": ['Polygon','Point']
+  }
+
 //Sets PolyOn to True which defines whether interaction is added
-  togglePolyTool(){
+  togglePolyTool(type){
     this.setState({
-      polyOn: true
+      DrawType: this.drawTypes[type]
     });
   };
 
   componentDidMount(){
 
-  let source = new SourceVector({
-    wrapX: false});
+    let source = new SourceVector({
+      wrapX: false});
+    let vector = new LayerVector({
+      source: source
+    });
 
-  let vector = new LayerVector({
-    source: source
-  });
+    // Layers & Interaction
+    this.addDraw = function(type) {
 
+      //Creates New Drawing
+     let draw = new Draw({
+              source: source,
+              type: type,
+            });
+      // Adds Drawing Interaction
+      map.addInteraction(draw)
+      // Removes Drawing Interaction
+      if(type !== 'Point') {
+        draw.on('drawend',endDraw)
+      }
+    }
 
-
-  // Layers & Interaction
-  let draw;
-  this.addInteractions = function() {
-    //Creates New Drawing
-    draw = new Draw({
-            source: source,
-            type: 'Polygon',
-          });
-    // Adds Drawing Interaction
-    map.addInteraction(draw)
-    console.log(vector)
-    // Removes Drawing Interaction
-     draw.on('drawend', c => { map.removeInteraction(draw) })
+    function endDraw(feature){
+      removeAllInteractions()
     }
 
     let bingLayer = new TileLayer ({
@@ -62,42 +72,51 @@ export class MainMap extends React.Component{
       })
     })
 
- // Orientation
+    function removeAllInteractions(){
+      map.getInteractions().forEach(function (interaction) {
+        if(interaction instanceof Draw) {
+          console.log(interaction)
+          map.removeInteraction(interaction)
+        }
+      });
+    }
+
+   // Orientation
     var projection = Projection.get('EPSG:3857');
     var killingtonCoords = [-72.803584,43.619210];
     var killingtonCoordsWebMercator = Projection.fromLonLat(killingtonCoords);
 
- // Map
-    let map = new Map({
-        loadTilesWhileInteracting: true,
-        target: 'map-container',
-        layers: [bingLayer,vector],
-        view: new View({
-          projection: projection,
-          center: killingtonCoordsWebMercator,
-          zoom: 14.2,
-          rotation: 2.4
-        })
-      });
+   // Map
+      let map = new Map({
+          loadTilesWhileInteracting: true,
+          target: 'map-container',
+          layers: [bingLayer,vector],
+          view: new View({
+            projection: projection,
+            center: killingtonCoordsWebMercator,
+            zoom: 14.2,
+            rotation: 2.4
+          })
+        });
 
-// Modifications
-    let modify = new Modify({source: source})
-    map.addInteraction(modify);
+      // Modifications
+      let modify = new Modify({source: source})
+      map.addInteraction(modify);
 
-
-}
-
-
+    }
 
 
   render() {
-    if (this.state.polyOn){
-        this.addInteractions();
+    if (this.state.DrawType){
+      this.state.DrawType.forEach(t=> {
+        this.addDraw(t);
+      })
     }
 
     return (
     <div id='map-container'>
-    <MapControls onClick={this.togglePolyTool} polyOn={this.state.polyOn} />
+    <MapControls drawTypes={this.drawTypes} onClick={this.togglePolyTool} polyOn={this.state.polyOn} />
+    <TrailList />
     </div>
   )
   }
