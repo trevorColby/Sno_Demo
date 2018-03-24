@@ -9,26 +9,30 @@ export class MapControls extends React.Component{
   };
 
   handleClick(e){
-    this.props.removeInteractions()
-    this.props.onClick(e.target.id)
+    let action = e.target.id
+    this.props.removeInteraction()
+
+    if (action !== 'removeInteraction') {
+      this.props.onClick(e.target.id)
+    }
+
+
   }
+
 
   render(){
     let style= {
-      position: 'absolute',
-      bottom: 0,
-      left: 0,
-      zIndex: 99
+      float: 'left'
     }
 
     return (
-      <div>
-      <ButtonGroup style= {style} >
+      <div style= {style}>
+      <ButtonGroup >
         <Button bsStyle="primary" id='Trail' onClick={this.handleClick}>Trail</Button>
         <Button bsStyle="primary" id='Hydrant' onClick={this.handleClick}>Hydrant</Button>
         <Button bsStyle="primary" id='HydrantLine' onClick={this.handleClick}>Hydrant Line</Button>
         <Button bsStyle="primary" id='HydrantTrail' onClick={this.handleClick}>Hydrant Trail</Button>
-        <Button bsStyle="success" onClick={this.handleClick}>Save</Button>
+        <Button bsStyle="success" id='removeInteraction' onClick={this.handleClick}>Save</Button>
       </ButtonGroup>
       </div>
     )
