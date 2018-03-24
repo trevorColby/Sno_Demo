@@ -9,7 +9,7 @@ import Projection from 'ol/proj';
 import SourceVector from 'ol/source/vector';
 import Draw from 'ol/interaction/draw';
 import Modify from 'ol/interaction/modify';
-
+import Collection from 'ol/collection';
 import {mapObjects} from '../utils/constants';
 import {getMapStyle} from '../utils/mapUtils';
 
@@ -18,15 +18,17 @@ class OpenLayersMap extends React.Component{
     super(props);
     this.state = {
       source: new SourceVector({wrapX: false}),
-      map: null, 
+      map: null,
       interactions: [],
-      hydrentIndex: 1
+      hydrentIndex: 1,
+      features: new Collection()
     };
   };
 
   componentWillReceiveProps(nextProps) {
+
     const {drawTypes} = this.props;
-    const {map, source, interactions} = this.state;
+    const {map, source, interactions, features} = this.state;
     // when drawTypes change, remove old intractions and add new ones
     if (nextProps.drawTypes !== drawTypes) {
       // removing old interactions
@@ -40,6 +42,7 @@ class OpenLayersMap extends React.Component{
           const draw = new Draw({
             source: source,
             type: type,
+            features: features,
             geometryName: type
           });
           draw.on('drawend', this.endDraw);
@@ -58,8 +61,8 @@ class OpenLayersMap extends React.Component{
   endDraw = (drawEvent) => {
     if (drawEvent.feature.geometryName_ === 'Polygon') {
       // add the trail to state
+      console.log(this.state.features)
       const coords = _.get(drawEvent, 'target.sketchLineCoords_', []);
-      console.log(drawEvent);
     }
   }
 
@@ -91,7 +94,7 @@ class OpenLayersMap extends React.Component{
 
    // Map
     const map = new Map({
-      loadTilesWhileInteracting: true,
+      loadTilesWhileInteracting: false,
       target: 'map-container',
       layers: [bingLayer, vector],
       view: new View({
