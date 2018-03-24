@@ -9,6 +9,7 @@ export class MapControls extends React.Component{
   };
 
   handleClick(e){
+    this.props.removeInteractions()
     this.props.onClick(e.target.id)
   }
 
