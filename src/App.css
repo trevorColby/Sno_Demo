@@ -1,3 +1,7 @@
+.ol-overlaycontainer-stopevent{
+  display: none;
+}
+
 .App {
   text-align: center;
 }

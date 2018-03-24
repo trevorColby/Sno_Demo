@@ -1,4 +1,5 @@
 import React from 'react';
+import _ from 'lodash';
 import Map from 'ol/map';
 import View from 'ol/view';
 import TileLayer from 'ol/layer/tile';
@@ -20,7 +21,13 @@ import Text from 'ol/style/text';
 class OpenLayersMap extends React.Component{
   constructor(props){
     super(props);
-    this.state = {DrawType: false, map: {}, hydrentIndex: 1};
+
+    this.state = {DrawType: false,
+      Interactions:[],
+      map: {}
+    };
+
+    this.addDraw = this.addDraw.bind(this)
     this.togglePolyTool = this.togglePolyTool.bind(this)
     this.removeAllInteractions = this.removeAllInteractions.bind(this)
   };
@@ -37,7 +44,6 @@ class OpenLayersMap extends React.Component{
        })
      }),
 }
-
   drawTypes = {
     "Trail": ['Polygon'],
     "Hydrant": ['Point'],
@@ -45,29 +51,55 @@ class OpenLayersMap extends React.Component{
     "HydrantTrail": ['Polygon','Point']
   }
 
-
-
 //Sets PolyOn to True which defines whether interaction is added
   togglePolyTool(type){
     this.setState({
       DrawType: this.drawTypes[type]
     });
+
+    this.drawTypes[type].forEach(t => { this.addDraw(t)})
   };
+
+// Add New Interaction
+  addDraw(type) {
+  // Creates New Drawing Interaction
+  let interactions = []
+  let source = this.state.source
+  let map = this.state.map
+
+  this.drawTypes[type].forEach(t=> {
+    let draw = new Draw({
+             source: source,
+             type: t,
+             geometryName: t
+           })
+        interactions.push(draw)
+     })
+  interactions.forEach(i => {
+      map.addInteraction(i)
+    })
+  //Pushes Interaction to State so we can remove later
+    this.setState({ Interactions: interactions})
+  }
+
+
+
 // Removes Interactions
   removeAllInteractions(){
-    let map = this.state.map
-    map.getInteractions().forEach(function (interaction) {
-      if(interaction instanceof Draw) {
-        map.removeInteraction(interaction)
-      }
-    });
+    this.state.Interactions.forEach(interaction => {
+        this.state.map.removeInteraction(interaction)
+    })
+
+    this.setState({
+      Interactions: []
+    })
   }
+
 
   componentDidMount(){
 
     let source = new SourceVector({
       wrapX: false});
-
     let vector = new LayerVector({
             source: source,
             style: function(feature){
@@ -109,23 +141,19 @@ class OpenLayersMap extends React.Component{
             }
           });
 
-    // Layers & Interaction
-    this.addDraw = function(type) {
-      //Creates New Drawing Interaction
-     let draw = new Draw({
-              source: source,
-              type: type,
-              geometryName: type
-            });
 
-
-      // Adds Drawing Interaction
-      map.addInteraction(draw)
-    }
-
-    function endDraw(feature){
-      /// Trigger when Layer is Done
-    }
+    // function endDraw(event){
+    //   let type = event.feature.geometryName_
+    //   /// Removes Interactions for Multiple Draw Interactions
+    //   if(type === 'LineString'){
+    //     map.getInteractions().forEach(function (interaction) {
+    //       console.log(interaction instanceof Draw)
+    //       if(interaction instanceof Draw) {
+    //         map.removeInteraction(interaction)
+    //       }
+    //     });
+    //   }
+    // }
 
     let bingLayer = new TileLayer ({
       visible: true,
@@ -157,17 +185,17 @@ class OpenLayersMap extends React.Component{
       // Modifications
       let modify = new Modify({source: source})
       map.addInteraction(modify);
-      this.setState({map: map})
-    }
 
+
+      this.setState({map: map, source: source})
+    }
 
   render() {
-    if (this.state.DrawType){
-      this.removeAllInteractions()
-      this.state.DrawType.forEach(t=> {
-        this.addDraw(t);
-      })
-    }
+    // if (this.state.DrawType){
+    //   this.state.DrawType.forEach(t=> {
+    //     this.addDraw(t);
+    //   })
+    // }
     return (
     <div id='map-container'>
       <MapControls
