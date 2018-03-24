@@ -10,6 +10,7 @@ import SourceVector from 'ol/source/vector';
 import Draw from 'ol/interaction/draw';
 import Modify from 'ol/interaction/modify';
 
+import {mapObjects} from '../utils/constants';
 import {getMapStyle} from '../utils/mapUtils';
 
 class OpenLayersMap extends React.Component{
@@ -18,24 +19,39 @@ class OpenLayersMap extends React.Component{
     this.state = {
       source: new SourceVector({wrapX: false}),
       map: null, 
+      interactions: [],
       hydrentIndex: 1
     };
-    this.removeAllInteractions = this.removeAllInteractions.bind(this)
   };
 
-  // Removes Interactions
-  removeAllInteractions(){
-    const {map} = this.state;
-    map.getInteractions().forEach(function (interaction) {
-      if(interaction instanceof Draw) {
-        map.removeInteraction(interaction)
-      }
-    });
-  }
+  componentWillReceiveProps(nextProps) {
+    const {drawTypes} = this.props;
+    const {map, source, interactions} = this.state;
+    // when drawTypes change, remove old intractions and add new ones
+    if (nextProps.drawTypes !== drawTypes) {
+      // removing old interactions
+      interactions.forEach(interaction => {
+          map.removeInteraction(interaction);
+      });
+      // creating new draw interactions if needed
+      if (nextProps.drawTypes) {
+        const newInteractions = [];
+        nextProps.drawTypes.forEach(type => {
+          const draw = new Draw({
+            source: source,
+            type: type,
+            geometryName: type
+          });
+          draw.on('drawend', this.endDraw);
+          newInteractions.push(draw);
+        });
 
-  componentDidUpdate(prevProps) {
-    if (prevProps.drawType && !this.props.drawType) {
-      this.removeAllInteractions();
+        newInteractions.forEach(i => {
+          map.addInteraction(i)
+        });
+        //Pushes Interaction to State so we can remove later
+        this.setState({ interactions: newInteractions})
+      }
     }
   }
 
@@ -47,27 +63,12 @@ class OpenLayersMap extends React.Component{
     }
   }
 
-  addDraw = (type) => {
-    // creates a new drawing interaction and adds it to the map
-    const {map, source} = this.state;
-    const draw = new Draw({
-      source: source,
-      type: type,
-      geometryName: type
-    });
-    draw.on('drawend', this.endDraw);
-    map.addInteraction(draw);
-  }
-
-  
-
   componentDidMount(){
     this.setupMap();
   }
 
   setupMap() {
     const {source} = this.state;
-
     const bingLayer = new TileLayer ({
       visible: true,
       preload: Infinity,
@@ -107,13 +108,6 @@ class OpenLayersMap extends React.Component{
   }
 
   render() {
-    const {drawType} = this.props;
-    if (drawType){
-      this.removeAllInteractions();
-      drawType.forEach(t=> {
-        this.addDraw(t);
-      })
-    }
     return <div id='map-container' />;
   }
 }
