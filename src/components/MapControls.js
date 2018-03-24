@@ -2,17 +2,6 @@ import React from 'react';
 import { Button, ButtonGroup } from 'react-bootstrap';
 
 class MapControls extends React.Component{
-
-  constructor(props){
-    super(props);
-    this.handleClick = this.handleClick.bind(this)
-  };
-
-  handleClick(e){
-    this.props.removeInteractions()
-    this.props.onClick(e.target.id)
-  }
-
   render(){
     let style= {
       position: 'fixed',
@@ -21,15 +10,17 @@ class MapControls extends React.Component{
       zIndex: 99
     }
 
+    const {onClick} = this.props;
+
     return (
       <div>
-      <ButtonGroup style= {style} >
-        <Button bsStyle="primary" id='Trail' onClick={this.handleClick}>Trail</Button>
-        <Button bsStyle="primary" id='Hydrant' onClick={this.handleClick}>Hydrant</Button>
-        <Button bsStyle="primary" id='HydrantLine' onClick={this.handleClick}>Hydrant Line</Button>
-        <Button bsStyle="primary" id='HydrantTrail' onClick={this.handleClick}>Hydrant Trail</Button>
-        <Button bsStyle="success" onClick={this.handleClick}>Save</Button>
-      </ButtonGroup>
+        <ButtonGroup style= {style} >
+          <Button bsStyle="primary" id='Trail' onClick={(e) => onClick(e.target.id)}>Trail</Button>
+          <Button bsStyle="primary" id='Hydrant' onClick={(e) => onClick(e.target.id)}>Hydrant</Button>
+          <Button bsStyle="primary" id='HydrantLine' onClick={(e) => onClick(e.target.id)}>Hydrant Line</Button>
+          <Button bsStyle="primary" id='HydrantTrail' onClick={(e) => onClick(e.target.id)}>Hydrant Trail</Button>
+          <Button bsStyle="success" onClick={onClick}>Save</Button>
+        </ButtonGroup>
       </div>
     )
   }

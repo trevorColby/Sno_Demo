@@ -3,23 +3,8 @@ import _ from 'lodash';
 import { Table } from 'react-bootstrap'
 
 class TrailList extends React.Component {
-
-  constructor(props){
-    super(props);
-    // this will be populated by something in props later
-    this.state = {
-      trails: [{
-        id: 1, name: 'First Trail', guns: 8
-      }, {
-        id: 2, name: 'Second Trail', guns: 12
-      }, {
-        id: 3, name: 'Third Trail', guns: 15
-      }]
-    };
-  }
-
   render(){
-    let style = {
+    const style = {
       width: '20%',
       backgroundColor: '#ffffff66',
       position: 'absolute',
@@ -27,7 +12,7 @@ class TrailList extends React.Component {
       top: '50%'
     }
 
-    const {trails} = this.state;
+    const {trails} = this.props;;
 
     return (
       <Table style={style}>
@@ -41,7 +26,7 @@ class TrailList extends React.Component {
         <tbody>
           {_.map(trails, (trail) => {
             return (
-              <tr>
+              <tr key={trail.id}>
                 <td>{trail.id}</td>
                 <td>{trail.name}</td>
                 <td>{trail.guns}</td>

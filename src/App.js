@@ -1,12 +1,12 @@
 import React, { Component } from 'react';
 import './App.css';
-import OpenLayersMap from './components/OpenLayersMap';
+import Container from './components/Container';
 
 class App extends Component {
   render() {
     return (
       <div className="App">
-        <OpenLayersMap />
+      	<Container />
       </div>
     );
   }
