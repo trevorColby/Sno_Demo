@@ -12,7 +12,7 @@ import Projection from 'ol/proj';
 import SourceVector from 'ol/source/vector';
 import Draw from 'ol/interaction/draw';
 import Modify from 'ol/interaction/modify';
-
+import Collection from 'ol/collection';
 import {mapObjects} from '../utils/constants';
 import {getMapStyle} from '../utils/mapUtils';
 
@@ -24,13 +24,44 @@ class OpenLayersMap extends React.Component{
       trailsSource: new SourceVector({wrapX: false}),
       map: null, 
       interactions: [],
-      hydrentIndex: 1
     };
   };
 
+  renderTrails = (trails, selectedTrail) => {
+    const {trailsSource} = this.state;
+    // redo the trails features
+    const newFeatures = [];
+    trails.forEach((trail) => {
+      if (trail.coords) {
+        // first add the trail itself
+        const feature = new Feature({
+          name: trail.name,
+          geometry: new Polygon([_.map(trail.coords, (pt) => {
+            return Projection.fromLonLat(pt);
+          })])
+        });
+        newFeatures.push(feature);
+
+        // then add each of its guns for the selected trail
+        if (selectedTrail === trail.id) {
+          trail.guns.forEach((gun) => {
+            const gunFeature = new Feature({
+              name: gun.id,
+              geometry: new Point(Projection.fromLonLat(gun.coords))
+            });
+            newFeatures.push(gunFeature);
+          });
+        }
+      }
+    });
+    trailsSource.clear();
+    trailsSource.addFeatures(newFeatures);
+  }
+
   componentWillReceiveProps(nextProps) {
-    const {createType, trails, endDraw} = this.props;
+    const {createType, trails, endDraw, selectedTrail} = this.props;
     const {map, source, interactions, trailsSource} = this.state;
+
     // when drawTypes change, remove old intractions and add new ones
     if (nextProps.createType !== createType) {
       // removing old interactions
@@ -59,32 +90,8 @@ class OpenLayersMap extends React.Component{
       }
     }
 
-    if (nextProps.trails !== trails) {
-      // redo the trails features
-      const newFeatures = [];
-      nextProps.trails.forEach((trail) => {
-        if (trail.coords) {
-          // first add the trail itself
-          const feature = new Feature({
-            name: trail.name,
-            geometry: new Polygon([_.map(trail.coords, (pt) => {
-              return Projection.fromLonLat(pt);
-            })])
-          });
-          newFeatures.push(feature);
-
-          // then add each of its guns
-          trail.guns.forEach((gun) => {
-            const gunFeature = new Feature({
-              name: gun.id,
-              geometry: new Point(Projection.fromLonLat(gun.coords))
-            });
-            newFeatures.push(gunFeature);
-          });
-        }
-      });
-      trailsSource.clear();
-      trailsSource.addFeatures(newFeatures);
+    if (nextProps.trails !== trails || nextProps.selectedTrail !== selectedTrail) {
+      this.renderTrails(nextProps.trails, nextProps.selectedTrail);
     }
   }
 
@@ -122,7 +129,7 @@ class OpenLayersMap extends React.Component{
 
     // Map
     const map = new Map({
-      loadTilesWhileInteracting: true,
+      loadTilesWhileInteracting: false,
       target: 'map-container',
       layers: [bingMapsLayer, trailsLayer, drawLayer],
       view: new View({

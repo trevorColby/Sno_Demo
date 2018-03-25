@@ -4,15 +4,9 @@ import Projection from 'ol/proj';
 import MapControls from './MapControls';
 import OpenLayersMap from './OpenLayersMap';
 import TrailList from './TrailList';
-
-const defaultTrails = [{
-    id: 1, name: 'First Trail', guns: []
-  }, {
-    id: 2, name: 'Second Trail', guns: []
-  }, {
-    id: 3, name: 'Third Trail', guns: []
-  }
-];
+import {mapObjects, defaultTrails} from '../utils/constants';
+import kill_logo from './../imgs/Kill_Logo.png'
+import {Image} from 'react-bootstrap';
 
 class Container extends React.Component{
 
@@ -31,6 +25,10 @@ class Container extends React.Component{
     const trails = savedTrails ? JSON.parse(savedTrails) : defaultTrails;
     this.setState({trails: trails});
   }
+  
+  componentDidUpdate() {
+    this.saveToLocalStorage();
+  }
 
   saveToLocalStorage = () => {
     localStorage.setItem('trails', JSON.stringify(this.state.trails));
@@ -42,7 +40,15 @@ class Container extends React.Component{
       return item.id !== trail.id;
     });
     this.setState({trails: newTrails});
-    this.saveToLocalStorage();
+  }
+
+  deleteGun = (gun) => {
+    const {trails, selectedTrail} = this.state;
+    const newTrails = _.cloneDeep(trails);
+    const selectedTrailIndex = _.findIndex(newTrails, (t) => t.id === selectedTrail);
+    const selectedGunIndex = _.findIndex(newTrails[selectedTrailIndex].guns, (g) => g.id === gun.id);
+    newTrails[selectedTrailIndex].guns.splice(selectedGunIndex, 1);
+    this.setState({trails: newTrails});
   }
 
   endDraw(drawEvent) {
@@ -80,7 +86,6 @@ class Container extends React.Component{
       default:
         console.log("haven't implemented this type yet");
     }
-    this.saveToLocalStorage();
   }
 
   mapControlClicked = (type) => {
@@ -93,13 +98,14 @@ class Container extends React.Component{
 
   render(){
     const {trails, createType, selectedTrail} = this.state;
-
     return (
       <div style={{position: 'relative'}}>
+        <Image style={{position: 'absolute', zIndex: '99', bottom:0, left:0, width: 300}} src={kill_logo} responsive />
         <OpenLayersMap 
           createType={createType} 
           endDraw={this.endDraw}
           trails={trails}
+          selectedTrail={selectedTrail}
         />
         <MapControls 
           onClick={this.mapControlClicked} 
@@ -109,6 +115,7 @@ class Container extends React.Component{
           trails={trails} 
           selected={selectedTrail} 
           deleteTrail={this.deleteTrail}
+          deleteGun={this.deleteGun}
           trailSelected={(id) => this.setState({selectedTrail: id})}
         />
       </div>
