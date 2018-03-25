@@ -6,8 +6,7 @@ import Style from 'ol/style/style';
 import RegularShape from 'ol/style/regularshape';
 
 export function getMapStyle(feature, resolution) {
-
-	switch(feature.geometryName_){
+	switch(feature.getGeometry().getType()){
 		case 'Point':
 		  return new Style({
 			image: new RegularShape({

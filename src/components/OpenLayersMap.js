@@ -2,6 +2,9 @@ import React from 'react';
 import _ from 'lodash';
 import Map from 'ol/map';
 import View from 'ol/view';
+import Feature from 'ol/feature';
+import Point from 'ol/geom/point';
+import Polygon from 'ol/geom/polygon';
 import TileLayer from 'ol/layer/tile';
 import LayerVector from 'ol/layer/vector';
 import BingMaps from 'ol/source/bingmaps';
@@ -18,34 +21,64 @@ class OpenLayersMap extends React.Component{
     super(props);
     this.state = {
       source: new SourceVector({wrapX: false}),
-      map: null,
+      trailsSource: new SourceVector({wrapX: false}),
+      map: null, 
       interactions: [],
-      hydrentIndex: 1,
-      features: new Collection()
     };
   };
 
-  componentWillReceiveProps(nextProps) {
+  renderTrails = (trails, selectedTrail) => {
+    const {trailsSource} = this.state;
+    // redo the trails features
+    const newFeatures = [];
+    trails.forEach((trail) => {
+      if (trail.coords) {
+        // first add the trail itself
+        const feature = new Feature({
+          name: trail.name,
+          geometry: new Polygon([_.map(trail.coords, (pt) => {
+            return Projection.fromLonLat(pt);
+          })])
+        });
+        newFeatures.push(feature);
 
-    const {drawTypes} = this.props;
-    const {map, source, interactions, features} = this.state;
+        // then add each of its guns for the selected trail
+        if (selectedTrail === trail.id) {
+          trail.guns.forEach((gun) => {
+            const gunFeature = new Feature({
+              name: gun.id,
+              geometry: new Point(Projection.fromLonLat(gun.coords))
+            });
+            newFeatures.push(gunFeature);
+          });
+        }
+      }
+    });
+    trailsSource.clear();
+    trailsSource.addFeatures(newFeatures);
+  }
+
+  componentWillReceiveProps(nextProps) {
+    const {createType, trails, endDraw, selectedTrail} = this.props;
+    const {map, source, interactions, trailsSource} = this.state;
+
     // when drawTypes change, remove old intractions and add new ones
-    if (nextProps.drawTypes !== drawTypes) {
+    if (nextProps.createType !== createType) {
       // removing old interactions
       interactions.forEach(interaction => {
           map.removeInteraction(interaction);
       });
       // creating new draw interactions if needed
-      if (nextProps.drawTypes) {
+      if (nextProps.createType && mapObjects[nextProps.createType]) {
         const newInteractions = [];
-        nextProps.drawTypes.forEach(type => {
+        const newInteractionTypes = mapObjects[nextProps.createType];
+        newInteractionTypes.forEach(type => {
           const draw = new Draw({
             source: source,
             type: type,
-            features: features,
             geometryName: type
           });
-          draw.on('drawend', this.endDraw);
+          draw.on('drawend', endDraw);
           newInteractions.push(draw);
         });
 
@@ -53,16 +86,12 @@ class OpenLayersMap extends React.Component{
           map.addInteraction(i)
         });
         //Pushes Interaction to State so we can remove later
-        this.setState({ interactions: newInteractions})
+        this.setState({interactions: newInteractions})
       }
     }
-  }
 
-  endDraw = (drawEvent) => {
-    if (drawEvent.feature.geometryName_ === 'Polygon') {
-      // add the trail to state
-      console.log(this.state.features)
-      const coords = _.get(drawEvent, 'target.sketchLineCoords_', []);
+    if (nextProps.trails !== trails || nextProps.selectedTrail !== selectedTrail) {
+      this.renderTrails(nextProps.trails, nextProps.selectedTrail);
     }
   }
 
@@ -71,8 +100,9 @@ class OpenLayersMap extends React.Component{
   }
 
   setupMap() {
-    const {source} = this.state;
-    const bingLayer = new TileLayer ({
+    const {source, trailsSource} = this.state;
+    source.on('addfeature', (e) => source.clear());
+    const bingMapsLayer = new TileLayer ({
       visible: true,
       preload: Infinity,
       source: new BingMaps({
@@ -82,8 +112,13 @@ class OpenLayersMap extends React.Component{
       })
     });
 
-    const vector = new LayerVector({
+    const drawLayer = new LayerVector({
       source: source,
+      style: getMapStyle
+    });
+
+    const trailsLayer = new LayerVector({
+      source: trailsSource,
       style: getMapStyle
     });
 
@@ -92,11 +127,11 @@ class OpenLayersMap extends React.Component{
     var killingtonCoords = [-72.803584,43.619210];
     var killingtonCoordsWebMercator = Projection.fromLonLat(killingtonCoords);
 
-   // Map
+    // Map
     const map = new Map({
       loadTilesWhileInteracting: false,
       target: 'map-container',
-      layers: [bingLayer, vector],
+      layers: [bingMapsLayer, trailsLayer, drawLayer],
       view: new View({
         projection: projection,
         center: killingtonCoordsWebMercator,
@@ -105,7 +140,7 @@ class OpenLayersMap extends React.Component{
       })
     });
     // Modifications
-    let modify = new Modify({source: source})
+    let modify = new Modify({source: source});
     map.addInteraction(modify);
     this.setState({map: map})
   }
