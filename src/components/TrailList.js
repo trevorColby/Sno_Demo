@@ -52,7 +52,7 @@ class TrailList extends React.Component {
       backgroundColor: '#E8E8E8',
       position: 'absolute',
       zIndex: '99',
-      top: '30%'
+      top: '0',
     }
 
     const {trails, selected, deleteTrail, trailSelected} = this.props;

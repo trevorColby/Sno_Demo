@@ -25,7 +25,7 @@ class Container extends React.Component{
     const trails = savedTrails ? JSON.parse(savedTrails) : defaultTrails;
     this.setState({trails: trails});
   }
-  
+
   componentDidUpdate() {
     this.saveToLocalStorage();
   }
@@ -100,24 +100,24 @@ class Container extends React.Component{
     const {trails, createType, selectedTrail} = this.state;
     return (
       <div style={{position: 'relative'}}>
-        <Image style={{position: 'absolute', zIndex: '99', bottom:0, left:0, width: 300}} src={kill_logo} responsive />
-        <OpenLayersMap 
-          createType={createType} 
+        <OpenLayersMap
+          createType={createType}
           endDraw={this.endDraw}
           trails={trails}
           selectedTrail={selectedTrail}
         />
-        <MapControls 
-          onClick={this.mapControlClicked} 
+        <MapControls
+          onClick={this.mapControlClicked}
           canAddHydrant={!!selectedTrail}
         />
-        <TrailList 
-          trails={trails} 
-          selected={selectedTrail} 
+        <TrailList
+          trails={trails}
+          selected={selectedTrail}
           deleteTrail={this.deleteTrail}
           deleteGun={this.deleteGun}
           trailSelected={(id) => this.setState({selectedTrail: id})}
         />
+        <Image style={{float: 'right', width: 300}} src={kill_logo} responsive />
       </div>
     )
   }
