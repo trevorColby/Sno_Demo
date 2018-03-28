@@ -9,7 +9,6 @@ import kill_logo from './../imgs/Kill_Logo.png'
 import {Image} from 'react-bootstrap';
 
 class Container extends React.Component{
-
   constructor(props){
     super(props);
     this.endDraw = this.endDraw.bind(this);
@@ -70,6 +69,9 @@ class Container extends React.Component{
   }
 
   endModify = (e) => {
+    if (!e) {
+      return;
+    }
     const {trails, selectedTrail} = this.state;
     const newTrails = _.cloneDeep(trails);
     const feature = e.target;
