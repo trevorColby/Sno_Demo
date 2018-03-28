@@ -1,7 +1,36 @@
 import React from 'react'
 import _ from 'lodash';
-import { Table, TableBody, TableHead, TableCell, TableRow } from 'material-ui';
+import { Table, TableBody, TableHead, TableCell, TableRow, withStyles } from 'material-ui';
 import TrailNameForm from './TrailNameForm';
+
+
+const CustomTableCell = withStyles(theme => ({
+  head: {
+    backgroundColor: theme.palette.common.black,
+    color: theme.palette.common.white,
+  },
+  body: {
+    fontSize: 14,
+  },
+}))(TableCell);
+
+const styles = theme => ({
+  root: {
+    width: '100%',
+    marginTop: theme.spacing.unit * 3,
+    overflowX: 'auto',
+  },
+  table: {
+    minWidth: 700,
+  },
+  row: {
+    '&:nth-of-type(odd)': {
+      backgroundColor: theme.palette.background.default,
+    },
+  },
+});
+
+
 
 class TrailList extends React.Component {
 
@@ -83,10 +112,10 @@ class TrailList extends React.Component {
         <Table>
         <TableHead>
           <TableRow>
-            <TableCell />
-            <TableCell>Trail Name</TableCell>
-            <TableCell>Guns</TableCell>
-            <TableCell />
+            <CustomTableCell  />
+            <CustomTableCell>Trail Name</CustomTableCell>
+            <CustomTableCell>Guns</CustomTableCell>
+            <CustomTableCell  />
           </TableRow>
         </TableHead>
         <TableBody>
