@@ -76,7 +76,7 @@ class Container extends React.Component{
     const newTrails = _.cloneDeep(trails);
     const feature = e.target;
     const selectedTrailIndex = _.findIndex(newTrails, (t) => t.id === selectedTrail);
-    
+
     if (feature.values_.id === _.get(newTrails, `${selectedTrailIndex}.id`)) {
       // if trail
       const newCoords = _.map(feature.getGeometry().getCoordinates()[0], (pt) => {
@@ -162,7 +162,7 @@ class Container extends React.Component{
           deleteGun={this.deleteGun}
           trailSelected={(id) => this.setState({selectedTrail: id, createType: id ? 'Trail' : null})}
         />
-        <Image style={{float: 'right', width: 300}} src={kill_logo} responsive />
+        <Image style={{float: 'right', width: 300, margin: 12}} src={kill_logo} responsive />
       </div>
     )
   }
