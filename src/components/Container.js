@@ -16,7 +16,6 @@ class Container extends React.Component{
     this.state = {
       createType: null,
       selectedTrail: null,
-      drawnItems: [],
       trails: []
       editableTrail: false
     }
@@ -90,10 +89,6 @@ class Container extends React.Component{
     }
 
     this.setState({trails: newTrails});
-    // trails[selectedIndex].coords = "coords";
-    // console.log(modifyEvent.features.getArray()[0].values_.id);
-    // if gun/hydrant
-    // do something
   }
 
   endDraw(drawEvent) {

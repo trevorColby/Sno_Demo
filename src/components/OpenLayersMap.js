@@ -32,6 +32,7 @@ class OpenLayersMap extends React.Component{
     const {endModify} = this.props;
     const {trailsSource, source} = this.state;
     source.clear();
+    trailsSource.clear();
     // redo the trails features for unselected trails
     const newFeatures = [];
     trails.forEach((trail) => {
@@ -47,7 +48,6 @@ class OpenLayersMap extends React.Component{
         newFeatures.push(feature);
       }
     });
-    trailsSource.clear();
     trailsSource.addFeatures(newFeatures);
 
     // if trail is selected then put it in draw layer with its guns
