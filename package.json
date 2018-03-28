@@ -10,9 +10,9 @@
     "react": "^16.2.0",
     "react-bootstrap": "^0.32.1",
     "react-dom": "^16.2.0",
-    "react-scripts": "1.1.1",
-    "homepage": "https://jolavb.github.io/Sno_Demo"
+    "react-scripts": "1.1.1"
   },
+  "homepage": "https://jolavb.github.io/Sno_Demo",
   "scripts": {
     "start": "react-scripts start",
     "build": "react-scripts build",

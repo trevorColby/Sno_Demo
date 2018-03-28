@@ -16,7 +16,8 @@ class Container extends React.Component{
     this.state = {
       createType: null,
       selectedTrail: null,
-      trails: []
+      editableTrail: false,
+      trails: [],
     }
   }
 
@@ -32,6 +33,23 @@ class Container extends React.Component{
 
   saveToLocalStorage = () => {
     localStorage.setItem('trails', JSON.stringify(this.state.trails));
+  }
+
+  renameTrail = (trailId, newName) => {
+    const {editableTrail, trails} = this.state
+    if(newName){
+      let editedTrails = trails.map((t)=> {
+         if(t.id == trailId) {
+           t.name = newName
+         }
+         return t
+      })
+
+      this.setState({editableTrail: null, trails: editedTrails})
+    } else{
+      this.setState({editableTrail: trailId})
+    }
+
   }
 
   deleteTrail = (trail) => {
@@ -97,7 +115,8 @@ class Container extends React.Component{
   }
 
   render(){
-    const {trails, createType, selectedTrail} = this.state;
+    const {trails, createType, selectedTrail, editableTrail} = this.state;
+
     return (
       <div style={{position: 'relative'}}>
         <OpenLayersMap
@@ -111,6 +130,8 @@ class Container extends React.Component{
           canAddHydrant={!!selectedTrail}
         />
         <TrailList
+          editableTrail={editableTrail}
+          renameTrail = {this.renameTrail}
           trails={trails}
           selected={selectedTrail}
           deleteTrail={this.deleteTrail}
