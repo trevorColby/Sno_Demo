@@ -21,6 +21,7 @@ class OpenLayersMap extends React.Component{
     super(props);
     this.state = {
       source: new SourceVector({wrapX: false}),
+      modifying: null,
       trailsSource: new SourceVector({wrapX: false}),
       map: null, 
       interactions: [],
@@ -28,71 +29,82 @@ class OpenLayersMap extends React.Component{
   };
 
   renderTrails = (trails, selectedTrail) => {
-    const {trailsSource} = this.state;
-    // redo the trails features
+    const {endModify} = this.props;
+    const {trailsSource, source} = this.state;
+    source.clear();
+    trailsSource.clear();
+    // redo the trails features for unselected trails
     const newFeatures = [];
     trails.forEach((trail) => {
-      if (trail.coords) {
+      if (trail.id !== selectedTrail && trail.coords) {
         // first add the trail itself
         const feature = new Feature({
           name: trail.name,
+          id: trail.id,
           geometry: new Polygon([_.map(trail.coords, (pt) => {
             return Projection.fromLonLat(pt);
           })])
         });
         newFeatures.push(feature);
-
-        // then add each of its guns for the selected trail
-        if (selectedTrail === trail.id) {
-          trail.guns.forEach((gun) => {
-            const gunFeature = new Feature({
-              name: gun.id,
-              geometry: new Point(Projection.fromLonLat(gun.coords))
-            });
-            newFeatures.push(gunFeature);
-          });
-        }
       }
     });
-    trailsSource.clear();
     trailsSource.addFeatures(newFeatures);
+
+    // if trail is selected then put it in draw layer with its guns
+    const selectedTrailObj = _.find(trails, (t) => t.id === selectedTrail);
+    if (selectedTrailObj) {
+      const drawFeatures = [];
+      drawFeatures.push(new Feature({
+        name: selectedTrailObj.name, 
+        id: selectedTrailObj.id,
+        geometry: new Polygon([_.map(selectedTrailObj.coords, (pt) => {
+            return Projection.fromLonLat(pt);
+          })])
+      }));
+      selectedTrailObj.guns.forEach((gun) => {
+        const gunFeature = new Feature({
+          name: gun.id,
+          id: gun.id,
+          geometry: new Point(Projection.fromLonLat(gun.coords))
+        });
+        drawFeatures.push(gunFeature);
+      });
+
+      _.each(drawFeatures, (f) => {
+        f.on('change', (e) => this.setState({modifying: e}));
+      });
+      source.addFeatures(drawFeatures);
+    }
   }
 
   componentWillReceiveProps(nextProps) {
     const {createType, trails, endDraw, selectedTrail} = this.props;
     const {map, source, interactions, trailsSource} = this.state;
+    
+    // remove old draw interactions
+    interactions.forEach(interaction => {
+        map.removeInteraction(interaction);
+    });
 
-    // when drawTypes change, remove old intractions and add new ones
-    if (nextProps.createType !== createType) {
-      // removing old interactions
-      interactions.forEach(interaction => {
-          map.removeInteraction(interaction);
+    // creating new draw interactions
+    const newInteractions = [];
+    const newInteractionTypes = mapObjects[nextProps.createType] || [];
+    newInteractionTypes.forEach(type => {
+      const draw = new Draw({
+        source: source,
+        type: type,
+        geometryName: type
       });
-      // creating new draw interactions if needed
-      if (nextProps.createType && mapObjects[nextProps.createType]) {
-        const newInteractions = [];
-        const newInteractionTypes = mapObjects[nextProps.createType];
-        newInteractionTypes.forEach(type => {
-          const draw = new Draw({
-            source: source,
-            type: type,
-            geometryName: type
-          });
-          draw.on('drawend', endDraw);
-          newInteractions.push(draw);
-        });
+      draw.on('drawend', endDraw);
+      newInteractions.push(draw);
+    });
 
-        newInteractions.forEach(i => {
-          map.addInteraction(i)
-        });
-        //Pushes Interaction to State so we can remove later
-        this.setState({interactions: newInteractions})
-      }
-    }
+    newInteractions.forEach(i => {
+      map.addInteraction(i);
+    });
+    this.setState({interactions: newInteractions});
 
-    if (nextProps.trails !== trails || nextProps.selectedTrail !== selectedTrail) {
-      this.renderTrails(nextProps.trails, nextProps.selectedTrail);
-    }
+    this.renderTrails(nextProps.trails, nextProps.selectedTrail);
   }
 
   componentDidMount(){
@@ -101,7 +113,7 @@ class OpenLayersMap extends React.Component{
 
   setupMap() {
     const {source, trailsSource} = this.state;
-    source.on('addfeature', (e) => source.clear());
+    const {endModify} = this.props;
     const bingMapsLayer = new TileLayer ({
       visible: true,
       preload: Infinity,
@@ -141,6 +153,7 @@ class OpenLayersMap extends React.Component{
     });
     // Modifications
     let modify = new Modify({source: source});
+    modify.on('modifyend', () => endModify(this.state.modifying));
     map.addInteraction(modify);
     this.setState({map: map})
   }
