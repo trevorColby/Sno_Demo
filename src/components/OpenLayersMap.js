@@ -22,10 +22,42 @@ class OpenLayersMap extends React.Component{
     this.state = {
       source: new SourceVector({wrapX: false}),
       trailsSource: new SourceVector({wrapX: false}),
-      map: null, 
+      map: null,
+      center: null,
       interactions: [],
     };
   };
+
+
+  panToLocation = (location) => {
+    // let view = this.state.map.getView()
+    console.log(this.state.map)
+    // view.animate({
+    //   center: location,
+    //   duration: 2000
+    // })
+  }
+
+  componentDidUpdate(prevProps, prevState){
+    const {selectedTrail, trails} = this.props;
+
+    if (selectedTrail !== prevProps.selectedTrail && selectedTrail ){
+
+      let currentTrail = trails.find((t)=>{
+        return t.id == selectedTrail
+      })
+
+      let centerCoords = Projection.fromLonLat(currentTrail.coords[0])
+      let view = this.state.map.getView()
+
+      view.animate({
+        center: centerCoords,
+        duration: 500,
+        zoom: 16,
+      })
+
+    }
+  }
 
   renderTrails = (trails, selectedTrail) => {
     const {trailsSource} = this.state;
@@ -61,7 +93,6 @@ class OpenLayersMap extends React.Component{
   componentWillReceiveProps(nextProps) {
     const {createType, trails, endDraw, selectedTrail} = this.props;
     const {map, source, interactions, trailsSource} = this.state;
-
     // when drawTypes change, remove old intractions and add new ones
     if (nextProps.createType !== createType) {
       // removing old interactions
