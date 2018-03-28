@@ -16,8 +16,8 @@ class Container extends React.Component{
     this.state = {
       createType: null,
       selectedTrail: null,
-      editableTrail: false,
       trails: [],
+      editableTrail: false
     }
   }
 
@@ -49,7 +49,7 @@ class Container extends React.Component{
     } else{
       this.setState({editableTrail: trailId})
     }
-
+    this.saveToLocalStorage();
   }
 
   deleteTrail = (trail) => {
@@ -69,6 +69,28 @@ class Container extends React.Component{
     this.setState({trails: newTrails});
   }
 
+  endModify = (e) => {
+    const {trails, selectedTrail} = this.state;
+    const newTrails = _.cloneDeep(trails);
+    const feature = e.target;
+    const selectedTrailIndex = _.findIndex(newTrails, (t) => t.id === selectedTrail);
+    
+    if (feature.values_.id === _.get(newTrails, `${selectedTrailIndex}.id`)) {
+      // if trail
+      const newCoords = _.map(feature.getGeometry().getCoordinates()[0], (pt) => {
+        return Projection.toLonLat(pt);
+      });
+      newTrails[selectedTrailIndex].coords = newCoords;
+    } else {
+      // its a hydrant
+      const newCoords = Projection.toLonLat(feature.getGeometry().getCoordinates());
+      const gunIndex = _.findIndex(newTrails[selectedTrailIndex].guns, (g) => g.id === feature.values_.id);
+      newTrails[selectedTrailIndex].guns[gunIndex].coords = newCoords;
+    }
+
+    this.setState({trails: newTrails});
+  }
+
   endDraw(drawEvent) {
     const {createType, trails, selectedTrail} = this.state;
     switch (createType){
@@ -76,7 +98,7 @@ class Container extends React.Component{
         const coords = _.map(_.get(drawEvent, 'target.sketchLineCoords_'), (drawCoord) => {
           return Projection.toLonLat(drawCoord);
         });
-
+        const newTrails = _.cloneDeep(trails);
         const newTrail = {
           // just use a timestamp to ensure unique id for now, database would supply later
           id: new Date().getTime(),
@@ -84,9 +106,8 @@ class Container extends React.Component{
           guns: [],
           coords: coords
         };
-        const newTrails = _.cloneDeep(trails);
         newTrails.push(newTrail);
-        this.setState({createType: null, trails: newTrails});
+        this.setState({createType: null, trails: newTrails, selectedTrail: newTrail.id});
         break;
       }
       case 'Hydrant': {
@@ -122,6 +143,7 @@ class Container extends React.Component{
         <OpenLayersMap
           createType={createType}
           endDraw={this.endDraw}
+          endModify={this.endModify}
           trails={trails}
           selectedTrail={selectedTrail}
         />
@@ -136,7 +158,7 @@ class Container extends React.Component{
           selected={selectedTrail}
           deleteTrail={this.deleteTrail}
           deleteGun={this.deleteGun}
-          trailSelected={(id) => this.setState({selectedTrail: id})}
+          trailSelected={(id) => this.setState({selectedTrail: id, createType: id ? 'Trail' : null})}
         />
         <Image style={{float: 'right', width: 300}} src={kill_logo} responsive />
       </div>
