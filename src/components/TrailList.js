@@ -10,12 +10,12 @@ class TrailList extends React.Component {
     const rowClass = isSelected ? 'selected' : '';
     const iconClass = `fa fa-${isSelected ? 'minus' : 'plus'}`;
     return (
-      <TableRow 
-        key={trail.id} 
-        className={rowClass} 
+      <TableRow
+        key={trail.id}
+        className={rowClass}
         style={{borderTop: '2px solid black'}}
       >
-        <TableCell style={{cursor: 'pointer'}} 
+        <TableCell style={{cursor: 'pointer'}}
           onClick={() => trailSelected(isSelected ? null : trail.id)}
         >
           <i className={iconClass} />
@@ -47,11 +47,12 @@ class TrailList extends React.Component {
 
   render(){
     const style = {
-      width: '20%',
+      height: 300,
+      overflowX: 'scroll',
       backgroundColor: '#E8E8E8',
       position: 'absolute',
       zIndex: '99',
-      top: '30%'
+      top: '0',
     }
 
     const {trails, selected, deleteTrail, trailSelected} = this.props;
@@ -66,7 +67,8 @@ class TrailList extends React.Component {
     }
 
     return (
-      <Table style={style}>
+      <div style={style}>
+        <Table>
         <TableHead>
           <TableRow>
             <TableCell />
@@ -81,7 +83,8 @@ class TrailList extends React.Component {
             return isTrail ? this.renderTrail(item) : this.renderGun(item);
           })}
         </TableBody>
-      </Table>
+        </Table>
+      </div>
     )
   }
 }
