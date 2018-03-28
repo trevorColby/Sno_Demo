@@ -8,20 +8,23 @@ class TrailNameForm extends React.Component{
     this.handleChange = this.handleChange.bind(this)
   }
 
+
   handleChange(e){
     this.setState({
       value: e.target.value
     })
-
-
   }
+
+  componentDidMount(){
+   this.editTrail.focus();
+}
 
   render(){
     const {renameTrail, trailId} = this.props;
 
     return(
       <form onBlur={()=>{ renameTrail(trailId, this.state.value) }} >
-        <input type="text" onChange={this.handleChange} value={this.state.value} name="name" />
+        <input ref={(i) => {this.editTrail = i}} type="text" onChange={this.handleChange} value={this.state.value} name="name" />
       </form>
     )
   }
