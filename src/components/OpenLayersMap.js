@@ -23,10 +23,42 @@ class OpenLayersMap extends React.Component{
       source: new SourceVector({wrapX: false}),
       modifying: null,
       trailsSource: new SourceVector({wrapX: false}),
-      map: null, 
+      map: null,
+      center: null,
       interactions: [],
     };
   };
+
+
+  panToLocation = (location) => {
+    // let view = this.state.map.getView()
+    console.log(this.state.map)
+    // view.animate({
+    //   center: location,
+    //   duration: 2000
+    // })
+  }
+
+  componentDidUpdate(prevProps, prevState){
+    const {selectedTrail, trails} = this.props;
+
+    if (selectedTrail !== prevProps.selectedTrail && selectedTrail ){
+
+      let currentTrail = trails.find((t)=>{
+        return t.id == selectedTrail
+      })
+
+      let centerCoords = Projection.fromLonLat(currentTrail.coords[0])
+      let view = this.state.map.getView()
+
+      view.animate({
+        center: centerCoords,
+        duration: 500,
+        zoom: 16,
+      })
+
+    }
+  }
 
   renderTrails = (trails, selectedTrail) => {
     const {endModify} = this.props;
