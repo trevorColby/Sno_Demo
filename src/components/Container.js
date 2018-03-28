@@ -16,7 +16,7 @@ class Container extends React.Component{
     this.state = {
       createType: null,
       selectedTrail: null,
-      trails: []
+      trails: [],
       editableTrail: false
     }
   }
@@ -49,7 +49,7 @@ class Container extends React.Component{
     } else{
       this.setState({editableTrail: trailId})
     }
-
+    this.saveToLocalStorage();
   }
 
   deleteTrail = (trail) => {
