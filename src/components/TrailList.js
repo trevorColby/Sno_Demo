@@ -1,14 +1,18 @@
 import React from 'react'
 import _ from 'lodash';
 import { Table, TableBody, TableHead, TableCell, TableRow } from 'material-ui';
+import TrailNameForm from './TrailNameForm';
 
 class TrailList extends React.Component {
+
   renderTrail = (trail) => {
-    const {selected, trailSelected, deleteTrail} = this.props;
+    const {selected, trailSelected, deleteTrail, editableTrail, renameTrail} = this.props;
 
     const isSelected = selected === trail.id;
+    const isEditable = editableTrail == trail.id;
     const rowClass = isSelected ? 'selected' : '';
     const iconClass = `fa fa-${isSelected ? 'minus' : 'plus'}`;
+
     return (
       <TableRow
         key={trail.id}
@@ -20,7 +24,14 @@ class TrailList extends React.Component {
         >
           <i className={iconClass} />
         </TableCell>
-        <TableCell>{trail.name}</TableCell>
+
+     {isEditable ?
+      (<TableCell >
+        <TrailNameForm renameTrail={renameTrail} trailId= {trail.id} trailName={trail.name} />
+       </TableCell>) :
+      (<TableCell id={trail.id}  onClick={(e)=>renameTrail(e.target.id)} >{trail.name}</TableCell>)
+     }
+
         <TableCell>{trail.guns.length}</TableCell>
         <TableCell>
           <i onClick={() => deleteTrail(trail)} style={{cursor: 'pointer'}} className="fa fa-trash-alt" />
@@ -59,6 +70,7 @@ class TrailList extends React.Component {
 
     const currentTrailIndex = _.findIndex(trails, (t) => t.id === selected);
     const selectedGuns = _.get(trails[currentTrailIndex], 'guns', []);
+
     const listItems = _.clone(trails);
     if (selectedGuns) {
       selectedGuns.forEach(gun => {

@@ -6,6 +6,7 @@ import Style from 'ol/style/style';
 import RegularShape from 'ol/style/regularshape';
 
 export function getMapStyle(feature, resolution) {
+
 	switch(feature.getGeometry().getType()){
 		case 'Point':
 		  return new Style({
@@ -35,7 +36,7 @@ export function getMapStyle(feature, resolution) {
 			 });
 			 const text = new Text({
 				 overflow: true,
-				 text: "New Trail",
+				 text: feature.values_.name,
 				 stroke: new Stroke({
  					color: '#FFFFFF',
  					width: 3
