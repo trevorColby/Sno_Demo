@@ -108,11 +108,11 @@ class OpenLayersMap extends React.Component{
       source.addFeatures(drawFeatures);
     }
   }
+  renderTrailsDebounce = _.debounce(this.renderTrails, 50);
 
   componentWillReceiveProps(nextProps) {
     const {createType, trails, endDraw, selectedTrail} = this.props;
     const {map, source, interactions, trailsSource} = this.state;
-    
     // remove old draw interactions
     interactions.forEach(interaction => {
         map.removeInteraction(interaction);
@@ -134,9 +134,9 @@ class OpenLayersMap extends React.Component{
     newInteractions.forEach(i => {
       map.addInteraction(i);
     });
-    this.setState({interactions: newInteractions});
+    this.setState({interactions: newInteractions, modifying: null});
 
-    this.renderTrails(nextProps.trails, nextProps.selectedTrail);
+    this.renderTrailsDebounce(nextProps.trails, nextProps.selectedTrail);
   }
 
   componentDidMount(){
