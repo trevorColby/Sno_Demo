@@ -23,7 +23,13 @@ class TrailNameForm extends React.Component{
     const {renameTrail, trailId} = this.props;
 
     return(
-      <form onBlur={()=>{ renameTrail(trailId, this.state.value) }} >
+      <form onSubmit={(e)=>{
+        e.preventDefault()
+        renameTrail(trailId, this.state.value)
+      }}   onBlur={()=>{ renameTrail(trailId, this.state.value) }} >
+
+
+
         <input ref={(i) => {this.editTrail = i}} type="text" onChange={this.handleChange} value={this.state.value} name="name" />
       </form>
     )
