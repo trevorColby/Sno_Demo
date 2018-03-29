@@ -87,9 +87,9 @@ class TrailList extends React.Component {
 
   render(){
     const style = {
-      height: 300,
+      height: '100%',
       overflowX: 'scroll',
-      backgroundColor: '#E8E8E8',
+      backgroundColor: 'rgba(232,232,232,.72)',
       position: 'absolute',
       zIndex: '99',
       top: '0',
