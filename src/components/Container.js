@@ -5,8 +5,10 @@ import MapControls from './MapControls';
 import OpenLayersMap from './OpenLayersMap';
 import TrailList from './TrailList';
 import {mapObjects, defaultTrails} from '../utils/constants';
+import {getElevation} from '../utils/mapUtils';
 import kill_logo from './../imgs/Kill_Logo.png'
 import {Image} from 'react-bootstrap';
+
 
 class Container extends React.Component{
   constructor(props){
@@ -68,6 +70,10 @@ class Container extends React.Component{
     this.setState({trails: newTrails});
   }
 
+  getElevation = () => {
+
+  }
+
   endModify = (e) => {
     if (!e) {
       return;
@@ -76,6 +82,7 @@ class Container extends React.Component{
     const newTrails = _.cloneDeep(trails);
     const feature = e.target;
     const selectedTrailIndex = _.findIndex(newTrails, (t) => t.id === selectedTrail);
+
 
     if (feature.values_.id === _.get(newTrails, `${selectedTrailIndex}.id`)) {
       // if trail
@@ -95,6 +102,7 @@ class Container extends React.Component{
 
   endDraw(drawEvent) {
     const {createType, trails, selectedTrail} = this.state;
+
     switch (createType){
       case 'Trail': {
         const coords = _.map(_.get(drawEvent, 'target.sketchLineCoords_'), (drawCoord) => {
@@ -114,6 +122,9 @@ class Container extends React.Component{
       }
       case 'Hydrant': {
         const coords = Projection.toLonLat(_.get(drawEvent, 'target.sketchCoords_'));
+        //getElevation(coords) provides elevation profile which will be used for
+        // hydrant ids which are numbered from highest elevation to lowest..curently screws up
+        // becuase of promise chain.
         const trailIndex = _.findIndex(trails, (trail) => trail.id === selectedTrail);
         if (trailIndex !== -1) {
           const guns = _.clone(trails[trailIndex].guns);
@@ -121,6 +132,9 @@ class Container extends React.Component{
           const newTrails = _.cloneDeep(trails);
           newTrails[trailIndex].guns = guns;
           this.setState({trails: newTrails});
+
+
+
           break;
         }
       }
