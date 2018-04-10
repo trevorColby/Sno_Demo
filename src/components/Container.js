@@ -9,7 +9,6 @@ import {getElevation} from '../utils/mapUtils';
 import kill_logo from './../imgs/Kill_Logo.png'
 import {Image} from 'react-bootstrap';
 
-
 class Container extends React.Component{
   constructor(props){
     super(props);
@@ -17,95 +16,89 @@ class Container extends React.Component{
     this.state = {
       createType: null,
       selectedTrail: null,
-      trails: [],
+      trails: {},
+      hydrants: {},
       editableTrail: false
     }
   }
 
   componentDidMount() {
     const savedTrails = localStorage.getItem('trails');
+    const savedHydrants = localStorage.getItem('hydrants');
     const trails = savedTrails ? JSON.parse(savedTrails) : defaultTrails;
-    this.setState({trails: trails});
+    const hydrants = savedHydrants ? JSON.parse(savedHydrants) : {};
+    this.setState({trails: trails, hydrants: hydrants});
   }
 
   componentDidUpdate() {
     this.saveToLocalStorage();
-
   }
 
   saveToLocalStorage = () => {
     localStorage.setItem('trails', JSON.stringify(this.state.trails));
+    localStorage.setItem('hydrants', JSON.stringify(this.state.hydrants));
   }
 
   renameTrail = (trailId, newName) => {
-    const {editableTrail, trails} = this.state
-    if(newName){
-      let editedTrails = trails.map((t)=> {
-         if(t.id == trailId) {
-           t.name = newName
-         }
-         return t
-      })
-
-      this.setState({editableTrail: null, trails: editedTrails})
+    const {editableTrail, trails} = this.state;
+    if (newName) {
+      const newTrails = _.cloneDeep(trails);
+      newTrails[trailId].name = newName;
+      this.setState({editableTrail: null, trails: newTrails})
     } else{
-      this.setState({editableTrail: trailId})
+      this.setState({editableTrail: trailId});
     }
     this.saveToLocalStorage();
   }
 
   deleteTrail = (trail) => {
     const {trails} = this.state;
-    const newTrails = _.filter(trails, (item) => {
-      return item.id !== trail.id;
-    });
+    const newTrails = _.clone(trails);
+    console.log(newTrails, trail.id);
+    delete newTrails[trail.id];
+    // decide if this should also delete the hydrants with it or just "orphan" them
     this.setState({trails: newTrails});
   }
 
-  deleteGun = (gun) => {
-    const {trails, selectedTrail} = this.state;
-    const newTrails = _.cloneDeep(trails);
-    const selectedTrailIndex = _.findIndex(newTrails, (t) => t.id === selectedTrail);
-    const selectedGunIndex = _.findIndex(newTrails[selectedTrailIndex].guns, (g) => g.id === gun.id);
-    newTrails[selectedTrailIndex].guns.splice(selectedGunIndex, 1);
-    this.setState({trails: newTrails});
+  deleteHydrant = (hydrant) => {
+    const {trails, hydrants, selectedTrail} = this.state;
+    const newHydrants = _.cloneDeep(hydrants);
+    delete newHydrants[hydrant.id];
+    this.setState({hydrants: newHydrants});
   }
 
   endModify = (e) => {
     if (!e) {
       return;
     }
-    const {trails, selectedTrail} = this.state;
-    const newTrails = _.cloneDeep(trails);
+    const {trails, selectedTrail, hydrants} = this.state;
     const feature = e.target;
-    const selectedTrailIndex = _.findIndex(newTrails, (t) => t.id === selectedTrail);
 
-
-    if (feature.values_.id === _.get(newTrails, `${selectedTrailIndex}.id`)) {
+    if (feature.values_.id === selectedTrail) {
       // if trail
+      const newTrails = _.cloneDeep(trails);
       const newCoords = _.map(feature.getGeometry().getCoordinates()[0], (pt) => {
         return Projection.toLonLat(pt);
       });
-      newTrails[selectedTrailIndex].coords = newCoords;
+      newTrails[selectedTrail].coords = newCoords;
+      this.setState({trails: newTrails});
     } else {
       // its a hydrant
+      const newHydrants = _.cloneDeep(hydrants);
       const newCoords = Projection.toLonLat(feature.getGeometry().getCoordinates());
-      const gunIndex = _.findIndex(newTrails[selectedTrailIndex].guns, (g) => g.id === feature.values_.id);
-      newTrails[selectedTrailIndex].guns[gunIndex].coords = newCoords;
+      newHydrants[feature.values_.id].coords = newCoords;
+      this.setState({hydrants: newHydrants});
     }
-
-    this.setState({trails: newTrails});
   }
 
   endDraw(drawEvent) {
-    const {createType, trails, selectedTrail} = this.state;
-
+    const {createType, trails, selectedTrail, hydrants} = this.state;
     switch (createType){
       case 'Trail': {
         const coords = _.map(_.get(drawEvent, 'target.sketchLineCoords_'), (drawCoord) => {
           return Projection.toLonLat(drawCoord);
         });
-        const newTrails = _.cloneDeep(trails);
+        const newTrails = _.clone(trails);
         const newTrail = {
           // just use a timestamp to ensure unique id for now, database would supply later
           id: new Date().getTime(),
@@ -113,30 +106,27 @@ class Container extends React.Component{
           guns: [],
           coords: coords
         };
-        newTrails.push(newTrail);
+        newTrails[newTrail.id] = newTrail;
         this.setState({createType: null, trails: newTrails, selectedTrail: newTrail.id});
         break;
       }
       case 'Hydrant': {
         const coords = Projection.toLonLat(_.get(drawEvent, 'target.sketchCoords_'));
-        const trailIndex = _.findIndex(trails, (trail) => trail.id === selectedTrail);
-        if (trailIndex !== -1) {
-          let guns = _.clone(trails[trailIndex].guns);
-          const gunIndex = guns.push({id: new Date().getTime(), coords: coords}) - 1;
-          let newTrails = _.cloneDeep(trails);
-          newTrails[trailIndex].guns = guns;
-          this.setState({trails: newTrails});
-
-          // Gets Elevation from coordinates and sets gun elevation in state
-          getElevation(coords)
-            .then((profile) => {
-              guns[gunIndex]["elevation"] = profile[0]['height'];
-              newTrails[trailIndex].guns = guns;
-              this.setState({trails: newTrails});
-            })
-
-          break;
-        }
+        const newHydrants = _.clone(hydrants);
+        const createdHydrant = {
+          id: new Date().getTime(), 
+          coords: coords, 
+          trail: selectedTrail
+        };
+        newHydrants[createdHydrant.id] = createdHydrant;
+        this.setState({hydrants: newHydrants});
+        getElevation(coords).then((data) => {
+          const elevation = data[0].height;
+          const newHydrantsv2 = _.clone(newHydrants);
+          newHydrantsv2[createdHydrant.id].elevation = elevation;
+          this.setState({hydrants: newHydrantsv2});
+        });
+        break;
       }
       default:
         console.log("haven't implemented this type yet");
@@ -153,7 +143,7 @@ class Container extends React.Component{
   }
 
   render(){
-    const {trails, createType, selectedTrail, editableTrail} = this.state;
+    const {trails, createType, selectedTrail, editableTrail, hydrants} = this.state;
 
     return (
       <div style={{position: 'relative'}}>
@@ -162,6 +152,7 @@ class Container extends React.Component{
           endDraw={this.endDraw}
           endModify={this.endModify}
           trails={trails}
+          hydrants={hydrants}
           selectedTrail={selectedTrail}
         />
         <MapControls
