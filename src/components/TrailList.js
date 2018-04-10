@@ -61,7 +61,7 @@ class TrailList extends React.Component {
       (<TableCell id={trail.id}  onClick={(e)=>renameTrail(e.target.id)} >{trail.name}</TableCell>)
      }
 
-        <TableCell>{trail.guns.length}</TableCell>
+        <TableCell>{trail.guns}</TableCell>
         <TableCell>
           <i onClick={() => deleteTrail(trail)} style={{cursor: 'pointer'}} className="fa fa-trash-alt" />
         </TableCell>

@@ -1,5 +1,5 @@
 import React from 'react';
-import {Button, Paper, BottomNavigation } from 'material-ui';
+import {Button } from 'material-ui';
 import PropTypes from 'prop-types';
 import { withStyles } from 'material-ui/styles';
 import green from 'material-ui/colors/green';
