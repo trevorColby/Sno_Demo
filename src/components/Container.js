@@ -140,7 +140,7 @@ class Container extends React.Component{
     const { selectedTrail } = this.state;
     let newHydrants = _.cloneDeep(this.state.hydrants)
     const targetHydrants = _.pickBy(newHydrants, (h) => h['trail'] === selectedTrail)
-    const sortedElevHydrants = _.sortBy(targetHydrants,'elevation' ).map((h,i)=> {
+    const sortedElevHydrants = _.orderBy(targetHydrants,'elevation', 'desc').map((h,i)=> {
       h.name = i + 1
       return h
     })
