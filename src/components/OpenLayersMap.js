@@ -19,6 +19,7 @@ import {getMapStyle} from '../utils/mapUtils';
 class OpenLayersMap extends React.Component{
   constructor(props){
     super(props);
+    this.renderTrails = this.renderTrails.bind(this);
     this.state = {
       source: new SourceVector({wrapX: false}),
       modifying: null,
@@ -29,6 +30,21 @@ class OpenLayersMap extends React.Component{
     };
   };
 
+  componentDidUpdate(prevProps, prevState){
+    const {selectedTrail, trails} = this.props;
+
+    if (selectedTrail !== prevProps.selectedTrail && selectedTrail ){
+      let currentTrail = trails[selectedTrail]
+      let centerCoords = Projection.fromLonLat(currentTrail.coords[0])
+      let view = this.state.map.getView()
+
+      view.animate({
+        center: centerCoords,
+        duration: 500,
+        zoom: 16,
+      })
+    }
+  }
 
   panToLocation = (location) => {
     // let view = this.state.map.getView()
@@ -39,35 +55,14 @@ class OpenLayersMap extends React.Component{
     // })
   }
 
-  componentDidUpdate(prevProps, prevState){
-    const {selectedTrail, trails} = this.props;
-
-    if (selectedTrail !== prevProps.selectedTrail && selectedTrail ){
-
-      let currentTrail = trails.find((t)=>{
-        return t.id == selectedTrail
-      })
-
-      let centerCoords = Projection.fromLonLat(currentTrail.coords[0])
-      let view = this.state.map.getView()
-
-      view.animate({
-        center: centerCoords,
-        duration: 500,
-        zoom: 16,
-      })
-
-    }
-  }
-
-  renderTrails = (trails, selectedTrail) => {
-    const {endModify} = this.props;
+  renderTrails() {
+    const {endModify, trails, selectedTrail, hydrants} = this.props;
     const {trailsSource, source} = this.state;
     source.clear();
     trailsSource.clear();
     // redo the trails features for unselected trails
     const newFeatures = [];
-    trails.forEach((trail) => {
+    _.each(trails, (trail) => {
       if (trail.id !== selectedTrail && trail.coords) {
         // first add the trail itself
         const feature = new Feature({
@@ -81,9 +76,8 @@ class OpenLayersMap extends React.Component{
       }
     });
     trailsSource.addFeatures(newFeatures);
-
-    // if trail is selected then put it in draw layer with its guns
-    const selectedTrailObj = _.find(trails, (t) => t.id === selectedTrail);
+    // if trail is selected then put it in draw layer with its hydrants
+    const selectedTrailObj = trails[selectedTrail];
     if (selectedTrailObj) {
       const drawFeatures = [];
       drawFeatures.push(new Feature({
@@ -93,18 +87,21 @@ class OpenLayersMap extends React.Component{
             return Projection.fromLonLat(pt);
           })])
       }));
-      selectedTrailObj.guns.forEach((gun) => {
-        const gunFeature = new Feature({
-          name: gun.id,
-          id: gun.id,
-          geometry: new Point(Projection.fromLonLat(gun.coords))
-        });
-        drawFeatures.push(gunFeature);
+      _.each(hydrants, (hydrant) => {
+        if (hydrant.trail === selectedTrail) {
+          const hydrantFeature = new Feature({
+            name: hydrant.name || hydrant.id,
+            id: hydrant.id,
+            geometry: new Point(Projection.fromLonLat(hydrant.coords))
+          });
+          drawFeatures.push(hydrantFeature);
+        }
       });
 
       _.each(drawFeatures, (f) => {
         f.on('change', (e) => this.setState({modifying: e}));
       });
+      console.log(drawFeatures.length);
       source.addFeatures(drawFeatures);
     }
   }
@@ -191,6 +188,7 @@ class OpenLayersMap extends React.Component{
   }
 
   render() {
+    console.log(this.props);
     return <div id='map-container' />;
   }
 }
