@@ -30,6 +30,7 @@ class Container extends React.Component{
 
   componentDidUpdate() {
     this.saveToLocalStorage();
+
   }
 
   saveToLocalStorage = () => {
@@ -68,10 +69,6 @@ class Container extends React.Component{
     const selectedGunIndex = _.findIndex(newTrails[selectedTrailIndex].guns, (g) => g.id === gun.id);
     newTrails[selectedTrailIndex].guns.splice(selectedGunIndex, 1);
     this.setState({trails: newTrails});
-  }
-
-  getElevation = () => {
-
   }
 
   endModify = (e) => {
@@ -122,18 +119,21 @@ class Container extends React.Component{
       }
       case 'Hydrant': {
         const coords = Projection.toLonLat(_.get(drawEvent, 'target.sketchCoords_'));
-        //getElevation(coords) provides elevation profile which will be used for
-        // hydrant ids which are numbered from highest elevation to lowest..curently screws up
-        // becuase of promise chain.
         const trailIndex = _.findIndex(trails, (trail) => trail.id === selectedTrail);
         if (trailIndex !== -1) {
-          const guns = _.clone(trails[trailIndex].guns);
-          guns.push({id: new Date().getTime(), coords: coords});
-          const newTrails = _.cloneDeep(trails);
+          let guns = _.clone(trails[trailIndex].guns);
+          const gunIndex = guns.push({id: new Date().getTime(), coords: coords}) - 1;
+          let newTrails = _.cloneDeep(trails);
           newTrails[trailIndex].guns = guns;
           this.setState({trails: newTrails});
 
-
+          // Gets Elevation from coordinates and sets gun elevation in state
+          getElevation(coords)
+            .then((profile) => {
+              guns[gunIndex]["elevation"] = profile[0]['height'];
+              newTrails[trailIndex].guns = guns;
+              this.setState({trails: newTrails});
+            })
 
           break;
         }
@@ -143,10 +143,11 @@ class Container extends React.Component{
     }
   }
 
+
   mapControlClicked = (type) => {
     if (type === 'Hydrant') {
       this.setState({createType: type});
-    } else {
+    }else {
       this.setState({createType: type || null, selectedTrail: null});
     }
   }
