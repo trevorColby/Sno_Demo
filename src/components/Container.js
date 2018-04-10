@@ -5,6 +5,7 @@ import MapControls from './MapControls';
 import OpenLayersMap from './OpenLayersMap';
 import TrailList from './TrailList';
 import {mapObjects, defaultTrails} from '../utils/constants';
+import {getElevation} from '../utils/mapUtils';
 import kill_logo from './../imgs/Kill_Logo.png'
 import {Image} from 'react-bootstrap';
 
@@ -119,6 +120,12 @@ class Container extends React.Component{
         };
         newHydrants[createdHydrant.id] = createdHydrant;
         this.setState({hydrants: newHydrants});
+        getElevation(coords).then((data) => {
+          const elevation = data[0].height;
+          const newHydrantsv2 = _.clone(newHydrants);
+          newHydrantsv2[createdHydrant.id].elevation = elevation;
+          this.setState({hydrants: newHydrantsv2});
+        });
         break;
       }
       default:
@@ -126,10 +133,11 @@ class Container extends React.Component{
     }
   }
 
+
   mapControlClicked = (type) => {
     if (type === 'Hydrant') {
       this.setState({createType: type});
-    } else {
+    }else {
       this.setState({createType: type || null, selectedTrail: null});
     }
   }

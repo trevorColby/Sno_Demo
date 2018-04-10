@@ -4,6 +4,8 @@ import Circle from 'ol/style/circle';
 import Text from 'ol/style/text';
 import Style from 'ol/style/style';
 import RegularShape from 'ol/style/regularshape';
+import axios from 'axios';
+import _ from 'lodash';
 
 export function getMapStyle(feature, resolution) {
 
@@ -54,4 +56,12 @@ export function getMapStyle(feature, resolution) {
 			 })
 	}
 
+}
+
+// Takes a series of ol coordinates and returns the elevation profile for those coordinates
+export function getElevation(coords){
+	let revcoords = _.reverse(_.clone(coords))
+  const key= 'Rnodo0GTN0IK8fpaVlRuTh3H0vX7yX6T'
+	return axios.get('http://open.mapquestapi.com/elevation/v1/profile?key='+ key + '&unit=f&shapeFormat=raw&latLngCollection=' + revcoords)
+	.then(profile => profile.data.elevationProfile)
 }
