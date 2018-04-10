@@ -148,7 +148,6 @@ class OpenLayersMap extends React.Component{
         provider: 'osm',
         lang: 'en',
         placeholder: 'Search for ...',
-        targetType: 'text-input',
         limit: 5,
         keepOpen: true,
         autoComplete: true,
@@ -175,6 +174,7 @@ class OpenLayersMap extends React.Component{
       target: 'map-container',
       layers: [bingMapsLayer, trailsLayer, drawLayer],
       view: new View({
+
         projection: projection,
         center: killingtonCoordsWebMercator,
         zoom: 14.2,
