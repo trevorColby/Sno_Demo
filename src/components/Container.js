@@ -54,7 +54,6 @@ class Container extends React.Component{
   deleteTrail = (trail) => {
     const {trails} = this.state;
     const newTrails = _.clone(trails);
-    console.log(newTrails, trail.id);
     delete newTrails[trail.id];
     // decide if this should also delete the hydrants with it or just "orphan" them
     this.setState({trails: newTrails});
@@ -114,23 +113,43 @@ class Container extends React.Component{
         const coords = Projection.toLonLat(_.get(drawEvent, 'target.sketchCoords_'));
         const newHydrants = _.clone(hydrants);
         const createdHydrant = {
-          id: new Date().getTime(), 
-          coords: coords, 
-          trail: selectedTrail
+          id: new Date().getTime(),
+          coords: coords,
+          trail: selectedTrail,
+          elevation: null,
+          name: null,
         };
         newHydrants[createdHydrant.id] = createdHydrant;
         this.setState({hydrants: newHydrants});
-        getElevation(coords).then((data) => {
-          const elevation = data[0].height;
-          const newHydrantsv2 = _.clone(newHydrants);
-          newHydrantsv2[createdHydrant.id].elevation = elevation;
-          this.setState({hydrants: newHydrantsv2});
-        });
+        getElevation(coords)
+          .then((data) => {
+              const elevation = data[0].height;
+              const newHydrantsv2 = _.clone(newHydrants);
+              newHydrantsv2[createdHydrant.id].elevation = elevation;
+              this.setState({hydrants: newHydrantsv2});
+            })
+            .then(this.indexNamebyElevation);
         break;
       }
       default:
         console.log("haven't implemented this type yet");
     }
+  }
+
+  indexNamebyElevation = () => {
+    const { selectedTrail } = this.state;
+    let newHydrants = _.cloneDeep(this.state.hydrants)
+    const targetHydrants = _.pickBy(newHydrants, (h) => h['trail'] === selectedTrail)
+    const sortedElevHydrants = _.sortBy(targetHydrants,'elevation' ).map((h,i)=> {
+      h.name = i + 1
+      return h
+    })
+    _.each(sortedElevHydrants, (h,key)=> {
+      newHydrants[h.id] = h
+    })
+    this.setState({
+      hydrants: newHydrants
+    })
   }
 
 

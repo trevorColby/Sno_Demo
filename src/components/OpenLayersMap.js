@@ -46,15 +46,6 @@ class OpenLayersMap extends React.Component{
     }
   }
 
-  panToLocation = (location) => {
-    // let view = this.state.map.getView()
-    console.log(this.state.map)
-    // view.animate({
-    //   center: location,
-    //   duration: 2000
-    // })
-  }
-
   renderTrails() {
     const {endModify, trails, selectedTrail, hydrants} = this.props;
     const {trailsSource, source} = this.state;
@@ -81,7 +72,7 @@ class OpenLayersMap extends React.Component{
     if (selectedTrailObj) {
       const drawFeatures = [];
       drawFeatures.push(new Feature({
-        name: selectedTrailObj.name, 
+        name: selectedTrailObj.name,
         id: selectedTrailObj.id,
         geometry: new Polygon([_.map(selectedTrailObj.coords, (pt) => {
             return Projection.fromLonLat(pt);
@@ -101,7 +92,6 @@ class OpenLayersMap extends React.Component{
       _.each(drawFeatures, (f) => {
         f.on('change', (e) => this.setState({modifying: e}));
       });
-      console.log(drawFeatures.length);
       source.addFeatures(drawFeatures);
     }
   }
@@ -188,7 +178,6 @@ class OpenLayersMap extends React.Component{
   }
 
   render() {
-    console.log(this.props);
     return <div id='map-container' />;
   }
 }
