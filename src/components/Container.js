@@ -6,6 +6,7 @@ import MapControls from './MapControls';
 import OpenLayersMap from './OpenLayersMap';
 import TrailList from './TrailList';
 import {getElevation} from '../utils/mapUtils';
+import SideMenu from './SideMenu';
 import kill_logo from './../imgs/Kill_Logo.png'
 import {Image} from 'react-bootstrap';
 
@@ -156,13 +157,15 @@ class Container extends React.Component{
           mode={mode}
           changeMode={(mode) => this.setState({mode})}
         />
-        <TrailList
-          modifyTrail={this.modifyTrail}
-          trails={trails}
-          hydrants={hydrants}
-          selected={selectedTrail}
-          trailSelected={(id) => this.setState({selectedTrail: id})}
-        />
+        <SideMenu mode={mode}>
+          <TrailList
+            modifyTrail={this.modifyTrail}
+            trails={trails}
+            hydrants={hydrants}
+            selected={selectedTrail}
+            trailSelected={(id) => this.setState({selectedTrail: id})}
+          />
+        </SideMenu>
         <Image style={{float: 'right', width: 300, margin: 12}} src={kill_logo} responsive />
       </div>
     )

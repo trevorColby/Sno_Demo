@@ -13,7 +13,7 @@ import SourceVector from 'ol/source/vector';
 import Draw from 'ol/interaction/draw';
 import Modify from 'ol/interaction/modify';
 import {mapObjects} from '../utils/constants';
-import {getMapStyle} from '../utils/mapUtils';
+import {getFeatureStyle} from '../utils/mapUtils';
 import Geocoder from 'ol-geocoder';
 
 class OpenLayersMap extends React.Component{
@@ -55,7 +55,8 @@ class OpenLayersMap extends React.Component{
     const newFeatures = [];
     trails.forEach((trail) => {
       const t = trail.toJS();
-      if (t.id !== selectedTrail && t.coords) {
+      if (t.coords) {
+        const featureType = t.id === selectedTrail ? 'selectedTrail' : 'trail';
         // first add the trail itself
         const feature = new Feature({
           name: t.name,
@@ -64,24 +65,28 @@ class OpenLayersMap extends React.Component{
             return Projection.fromLonLat(pt);
           })])
         });
+        feature.setStyle(getFeatureStyle(featureType, t.name));
         newFeatures.push(feature);
       }
     });
     hydrants.forEach((hydrant) => {
       const h = hydrant.toJS();
-      if (h.trail !== selectedTrail && h.coords) {
+      if (h.coords) {
+        const featureType = h.trail === selectedTrail ? 'selectedHydrant' : 'hydrant';
+      //if (h.trail !== selectedTrail && h.coords) {
         const feature = new Feature({
           name: h.name,
           id: h.id,
           geometry: new Point(Projection.fromLonLat(h.coords))
         });
+        feature.setStyle(getFeatureStyle(featureType, h.name));
         newFeatures.push(feature);
       }
-    })
+    });
     staticSource.addFeatures(newFeatures);
 
     // if trail is selected then put it in draw layer with its hydrants
-    if (selectedTrail && trails.get(selectedTrail)) {
+    /*if (selectedTrail && trails.get(selectedTrail)) {
       const selectedTrailObj = trails.get(selectedTrail).toJS();
       const drawFeatures = [];
       drawFeatures.push(new Feature({
@@ -107,7 +112,7 @@ class OpenLayersMap extends React.Component{
         f.on('change', (e) => this.setState({modifying: e}));
       });
       modifyingSource.addFeatures(drawFeatures);
-    }
+    }*/
   }
   renderTrailsDebounce = _.debounce(this.renderTrails, 50);
 
@@ -168,13 +173,11 @@ class OpenLayersMap extends React.Component{
     });
 
     const modifyingLayer = new LayerVector({
-      source: modifyingSource,
-      style: getMapStyle
+      source: modifyingSource
     });
 
     const staticLayer = new LayerVector({
-      source: staticSource,
-      style: getMapStyle
+      source: staticSource
     });
 
     // Orientation
