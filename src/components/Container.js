@@ -140,6 +140,13 @@ class Container extends React.Component{
     });
   }
 
+
+  importKMLClicked = (loadedHydrants) => {
+    this.setState({
+      hydrants: Immutable.fromJS(loadedHydrants)
+    })
+  }
+
   render(){
     const {trails, mode, selectedTrail, hydrants} = this.state;
 

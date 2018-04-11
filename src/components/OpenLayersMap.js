@@ -159,10 +159,17 @@ class OpenLayersMap extends React.Component{
     });
 
 <<<<<<< HEAD
+<<<<<<< HEAD
 
 
 =======
 >>>>>>> switch to modes
+=======
+=======
+
+
+>>>>>>> Successfully import KML Points to Map
+>>>>>>> Successfully import KML Points to Map
     var geocoder = new Geocoder('nominatim', {
       provider: 'osm',
       lang: 'en',

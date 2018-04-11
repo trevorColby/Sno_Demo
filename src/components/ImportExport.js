@@ -4,14 +4,20 @@ import tj from '@mapbox/togeojson';
 import fs from 'fs';
 import DOMParser from 'xmldom';
 <<<<<<< HEAD
+<<<<<<< HEAD
+=======
+>>>>>>> Successfully import KML Points to Map
 import Hydrants from './../KML/Hydrants.kml';
 import KML from 'ol/format/kml';
 import Point from 'ol/geom/point';
 import Projection from 'ol/proj';
 import _ from 'lodash';
+<<<<<<< HEAD
 =======
 import Hydrants from './../KML/Hydrants.kml'
 >>>>>>> Add ImportExport
+=======
+>>>>>>> Successfully import KML Points to Map
 
 class ImportExport extends React.Component {
 
