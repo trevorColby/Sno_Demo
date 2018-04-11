@@ -148,8 +148,6 @@ class Container extends React.Component{
   render(){
     const {trails, mode, selectedTrail, hydrants} = this.state;
 
-    console.log(this.state.hydrants.toJS())
-
     return (
       <div style={{position: 'relative'}}>
         <OpenLayersMap
