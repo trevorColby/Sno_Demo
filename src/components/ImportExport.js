@@ -1,5 +1,6 @@
 import React from 'react';
 import { Button } from 'material-ui';
+import Hydrants from './../KML/Hydrants.kml';
 import KML from 'ol/format/kml';
 import _ from 'lodash';
 import Immutable from 'immutable';

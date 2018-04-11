@@ -159,6 +159,7 @@ class OpenLayersMap extends React.Component{
       })
     });
 
+
     var geocoder = new Geocoder('nominatim', {
       provider: 'osm',
       lang: 'en',
