@@ -1,12 +1,6 @@
 import React from 'react';
 import { Button } from 'material-ui';
-import tj from '@mapbox/togeojson';
-import fs from 'fs';
-import DOMParser from 'xmldom';
-import Hydrants from './../KML/Hydrants.kml';
 import KML from 'ol/format/kml';
-import Point from 'ol/geom/point';
-import Projection from 'ol/proj';
 import _ from 'lodash';
 
 
@@ -45,18 +39,17 @@ class ImportExport extends React.Component {
       return klm.map((feature, index) => {
 
         const coords = feature.get('geometry').flatCoordinates
-  
+
         return {
           name: feature.get('description'),
           id: index,
           coords: _.chunk(coords,3),
-          hydrants: null,
         }
       })
     }
 
-    function processHydrants(kml){
-      return kml.map((feature, index)=> {
+    function processHydrants(klm){
+      return klm.map((feature, index)=> {
         const coords = feature.get('geometry').getGeometries()[0].flatCoordinates
         coords.pop()
         return {
@@ -81,7 +74,7 @@ class ImportExport extends React.Component {
 
     return (
         <div style={style}>
-          <input onChange={this.changeFile} type='file' id='layerImport' />
+          <input onChange={this.changeFile} type='file' />
           <Button variant="raised" onClick={this.importFile} > Import </Button>
           <Button variant="raised" > Export </Button>
         </div>

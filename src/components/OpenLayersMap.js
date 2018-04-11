@@ -196,8 +196,6 @@ class OpenLayersMap extends React.Component{
       })
     });
 
-
-
     //Controls
     map.addControl(geocoder)
 
