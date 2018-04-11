@@ -17,7 +17,6 @@ class TrailNameForm extends React.Component {
 
   render() {
     const { renameTrail, trailId } = this.props;
-
     return (
       <form
         onSubmit={(e) => {
