@@ -3,7 +3,11 @@ import { Button } from 'material-ui';
 import tj from '@mapbox/togeojson';
 import fs from 'fs';
 import DOMParser from 'xmldom';
-import Hydrants from './../KML/Hydrants.kml'
+import Hydrants from './../KML/Hydrants.kml';
+import KML from 'ol/format/kml';
+import Point from 'ol/geom/point';
+import Projection from 'ol/proj';
+import _ from 'lodash';
 
 class ImportExport extends React.Component {
 
@@ -25,14 +29,24 @@ class ImportExport extends React.Component {
 
   importFile = () =>  {
     const { selectedFiles } = this.state;
+    const { importKMLClicked } = this.props;
     const reader = new FileReader();
-    let kml;
 
     reader.onload = function(event){
-      const kml = new DOMParser.DOMParser().parseFromString(event.target.result);
-      console.log(kml)
-      var converted = tj.kml(kml);
-      console.log(converted)
+      const kml = new KML().readFeatures(event.target.result)
+      const kmlMap = kml.map((feature, index)=> {
+        const coords = feature.get('geometry').getGeometries()[0].flatCoordinates
+        coords.pop()
+        return {
+          name: feature.get('name'),
+          id: index,
+          coords: coords,
+          elevation: null,
+          trail: null
+        }
+      })
+
+      importKMLClicked(_.keyBy(kmlMap, 'id'))
     }
 
     reader.readAsText(selectedFiles[0])

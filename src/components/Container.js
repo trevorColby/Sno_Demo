@@ -159,12 +159,16 @@ class Container extends React.Component{
     }
   }
 
-  importKLMClicked = (file) => {
-    console.log(file)
+  importKMLClicked = (loadedHydrants) => {
+    this.setState({
+      hydrants: Immutable.fromJS(loadedHydrants)
+    })
   }
 
   render(){
     const {trails, createType, selectedTrail, hydrants} = this.state;
+
+    console.log(this.state.hydrants.toJS())
 
     return (
       <div style={{position: 'relative'}}>
@@ -190,7 +194,7 @@ class Container extends React.Component{
         />
 
         <ImportExport
-        importKLMClicked= {this.importKLMClicked}
+        importKMLClicked= {this.importKMLClicked}
          />
 
         <Image style={{float: 'right', width: 300, margin: 12}} src={kill_logo} responsive />

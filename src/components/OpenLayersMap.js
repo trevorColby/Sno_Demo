@@ -37,7 +37,7 @@ class OpenLayersMap extends React.Component{
     if (selectedTrail !== prevProps.selectedTrail && selectedTrail ){
       let firstCoords = trails.getIn([selectedTrail, 'coords', 0]);
       let centerCoords = Projection.fromLonLat(firstCoords ? firstCoords.toJS() : [0,0]);
-      
+
       map.getView().animate({
         center: centerCoords,
         duration: 500,
@@ -80,7 +80,7 @@ class OpenLayersMap extends React.Component{
           })])
       }));
       hydrants.forEach((hydrant) => {
-        if (hydrant.get('trail') === selectedTrail) {
+        if (hydrant.get('trail') === selectedTrail || true) {
           const h = hydrant.toJS();
           const hydrantFeature = new Feature({
             name: h.name || h.id,
@@ -145,7 +145,7 @@ class OpenLayersMap extends React.Component{
       })
     });
 
-    
+
 
     var geocoder = new Geocoder('nominatim', {
       provider: 'osm',
@@ -168,7 +168,7 @@ class OpenLayersMap extends React.Component{
 
     // Orientation
     var projection = Projection.get('EPSG:3857');
-    var killingtonCoords = [-72.803584,43.619210];
+    var killingtonCoords = [-106.553668, 39.612616];
     var killingtonCoordsWebMercator = Projection.fromLonLat(killingtonCoords);
 
     // Map
@@ -184,6 +184,8 @@ class OpenLayersMap extends React.Component{
         rotation: 2.4
       })
     });
+
+
 
     //Controls
     map.addControl(geocoder)
