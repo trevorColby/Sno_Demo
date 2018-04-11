@@ -31,8 +31,17 @@ const styles = theme => ({
 });
 
 class TrailList extends React.Component {
+  constructor(props) {
+    super(props);
+    this.state = {
+      editableTrail: null
+    }
+  }
+
   renderTrail = (trail) => {
-    const {selected, trailSelected, deleteTrail, editableTrail, renameTrail, hydrants} = this.props;
+    const {selected, trailSelected, deleteTrail, renameTrail, hydrants} = this.props;
+    const {editableTrail} = this.state;
+
     const id = trail.id;
     const isSelected = selected === id;
     const isEditable = editableTrail === id;
@@ -53,9 +62,12 @@ class TrailList extends React.Component {
 
        {isEditable ?
         (<TableCell >
-          <TrailNameForm renameTrail={renameTrail} trailId={id} trailName={trail.name} />
+          <TrailNameForm 
+            onSubmit={(name) => {renameTrail(id, name); this.setState({editableTrail: null})}} 
+            trailName={trail.name} 
+          />
          </TableCell>) :
-        (<TableCell onClick={(e) => renameTrail(id)} >{trail.name}</TableCell>)
+        (<TableCell onClick={(e) => {this.setState({editableTrail: id})}} >{trail.name}</TableCell>)
        }
 
         <TableCell>{hydrants.filter((h) => h.get('trail') === id).size}</TableCell>

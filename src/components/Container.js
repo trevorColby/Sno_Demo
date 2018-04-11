@@ -18,8 +18,7 @@ class Container extends React.Component{
       createType: null,
       selectedTrail: null,
       trails: Immutable.Map(),
-      hydrants: Immutable.Map(),
-      editableTrail: false
+      hydrants: Immutable.Map()
     }
   }
 
@@ -44,11 +43,8 @@ class Container extends React.Component{
     const {trails} = this.state;
     if (newName) {
       this.setState({
-        editableTrail: null, 
         trails: trails.setIn([trailId, 'name'], newName)
       });
-    } else {
-      this.setState({editableTrail: trailId});
     }
   }
 
@@ -140,7 +136,7 @@ class Container extends React.Component{
   }
 
   render(){
-    const {trails, createType, selectedTrail, editableTrail, hydrants} = this.state;
+    const {trails, createType, selectedTrail, hydrants} = this.state;
 
     return (
       <div style={{position: 'relative'}}>
@@ -157,7 +153,6 @@ class Container extends React.Component{
           canAddHydrant={!!selectedTrail}
         />
         <TrailList
-          editableTrail={editableTrail}
           renameTrail={this.renameTrail}
           trails={trails}
           hydrants={hydrants}
