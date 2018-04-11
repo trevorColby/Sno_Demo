@@ -130,6 +130,26 @@ class Container extends React.Component{
     }
   }
 
+  indexNamebyElevation = () => {
+    const { selectedTrail } = this.state;
+    let newHydrants = _.cloneDeep(this.state.hydrants);
+
+    const sortedTrailHydrants = _.chain(newHydrants)
+      .pickBy((h) => h['trail'] === selectedTrail)
+      .orderBy('elevation', 'desc')
+      .map((h,i)=> {
+        h.name = i + 1
+        return h
+      }).value();
+
+    _.each(sortedTrailHydrants , (h,key)=> {
+      newHydrants[h.id] = h
+    });
+    this.setState({
+      hydrants: newHydrants
+    });
+  }
+
   mapControlClicked = (type) => {
     if (type === 'Hydrant') {
       this.setState({createType: type});

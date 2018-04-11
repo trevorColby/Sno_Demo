@@ -14,6 +14,7 @@ import Draw from 'ol/interaction/draw';
 import Modify from 'ol/interaction/modify';
 import {mapObjects} from '../utils/constants';
 import {getMapStyle} from '../utils/mapUtils';
+import Geocoder from 'ol-geocoder';
 
 class OpenLayersMap extends React.Component{
   constructor(props){
@@ -72,7 +73,7 @@ class OpenLayersMap extends React.Component{
       const selectedTrailObj = trails.get(selectedTrail).toJS();
       const drawFeatures = [];
       drawFeatures.push(new Feature({
-        name: selectedTrailObj.name, 
+        name: selectedTrailObj.name,
         id: selectedTrailObj.id,
         geometry: new Polygon([_.map(selectedTrailObj.coords, (pt) => {
             return Projection.fromLonLat(pt);
@@ -144,6 +145,17 @@ class OpenLayersMap extends React.Component{
       })
     });
 
+    
+
+    var geocoder = new Geocoder('nominatim', {
+      provider: 'osm',
+      lang: 'en',
+      placeholder: 'Search for ...',
+      limit: 5,
+      keepOpen: true,
+      autoComplete: true,
+    });
+
     const modifyingLayer = new LayerVector({
       source: modifyingSource,
       style: getMapStyle
@@ -165,17 +177,23 @@ class OpenLayersMap extends React.Component{
       target: 'map-container',
       layers: [bingMapsLayer, staticLayer, modifyingLayer],
       view: new View({
+
         projection: projection,
         center: killingtonCoordsWebMercator,
         zoom: 14.2,
         rotation: 2.4
       })
     });
+
+    //Controls
+    map.addControl(geocoder)
+
+
     // Modifications
     let modify = new Modify({source: modifyingSource});
     modify.on('modifyend', () => endModify(this.state.modifying));
     map.addInteraction(modify);
-    this.setState({map: map})
+    this.setState({map: map});
   }
 
   render() {
