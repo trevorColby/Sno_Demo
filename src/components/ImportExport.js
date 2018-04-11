@@ -26,7 +26,7 @@ class ImportExport extends React.Component {
 
   importFile = () =>  {
     const { selectedFiles } = this.state;
-    const { importKMLClicked, mode } = this.props;
+    const { importKMLClicked } = this.props;
     const reader = new FileReader();
       reader.onload = function(event){
         try {

@@ -159,6 +159,11 @@ class OpenLayersMap extends React.Component{
       })
     });
 
+<<<<<<< HEAD
+=======
+
+
+>>>>>>> Successfully import KML Points to Map
     var geocoder = new Geocoder('nominatim', {
       provider: 'osm',
       lang: 'en',
@@ -179,8 +184,14 @@ class OpenLayersMap extends React.Component{
     });
 
     // Orientation
+<<<<<<< HEAD
     const projection = Projection.get('EPSG:3857');
     const centerCoords = [-106.553668, 39.612616];
+=======
+    var projection = Projection.get('EPSG:3857');
+    var killingtonCoords = [-106.553668, 39.612616];
+    var killingtonCoordsWebMercator = Projection.fromLonLat(killingtonCoords);
+>>>>>>> Successfully import KML Points to Map
 
     // Map
     const map = new Map({
@@ -194,6 +205,8 @@ class OpenLayersMap extends React.Component{
         rotation: 2.4
       })
     });
+
+
 
     //Controls
     map.addControl(geocoder)
