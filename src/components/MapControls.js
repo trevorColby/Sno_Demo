@@ -7,18 +7,24 @@ class MapControls extends React.Component{
       float: 'left'
     }
 
-    const {onClick, canAddHydrant} = this.props;
-
+    const {changeMode, mode} = this.props;
 
     return (
         <div style={style}>
-          <Button variant="raised" id='Trail' onClick={()=> onClick('Trail')}> Trail </Button>
-          {canAddHydrant ? (
-            <Button variant="raised" onClick={()=> onClick('Hydrant')} id='Hydrant'>Hydrant</Button>
-          ) : null}
-          <Button variant="raised" onClick={()=> onClick('HydrantLine')} id='HydrantLine' >Hydrant Line</Button>
-          <Button variant="raised" onClick={()=> onClick('HydrantTrail')} id='HydrantTrail' >Hydrant Trail</Button>
-          <Button variant="raised" onClick={()=> onClick('removeInteraction')} id='removeInteraction' >Save</Button>
+          <Button 
+            variant="raised" 
+            color={mode==='trails' ? 'primary' : 'default'} 
+            onClick={()=> changeMode('trails')}>
+            Trails
+          </Button>
+          <Button 
+            variant="raised" 
+            color={mode==='hydrants' ? 'primary' : 'default'} 
+            onClick={()=> changeMode('hydrants')}>
+            Hydrants
+          </Button>
+          <Button variant="raised">Import / Export</Button>
+          <Button variant="raised">Auto-associate hydrants</Button>
         </div>
     )
   }
