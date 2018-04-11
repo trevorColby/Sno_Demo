@@ -140,14 +140,11 @@ class Container extends React.Component{
     });
   }
 
-<<<<<<< HEAD
   importKMLClicked = (kmlData) => {
     this.setState(kmlData)
   }
 
 
-=======
->>>>>>> switch to modes
   render(){
     const {trails, mode, selectedTrail, hydrants} = this.state;
 
