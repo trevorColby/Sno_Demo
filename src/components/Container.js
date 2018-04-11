@@ -5,7 +5,6 @@ import Projection from 'ol/proj';
 import MapControls from './MapControls';
 import OpenLayersMap from './OpenLayersMap';
 import TrailList from './TrailList';
-import {defaultTrails} from '../utils/constants';
 import {getElevation} from '../utils/mapUtils';
 import kill_logo from './../imgs/Kill_Logo.png'
 import {Image} from 'react-bootstrap';
@@ -16,7 +15,7 @@ class Container extends React.Component{
     super(props);
     this.endDraw = this.endDraw.bind(this);
     this.state = {
-      createType: null,
+      mode: 'trails',
       selectedTrail: null,
       trails: Immutable.Map(),
       hydrants: Immutable.Map()
@@ -26,7 +25,7 @@ class Container extends React.Component{
   componentDidMount() {
     const savedTrails = localStorage.getItem('trails');
     const savedHydrants = localStorage.getItem('hydrants');
-    const trails = savedTrails ? JSON.parse(savedTrails) : defaultTrails;
+    const trails = savedTrails ? JSON.parse(savedTrails) : {};
     const hydrants = savedHydrants ? JSON.parse(savedHydrants) : {};
     this.setState({
       trails: Immutable.fromJS(trails),
@@ -40,31 +39,24 @@ class Container extends React.Component{
     localStorage.setItem('hydrants', JSON.stringify(hydrants.toJS()));
   }
 
-  renameTrail = (trailId, newName) => {
+  modifyTrail = (trailId, editedFields, shouldDelete=false) => {
     const {trails} = this.state;
-    if (newName) {
-      this.setState({
-        trails: trails.setIn([trailId, 'name'], newName)
-      });
+    if (shouldDelete) {
+      this.setState({trails: trails.delete(trailId)});
+    } else {
+      let newTrail = trails.get(trailId).merge(editedFields);
+      this.setState({trails: trails.set(trailId, newTrail)});
     }
   }
 
-  deleteTrail = (id) => {
-    const {trails} = this.state;
-    const newTrails = trails.delete(id.toString());
-    // decide if this should also delete the hydrants with it or just "orphan" them
-    this.setState({trails: newTrails});
-  }
-
-  deleteHydrant = (id) => {
+  modifyHydrant = (hydrantId, editedFields, shouldDelete=false) => {
     const {hydrants} = this.state;
-    this.setState({hydrants: hydrants.delete(id)});
-  }
-
-  updateHydrant = (hydrantId, editedFields) => {
-    const {hydrants} = this.state;
-    let newHydrant = hydrants.get(hydrantId).merge(editedFields);
-    this.setState({hydrants: hydrants.set(hydrantId, newHydrant)});
+    if (shouldDelete) {
+      this.setState({hydrants: hydrants.delete(hydrantId)});
+    } else {
+      let newHydrant = hydrants.get(hydrantId).merge(editedFields);
+      this.setState({hydrants: hydrants.set(hydrantId, newHydrant)});
+    }
   }
 
   endModify = (e) => {
@@ -79,24 +71,20 @@ class Container extends React.Component{
       const newCoords = _.map(feature.getGeometry().getCoordinates()[0], (pt) => {
         return Projection.toLonLat(pt);
       });
-      this.setState({
-        trails: trails.setIn([selectedTrail, 'coords'], Immutable.fromJS(newCoords))
-      });
+      this.modifyTrail(selectedTrail, {coords: Immutable.fromJS(newCoords)});
     } else {
       // its a hydrant
       const newCoords = Projection.toLonLat(feature.getGeometry().getCoordinates());
-      this.setState({
-        hydrants: hydrants.setIn([feature.values_.id, 'coords'], Immutable.fromJS(newCoords))
-      });
+      this.modifyHydrant(feature.values_.id, {coords: Immutable.fromJS(newCoords)});
     }
   }
 
   endDraw(drawEvent) {
-    const {createType, trails, selectedTrail, hydrants} = this.state;
+    const {mode, trails, selectedTrail, hydrants} = this.state;
     let id = new Date().getTime();
     id = id.toString();
-    switch (createType){
-      case 'Trail': {
+    switch (mode){
+      case 'trails': {
         const coords = _.map(_.get(drawEvent, 'target.sketchLineCoords_'), (drawCoord) => {
           return Projection.toLonLat(drawCoord);
         });
@@ -108,10 +96,10 @@ class Container extends React.Component{
           coords: coords
         });
         let newTrails = trails.set(newTrail.get('id'), newTrail);
-        this.setState({createType: null, trails: newTrails, selectedTrail: newTrail.id});
+        this.setState({trails: newTrails, selectedTrail: newTrail.id});
         break;
       }
-      case 'Hydrant': {
+      case 'hydrants': {
         const coords = Projection.toLonLat(_.get(drawEvent, 'target.sketchCoords_'));
         const createdHydrant = Immutable.fromJS({
           id: id,
@@ -122,7 +110,7 @@ class Container extends React.Component{
         this.setState({hydrants: newHydrants});
         getElevation(coords).then((data) => {
           const elevation = data[0].height;
-          this.updateHydrant(id, {elevation});
+          this.modifyHydrant(id, {elevation});
         });
         break;
       }
@@ -132,25 +120,27 @@ class Container extends React.Component{
   }
 
   indexNamebyElevation = () => {
-    const { selectedTrail } = this.state;
-    let newHydrants = _.cloneDeep(this.state.hydrants);
+    const { selectedTrail, hydrants } = this.state;
 
-    const sortedTrailHydrants = _.chain(newHydrants)
-      .pickBy((h) => h['trail'] === selectedTrail)
+    const sortedTrailHydrants = hydrants.toJS()
+      .filter((h) => h.trail === selectedTrail)
       .orderBy('elevation', 'desc')
       .map((h,i)=> {
         h.name = i + 1
         return h
       }).value();
 
-    _.each(sortedTrailHydrants , (h,key)=> {
-      newHydrants[h.id] = h
+    let newHydrants = hydrants.map((h) => {
+      const elevationIndex = _.findIndex(sortedTrailHydrants, (sortedHydrant) => sortedHydrant.id === h.get('id'));
+      return h.set('name', elevationIndex);
     });
+
     this.setState({
       hydrants: newHydrants
     });
   }
 
+<<<<<<< HEAD
   mapControlClicked = (type) => {
     if (type === 'Hydrant') {
       this.setState({createType: type});
@@ -165,15 +155,17 @@ class Container extends React.Component{
     })
   }
 
+=======
+>>>>>>> switch to modes
   render(){
-    const {trails, createType, selectedTrail, hydrants} = this.state;
+    const {trails, mode, selectedTrail, hydrants} = this.state;
 
     console.log(this.state.hydrants.toJS())
 
     return (
       <div style={{position: 'relative'}}>
         <OpenLayersMap
-          createType={createType}
+          mode={mode}
           endDraw={this.endDraw}
           endModify={this.endModify}
           trails={trails}
@@ -181,16 +173,15 @@ class Container extends React.Component{
           selectedTrail={selectedTrail}
         />
         <MapControls
-          onClick={this.mapControlClicked}
-          canAddHydrant={!!selectedTrail}
+          mode={mode}
+          changeMode={(mode) => this.setState({mode})}
         />
         <TrailList
-          renameTrail={this.renameTrail}
+          modifyTrail={this.modifyTrail}
           trails={trails}
           hydrants={hydrants}
           selected={selectedTrail}
-          deleteTrail={this.deleteTrail}
-          trailSelected={(id) => this.setState({selectedTrail: id, createType: id ? 'Trail' : null})}
+          trailSelected={(id) => this.setState({selectedTrail: id})}
         />
 
         <ImportExport

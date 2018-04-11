@@ -39,7 +39,7 @@ class TrailList extends React.Component {
   }
 
   renderTrail = (trail) => {
-    const {selected, trailSelected, deleteTrail, renameTrail, hydrants} = this.props;
+    const {selected, trailSelected, modifyTrail, hydrants} = this.props;
     const {editableTrail} = this.state;
 
     const id = trail.id;
@@ -63,7 +63,7 @@ class TrailList extends React.Component {
        {isEditable ?
         (<TableCell >
           <TrailNameForm 
-            onSubmit={(name) => {renameTrail(id, name); this.setState({editableTrail: null})}} 
+            onSubmit={(name) => {modifyTrail(id, {name}); this.setState({editableTrail: null})}} 
             trailName={trail.name} 
           />
          </TableCell>) :
@@ -72,7 +72,7 @@ class TrailList extends React.Component {
 
         <TableCell>{hydrants.filter((h) => h.get('trail') === id).size}</TableCell>
         <TableCell>
-          <i onClick={() => deleteTrail(id)} style={{cursor: 'pointer'}} className="fa fa-trash-alt" />
+          <i onClick={() => modifyTrail(id, null, true)} style={{cursor: 'pointer'}} className="fa fa-trash-alt" />
         </TableCell>
       </TableRow>
     );

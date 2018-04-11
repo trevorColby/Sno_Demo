@@ -47,7 +47,7 @@ class OpenLayersMap extends React.Component{
   }
 
   renderTrails() {
-    const {trails, selectedTrail, hydrants} = this.props;
+    const {trails, selectedTrail, hydrants, mode} = this.props;
     const {modifyingSource, staticSource} = this.state;
     staticSource.clear();
     modifyingSource.clear();
@@ -67,7 +67,19 @@ class OpenLayersMap extends React.Component{
         newFeatures.push(feature);
       }
     });
+    hydrants.forEach((hydrant) => {
+      const h = hydrant.toJS();
+      if (h.trail !== selectedTrail && h.coords) {
+        const feature = new Feature({
+          name: h.name,
+          id: h.id,
+          geometry: new Point(Projection.fromLonLat(h.coords))
+        });
+        newFeatures.push(feature);
+      }
+    })
     staticSource.addFeatures(newFeatures);
+
     // if trail is selected then put it in draw layer with its hydrants
     if (selectedTrail && trails.get(selectedTrail)) {
       const selectedTrailObj = trails.get(selectedTrail).toJS();
@@ -102,6 +114,7 @@ class OpenLayersMap extends React.Component{
   componentWillReceiveProps(nextProps) {
     const {endDraw} = this.props;
     const {map, interactions, modifyingSource} = this.state;
+    console.log(map);
     // remove old draw interactions
     interactions.forEach(interaction => {
         map.removeInteraction(interaction);
@@ -109,7 +122,7 @@ class OpenLayersMap extends React.Component{
 
     // creating new draw interactions
     const newInteractions = [];
-    const newInteractionTypes = mapObjects[nextProps.createType] || [];
+    const newInteractionTypes = mapObjects[nextProps.mode] || [];
     newInteractionTypes.forEach(type => {
       const draw = new Draw({
         source: modifyingSource,
@@ -119,9 +132,10 @@ class OpenLayersMap extends React.Component{
       draw.on('drawend', endDraw);
       newInteractions.push(draw);
     });
-
     newInteractions.forEach(i => {
-      map.addInteraction(i);
+      if (map) {
+        map.addInteraction(i);
+      }
     });
     this.setState({interactions: newInteractions, modifying: null});
 
@@ -145,8 +159,11 @@ class OpenLayersMap extends React.Component{
       })
     });
 
+<<<<<<< HEAD
 
 
+=======
+>>>>>>> switch to modes
     var geocoder = new Geocoder('nominatim', {
       provider: 'osm',
       lang: 'en',
@@ -195,7 +212,7 @@ class OpenLayersMap extends React.Component{
     let modify = new Modify({source: modifyingSource});
     modify.on('modifyend', () => endModify(this.state.modifying));
     map.addInteraction(modify);
-    this.setState({map: map});
+    this.setState({map});
   }
 
   render() {
