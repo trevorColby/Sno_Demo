@@ -140,17 +140,24 @@ class Container extends React.Component{
     });
   }
 
-
-  importKMLClicked = (loadedHydrants) => {
-    this.setState({
-      hydrants: Immutable.fromJS(loadedHydrants)
-    })
+  importKMLClicked = (klmData) => {
+    console.log(klmData)
+    if( this.state.mode === 'trails'){
+      this.setState({
+        trails: Immutable.fromJS(klmData)
+      })
+    } else {
+      this.setState({
+        hydrants: Immutable.fromJS(klmData)
+      })
+    }
   }
+
 
   render(){
     const {trails, mode, selectedTrail, hydrants} = this.state;
 
-    console.log(this.state.hydrants.toJS())
+    console.log(this.state.trails.toJS())
 
     return (
       <div style={{position: 'relative'}}>
@@ -175,6 +182,7 @@ class Container extends React.Component{
         />
 
         <ImportExport
+        mode = {mode}
         importKMLClicked= {this.importKMLClicked}
          />
 

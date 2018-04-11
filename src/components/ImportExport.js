@@ -3,21 +3,12 @@ import { Button } from 'material-ui';
 import tj from '@mapbox/togeojson';
 import fs from 'fs';
 import DOMParser from 'xmldom';
-<<<<<<< HEAD
-<<<<<<< HEAD
-=======
->>>>>>> Successfully import KML Points to Map
 import Hydrants from './../KML/Hydrants.kml';
 import KML from 'ol/format/kml';
 import Point from 'ol/geom/point';
 import Projection from 'ol/proj';
 import _ from 'lodash';
-<<<<<<< HEAD
-=======
-import Hydrants from './../KML/Hydrants.kml'
->>>>>>> Add ImportExport
-=======
->>>>>>> Successfully import KML Points to Map
+
 
 class ImportExport extends React.Component {
 
@@ -37,14 +28,35 @@ class ImportExport extends React.Component {
     })
   }
 
+
   importFile = () =>  {
     const { selectedFiles } = this.state;
-    const { importKMLClicked } = this.props;
+    const { importKMLClicked, mode } = this.props;
     const reader = new FileReader();
 
     reader.onload = function(event){
       const kml = new KML().readFeatures(event.target.result)
-      const kmlMap = kml.map((feature, index)=> {
+      const kmlMap = mode === 'trails'? processTrails(kml) : processHydrants(kml)
+      importKMLClicked(_.keyBy(kmlMap, 'id'))
+    }
+
+
+    function processTrails(klm){
+      return klm.map((feature, index) => {
+
+        const coords = feature.get('geometry').flatCoordinates
+  
+        return {
+          name: feature.get('description'),
+          id: index,
+          coords: _.chunk(coords,3),
+          hydrants: null,
+        }
+      })
+    }
+
+    function processHydrants(kml){
+      return kml.map((feature, index)=> {
         const coords = feature.get('geometry').getGeometries()[0].flatCoordinates
         coords.pop()
         return {
@@ -56,14 +68,12 @@ class ImportExport extends React.Component {
         }
       })
 
-      importKMLClicked(_.keyBy(kmlMap, 'id'))
     }
 
     reader.readAsText(selectedFiles[0])
 
   }
 
-<<<<<<< HEAD
   render() {
     let style= {
       float: 'left'
@@ -78,19 +88,4 @@ class ImportExport extends React.Component {
     )
   }
 }
-=======
->>>>>>> Add ImportExport
-
 export default ImportExport;
-
-
-// const reader = new FileReader();
-// const { selectedFiles } = this.state;
-//
-//
-// reader.onload = function(event){
-//   let jsonResult = JSON.parse(event.target.result)
-//   console.log(jsonResult)
-// }
-//
-// reader.readAsText(selectedFiles[0])
