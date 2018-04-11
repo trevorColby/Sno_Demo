@@ -145,7 +145,6 @@ class Container extends React.Component{
     this.setState(kmlData)
 =======
   importKMLClicked = (klmData) => {
-    console.log(klmData)
     if( this.state.mode === 'trails'){
       this.setState({
         trails: Immutable.fromJS(klmData)
