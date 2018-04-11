@@ -1,15 +1,7 @@
 import React from 'react';
-import {Button } from 'material-ui';
-import PropTypes from 'prop-types';
-import { withStyles } from 'material-ui/styles';
-import green from 'material-ui/colors/green';
-import Icon from 'material-ui/Icon';
-
-
+import { Button } from 'material-ui';
 
 class MapControls extends React.Component{
-
-
   render(){
     let style= {
       float: 'left'

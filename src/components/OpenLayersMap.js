@@ -12,7 +12,6 @@ import Projection from 'ol/proj';
 import SourceVector from 'ol/source/vector';
 import Draw from 'ol/interaction/draw';
 import Modify from 'ol/interaction/modify';
-import Collection from 'ol/collection';
 import {mapObjects} from '../utils/constants';
 import {getMapStyle} from '../utils/mapUtils';
 import Geocoder from 'ol-geocoder';
@@ -22,9 +21,9 @@ class OpenLayersMap extends React.Component{
     super(props);
     this.renderTrails = this.renderTrails.bind(this);
     this.state = {
-      source: new SourceVector({wrapX: false}),
+      modifyingSource: new SourceVector({wrapX: false}),
       modifying: null,
-      trailsSource: new SourceVector({wrapX: false}),
+      staticSource: new SourceVector({wrapX: false}),
       map: null,
       center: null,
       interactions: [],
@@ -33,44 +32,45 @@ class OpenLayersMap extends React.Component{
 
   componentDidUpdate(prevProps, prevState){
     const {selectedTrail, trails} = this.props;
+    const {map} = this.state;
 
     if (selectedTrail !== prevProps.selectedTrail && selectedTrail ){
-      let currentTrail = trails[selectedTrail]
-      let centerCoords = Projection.fromLonLat(currentTrail.coords[0])
-      let view = this.state.map.getView()
-
-      view.animate({
+      let firstCoords = trails.getIn([selectedTrail, 'coords', 0]);
+      let centerCoords = Projection.fromLonLat(firstCoords ? firstCoords.toJS() : [0,0]);
+      
+      map.getView().animate({
         center: centerCoords,
         duration: 500,
         zoom: 16,
-      })
+      });
     }
   }
 
   renderTrails() {
-    const {endModify, trails, selectedTrail, hydrants} = this.props;
-    const {trailsSource, source} = this.state;
-    source.clear();
-    trailsSource.clear();
+    const {trails, selectedTrail, hydrants} = this.props;
+    const {modifyingSource, staticSource} = this.state;
+    staticSource.clear();
+    modifyingSource.clear();
     // redo the trails features for unselected trails
     const newFeatures = [];
-    _.each(trails, (trail) => {
-      if (trail.id !== selectedTrail && trail.coords) {
+    trails.forEach((trail) => {
+      const t = trail.toJS();
+      if (t.id !== selectedTrail && t.coords) {
         // first add the trail itself
         const feature = new Feature({
-          name: trail.name,
-          id: trail.id,
-          geometry: new Polygon([_.map(trail.coords, (pt) => {
+          name: t.name,
+          id: t.id,
+          geometry: new Polygon([_.map(t.coords, (pt) => {
             return Projection.fromLonLat(pt);
           })])
         });
         newFeatures.push(feature);
       }
     });
-    trailsSource.addFeatures(newFeatures);
+    staticSource.addFeatures(newFeatures);
     // if trail is selected then put it in draw layer with its hydrants
-    const selectedTrailObj = trails[selectedTrail];
-    if (selectedTrailObj) {
+    if (selectedTrail && trails.get(selectedTrail)) {
+      const selectedTrailObj = trails.get(selectedTrail).toJS();
       const drawFeatures = [];
       drawFeatures.push(new Feature({
         name: selectedTrailObj.name,
@@ -79,12 +79,13 @@ class OpenLayersMap extends React.Component{
             return Projection.fromLonLat(pt);
           })])
       }));
-      _.each(hydrants, (hydrant) => {
-        if (hydrant.trail === selectedTrail) {
+      hydrants.forEach((hydrant) => {
+        if (hydrant.get('trail') === selectedTrail) {
+          const h = hydrant.toJS();
           const hydrantFeature = new Feature({
-            name: hydrant.name || hydrant.id,
-            id: hydrant.id,
-            geometry: new Point(Projection.fromLonLat(hydrant.coords))
+            name: h.name || h.id,
+            id: h.id,
+            geometry: new Point(Projection.fromLonLat(h.coords))
           });
           drawFeatures.push(hydrantFeature);
         }
@@ -93,14 +94,14 @@ class OpenLayersMap extends React.Component{
       _.each(drawFeatures, (f) => {
         f.on('change', (e) => this.setState({modifying: e}));
       });
-      source.addFeatures(drawFeatures);
+      modifyingSource.addFeatures(drawFeatures);
     }
   }
   renderTrailsDebounce = _.debounce(this.renderTrails, 50);
 
   componentWillReceiveProps(nextProps) {
-    const {createType, trails, endDraw, selectedTrail} = this.props;
-    const {map, source, interactions, trailsSource} = this.state;
+    const {endDraw} = this.props;
+    const {map, interactions, modifyingSource} = this.state;
     // remove old draw interactions
     interactions.forEach(interaction => {
         map.removeInteraction(interaction);
@@ -111,7 +112,7 @@ class OpenLayersMap extends React.Component{
     const newInteractionTypes = mapObjects[nextProps.createType] || [];
     newInteractionTypes.forEach(type => {
       const draw = new Draw({
-        source: source,
+        source: modifyingSource,
         type: type,
         geometryName: type
       });
@@ -132,9 +133,9 @@ class OpenLayersMap extends React.Component{
   }
 
   setupMap() {
-    const {source, trailsSource} = this.state;
+    const {staticSource, modifyingSource} = this.state;
     const {endModify} = this.props;
-    const bingMapsLayer = new TileLayer ({
+    const bingMapsLayer = new TileLayer({
       visible: true,
       preload: Infinity,
       source: new BingMaps({
@@ -144,22 +145,24 @@ class OpenLayersMap extends React.Component{
       })
     });
 
-    var geocoder = new Geocoder('nominatim', {
-        provider: 'osm',
-        lang: 'en',
-        placeholder: 'Search for ...',
-        limit: 5,
-        keepOpen: true,
-        autoComplete: true,
-      });
+    
 
-    const drawLayer = new LayerVector({
-      source: source,
+    var geocoder = new Geocoder('nominatim', {
+      provider: 'osm',
+      lang: 'en',
+      placeholder: 'Search for ...',
+      limit: 5,
+      keepOpen: true,
+      autoComplete: true,
+    });
+
+    const modifyingLayer = new LayerVector({
+      source: modifyingSource,
       style: getMapStyle
     });
 
-    const trailsLayer = new LayerVector({
-      source: trailsSource,
+    const staticLayer = new LayerVector({
+      source: staticSource,
       style: getMapStyle
     });
 
@@ -172,7 +175,7 @@ class OpenLayersMap extends React.Component{
     const map = new Map({
       loadTilesWhileInteracting: false,
       target: 'map-container',
-      layers: [bingMapsLayer, trailsLayer, drawLayer],
+      layers: [bingMapsLayer, staticLayer, modifyingLayer],
       view: new View({
 
         projection: projection,
@@ -187,10 +190,10 @@ class OpenLayersMap extends React.Component{
 
 
     // Modifications
-    let modify = new Modify({source: source});
+    let modify = new Modify({source: modifyingSource});
     modify.on('modifyend', () => endModify(this.state.modifying));
     map.addInteraction(modify);
-    this.setState({map: map})
+    this.setState({map: map});
   }
 
   render() {

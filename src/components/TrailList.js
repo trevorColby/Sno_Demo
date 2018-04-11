@@ -30,57 +30,50 @@ const styles = theme => ({
   },
 });
 
-
-
 class TrailList extends React.Component {
+  constructor(props) {
+    super(props);
+    this.state = {
+      editableTrail: null
+    }
+  }
 
   renderTrail = (trail) => {
-    const {selected, trailSelected, deleteTrail, editableTrail, renameTrail} = this.props;
+    const {selected, trailSelected, deleteTrail, renameTrail, hydrants} = this.props;
+    const {editableTrail} = this.state;
 
-    const isSelected = selected === trail.id;
-    const isEditable = editableTrail == trail.id;
+    const id = trail.id;
+    const isSelected = selected === id;
+    const isEditable = editableTrail === id;
     const rowClass = isSelected ? 'selected' : '';
     const iconClass = `fa fa-${isSelected ? 'minus' : 'plus'}`;
 
     return (
       <TableRow
-        key={trail.id}
+        key={id}
         className={rowClass}
         style={{borderTop: '2px solid black'}}
       >
         <TableCell style={{cursor: 'pointer'}}
-          onClick={() => trailSelected(isSelected ? null : trail.id)}
+          onClick={() => trailSelected(isSelected ? null : id)}
         >
           <i className={iconClass} />
         </TableCell>
 
-     {isEditable ?
-      (<TableCell >
-        <TrailNameForm renameTrail={renameTrail} trailId= {trail.id} trailName={trail.name} />
-       </TableCell>) :
-      (<TableCell id={trail.id}  onClick={(e)=>renameTrail(e.target.id)} >{trail.name}</TableCell>)
-     }
+       {isEditable ?
+        (<TableCell >
+          <TrailNameForm 
+            onSubmit={(name) => {renameTrail(id, name); this.setState({editableTrail: null})}} 
+            trailName={trail.name} 
+          />
+         </TableCell>) :
+        (<TableCell onClick={(e) => {this.setState({editableTrail: id})}} >{trail.name}</TableCell>)
+       }
 
-        <TableCell>{trail.guns}</TableCell>
+        <TableCell>{hydrants.filter((h) => h.get('trail') === id).size}</TableCell>
         <TableCell>
-          <i onClick={() => deleteTrail(trail)} style={{cursor: 'pointer'}} className="fa fa-trash-alt" />
+          <i onClick={() => deleteTrail(id)} style={{cursor: 'pointer'}} className="fa fa-trash-alt" />
         </TableCell>
-      </TableRow>
-    );
-  }
-
-  renderGun = (gun) => {
-    const {deleteGun} = this.props;
-    return (
-      <TableRow key={gun.id}>
-        <TableCell>GUN</TableCell>
-        <TableCell>
-          {gun.id}
-        </TableCell>
-        <TableCell >
-          <i onClick={() => deleteGun(gun)} style={{cursor: 'pointer'}} className="fa fa-trash-alt" />
-        </TableCell>
-        <TableCell />
       </TableRow>
     );
   }
@@ -95,17 +88,7 @@ class TrailList extends React.Component {
       top: '0',
     }
 
-    const {trails, selected, deleteTrail, trailSelected} = this.props;
-
-    const currentTrailIndex = _.findIndex(trails, (t) => t.id === selected);
-    const selectedGuns = _.get(trails[currentTrailIndex], 'guns', []);
-
-    const listItems = _.clone(trails);
-    if (selectedGuns) {
-      selectedGuns.forEach(gun => {
-        listItems.splice(currentTrailIndex+1, 0, gun);
-      });
-    }
+    const {trails} = this.props;
 
     return (
       <div style={style}>
@@ -119,10 +102,7 @@ class TrailList extends React.Component {
           </TableRow>
         </TableHead>
         <TableBody>
-          {_.map(listItems, (item) => {
-            const isTrail = !!item.name
-            return isTrail ? this.renderTrail(item) : this.renderGun(item);
-          })}
+          {_.map(trails.toJS(), (item) => this.renderTrail(item))}
         </TableBody>
         </Table>
       </div>

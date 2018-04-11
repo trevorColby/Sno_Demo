@@ -12,7 +12,7 @@ export const defaultHydrants = {
 
 export const defaultTrails = {
   "1": {
-    "id": 1,
+    "id": "1",
     "name": "First Trail",
     "coords": [
       [
@@ -34,7 +34,7 @@ export const defaultTrails = {
     ]
   },
   "2": {
-    "id": 2,
+    "id": "2",
     "name": "Second Trail",
     "coords": [
       [
@@ -72,7 +72,7 @@ export const defaultTrails = {
     ]
   },
   "3": {
-    "id": 3,
+    "id": "3",
     "name": "Third Trail",
     "coords": [
       [

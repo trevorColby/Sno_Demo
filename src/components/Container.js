@@ -1,10 +1,11 @@
 import React from 'react';
 import _ from 'lodash';
+import Immutable from 'immutable';
 import Projection from 'ol/proj';
 import MapControls from './MapControls';
 import OpenLayersMap from './OpenLayersMap';
 import TrailList from './TrailList';
-import {mapObjects, defaultTrails} from '../utils/constants';
+import {defaultTrails} from '../utils/constants';
 import {getElevation} from '../utils/mapUtils';
 import kill_logo from './../imgs/Kill_Logo.png'
 import {Image} from 'react-bootstrap';
@@ -16,9 +17,8 @@ class Container extends React.Component{
     this.state = {
       createType: null,
       selectedTrail: null,
-      trails: {},
-      hydrants: {},
-      editableTrail: false
+      trails: Immutable.Map(),
+      hydrants: Immutable.Map()
     }
   }
 
@@ -27,43 +27,43 @@ class Container extends React.Component{
     const savedHydrants = localStorage.getItem('hydrants');
     const trails = savedTrails ? JSON.parse(savedTrails) : defaultTrails;
     const hydrants = savedHydrants ? JSON.parse(savedHydrants) : {};
-    this.setState({trails: trails, hydrants: hydrants});
+    this.setState({
+      trails: Immutable.fromJS(trails), 
+      hydrants: Immutable.fromJS(hydrants)
+    });
   }
 
   componentDidUpdate() {
-    this.saveToLocalStorage();
-  }
-
-  saveToLocalStorage = () => {
-    localStorage.setItem('trails', JSON.stringify(this.state.trails));
-    localStorage.setItem('hydrants', JSON.stringify(this.state.hydrants));
+    const {trails, hydrants} = this.state;
+    localStorage.setItem('trails', JSON.stringify(trails.toJS()));
+    localStorage.setItem('hydrants', JSON.stringify(hydrants.toJS()));
   }
 
   renameTrail = (trailId, newName) => {
-    const {editableTrail, trails} = this.state;
+    const {trails} = this.state;
     if (newName) {
-      const newTrails = _.cloneDeep(trails);
-      newTrails[trailId].name = newName;
-      this.setState({editableTrail: null, trails: newTrails})
-    } else{
-      this.setState({editableTrail: trailId});
+      this.setState({
+        trails: trails.setIn([trailId, 'name'], newName)
+      });
     }
-    this.saveToLocalStorage();
   }
 
-  deleteTrail = (trail) => {
+  deleteTrail = (id) => {
     const {trails} = this.state;
-    const newTrails = _.clone(trails);
-    delete newTrails[trail.id];
+    const newTrails = trails.delete(id.toString());
     // decide if this should also delete the hydrants with it or just "orphan" them
     this.setState({trails: newTrails});
   }
 
-  deleteHydrant = (hydrant) => {
-    const {trails, hydrants, selectedTrail} = this.state;
-    const newHydrants = _.cloneDeep(hydrants);
-    delete newHydrants[hydrant.id];
-    this.setState({hydrants: newHydrants});
+  deleteHydrant = (id) => {
+    const {hydrants} = this.state;
+    this.setState({hydrants: hydrants.delete(id)});
+  }
+
+  updateHydrant = (hydrantId, editedFields) => {
+    const {hydrants} = this.state;
+    let newHydrant = hydrants.get(hydrantId).merge(editedFields);
+    this.setState({hydrants: hydrants.set(hydrantId, newHydrant)});
   }
 
   endModify = (e) => {
@@ -75,60 +75,54 @@ class Container extends React.Component{
 
     if (feature.values_.id === selectedTrail) {
       // if trail
-      const newTrails = _.cloneDeep(trails);
       const newCoords = _.map(feature.getGeometry().getCoordinates()[0], (pt) => {
         return Projection.toLonLat(pt);
       });
-      newTrails[selectedTrail].coords = newCoords;
-      this.setState({trails: newTrails});
+      this.setState({
+        trails: trails.setIn([selectedTrail, 'coords'], Immutable.fromJS(newCoords))
+      });
     } else {
       // its a hydrant
-      const newHydrants = _.cloneDeep(hydrants);
       const newCoords = Projection.toLonLat(feature.getGeometry().getCoordinates());
-      newHydrants[feature.values_.id].coords = newCoords;
-      this.setState({hydrants: newHydrants});
+      this.setState({
+        hydrants: hydrants.setIn([feature.values_.id, 'coords'], Immutable.fromJS(newCoords))
+      });
     }
   }
 
   endDraw(drawEvent) {
     const {createType, trails, selectedTrail, hydrants} = this.state;
+    let id = new Date().getTime();
+    id = id.toString();
     switch (createType){
       case 'Trail': {
         const coords = _.map(_.get(drawEvent, 'target.sketchLineCoords_'), (drawCoord) => {
           return Projection.toLonLat(drawCoord);
         });
-        const newTrails = _.clone(trails);
-        const newTrail = {
+        const newTrail = Immutable.fromJS({
           // just use a timestamp to ensure unique id for now, database would supply later
-          id: new Date().getTime(),
+          id: id,
           name: 'New Trail',
           guns: [],
           coords: coords
-        };
-        newTrails[newTrail.id] = newTrail;
+        });
+        let newTrails = trails.set(newTrail.get('id'), newTrail);
         this.setState({createType: null, trails: newTrails, selectedTrail: newTrail.id});
         break;
       }
       case 'Hydrant': {
         const coords = Projection.toLonLat(_.get(drawEvent, 'target.sketchCoords_'));
-        const newHydrants = _.clone(hydrants);
-        const createdHydrant = {
-          id: new Date().getTime(),
-          coords: coords,
-          trail: selectedTrail,
-          elevation: null,
-          name: null,
-        };
-        newHydrants[createdHydrant.id] = createdHydrant;
+        const createdHydrant = Immutable.fromJS({
+          id: id, 
+          coords: coords, 
+          trail: selectedTrail
+        });
+        let newHydrants = hydrants.set(createdHydrant.get('id'), createdHydrant);
         this.setState({hydrants: newHydrants});
-        getElevation(coords)
-          .then((data) => {
-              const elevation = data[0].height;
-              const newHydrantsv2 = _.clone(newHydrants);
-              newHydrantsv2[createdHydrant.id].elevation = elevation;
-              this.setState({hydrants: newHydrantsv2});
-            })
-            .then(this.indexNamebyElevation);
+        getElevation(coords).then((data) => {
+          const elevation = data[0].height;
+          this.updateHydrant(id, {elevation});
+        });
         break;
       }
       default:
@@ -138,7 +132,7 @@ class Container extends React.Component{
 
   indexNamebyElevation = () => {
     const { selectedTrail } = this.state;
-    let newHydrants = _.cloneDeep(this.state.hydrants)
+    let newHydrants = _.cloneDeep(this.state.hydrants);
 
     const sortedTrailHydrants = _.chain(newHydrants)
       .pickBy((h) => h['trail'] === selectedTrail)
@@ -146,17 +140,15 @@ class Container extends React.Component{
       .map((h,i)=> {
         h.name = i + 1
         return h
-      }).value()
+      }).value();
 
     _.each(sortedTrailHydrants , (h,key)=> {
       newHydrants[h.id] = h
-    })
+    });
     this.setState({
       hydrants: newHydrants
-    })
-
+    });
   }
-
 
   mapControlClicked = (type) => {
     if (type === 'Hydrant') {
@@ -167,7 +159,7 @@ class Container extends React.Component{
   }
 
   render(){
-    const {trails, createType, selectedTrail, editableTrail, hydrants} = this.state;
+    const {trails, createType, selectedTrail, hydrants} = this.state;
 
     return (
       <div style={{position: 'relative'}}>
@@ -184,12 +176,11 @@ class Container extends React.Component{
           canAddHydrant={!!selectedTrail}
         />
         <TrailList
-          editableTrail={editableTrail}
-          renameTrail = {this.renameTrail}
+          renameTrail={this.renameTrail}
           trails={trails}
+          hydrants={hydrants}
           selected={selectedTrail}
           deleteTrail={this.deleteTrail}
-          deleteGun={this.deleteGun}
           trailSelected={(id) => this.setState({selectedTrail: id, createType: id ? 'Trail' : null})}
         />
         <Image style={{float: 'right', width: 300, margin: 12}} src={kill_logo} responsive />

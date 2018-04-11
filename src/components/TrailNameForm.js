@@ -5,6 +5,7 @@ class TrailNameForm extends React.Component {
     super(props);
     this.state = { value: props.trailName };
     this.handleChange = this.handleChange.bind(this);
+    this.handleSubmit = this.handleSubmit.bind(this);
   }
 
   componentDidMount() {
@@ -15,16 +16,19 @@ class TrailNameForm extends React.Component {
     this.setState({ value: e.target.value });
   }
 
-  render() {
-    const { renameTrail, trailId } = this.props;
+  handleSubmit() {
+    const { trailName, onSubmit } = this.props;
+    const { value } = this.state;
+    if (value !== trailName) {
+      onSubmit(value);
+    }
+  }
 
+  render() {
     return (
       <form
-        onSubmit={(e) => {
-          e.preventDefault();
-          renameTrail(trailId, this.state.value);
-        }}
-        onBlur={() => renameTrail(trailId, this.state.value)}
+        onSubmit={this.handleSubmit}
+        onBlur={this.handleSubmit}
       >
         <input
           ref={(i) => { this.editTrail = i; }}
