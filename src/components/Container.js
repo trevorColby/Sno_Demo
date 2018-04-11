@@ -140,23 +140,6 @@ class Container extends React.Component{
     });
   }
 
-<<<<<<< HEAD
-  mapControlClicked = (type) => {
-    if (type === 'Hydrant') {
-      this.setState({createType: type});
-    }else {
-      this.setState({createType: type || null, selectedTrail: null});
-    }
-  }
-
-  importKMLClicked = (loadedHydrants) => {
-    this.setState({
-      hydrants: Immutable.fromJS(loadedHydrants)
-    })
-  }
-
-=======
->>>>>>> switch to modes
   render(){
     const {trails, mode, selectedTrail, hydrants} = this.state;
 

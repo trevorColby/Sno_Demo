@@ -3,11 +3,15 @@ import { Button } from 'material-ui';
 import tj from '@mapbox/togeojson';
 import fs from 'fs';
 import DOMParser from 'xmldom';
+<<<<<<< HEAD
 import Hydrants from './../KML/Hydrants.kml';
 import KML from 'ol/format/kml';
 import Point from 'ol/geom/point';
 import Projection from 'ol/proj';
 import _ from 'lodash';
+=======
+import Hydrants from './../KML/Hydrants.kml'
+>>>>>>> Add ImportExport
 
 class ImportExport extends React.Component {
 
@@ -53,6 +57,7 @@ class ImportExport extends React.Component {
 
   }
 
+<<<<<<< HEAD
   render() {
     let style= {
       float: 'left'
@@ -67,6 +72,8 @@ class ImportExport extends React.Component {
     )
   }
 }
+=======
+>>>>>>> Add ImportExport
 
 export default ImportExport;
 
