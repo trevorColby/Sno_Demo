@@ -114,7 +114,6 @@ class OpenLayersMap extends React.Component{
   componentWillReceiveProps(nextProps) {
     const {endDraw} = this.props;
     const {map, interactions, modifyingSource} = this.state;
-    console.log(map);
     // remove old draw interactions
     interactions.forEach(interaction => {
         map.removeInteraction(interaction);
