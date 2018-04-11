@@ -60,6 +60,12 @@ class Container extends React.Component{
     this.setState({hydrants: hydrants.delete(id)});
   }
 
+  updateHydrant = (hydrantId, editedFields) => {
+    const {hydrants} = this.state;
+    let newHydrant = hydrants.get(hydrantId).merge(editedFields);
+    this.setState({hydrants: hydrants.set(hydrantId, newHydrant)});
+  }
+
   endModify = (e) => {
     if (!e) {
       return;
@@ -115,10 +121,7 @@ class Container extends React.Component{
         this.setState({hydrants: newHydrants});
         getElevation(coords).then((data) => {
           const elevation = data[0].height;
-          // potential problem: 
-          // dropping hydrants fast, this will remove the ones dropped after this one but before the elevation fetch is made
-          newHydrants = newHydrants.setIn([createdHydrant.id, 'elevation'], elevation);
-          this.setState({hydrants: newHydrants});
+          this.updateHydrant(id, {elevation});
         });
         break;
       }
@@ -158,7 +161,6 @@ class Container extends React.Component{
           hydrants={hydrants}
           selected={selectedTrail}
           deleteTrail={this.deleteTrail}
-          deleteGun={this.deleteGun}
           trailSelected={(id) => this.setState({selectedTrail: id, createType: id ? 'Trail' : null})}
         />
         <Image style={{float: 'right', width: 300, margin: 12}} src={kill_logo} responsive />
