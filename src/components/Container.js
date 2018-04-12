@@ -34,13 +34,37 @@ class Container extends React.Component {
     };
   }
 
-  /*
-  componentDidUpdate() {
-    const { trails, hydrants } = this.state;
+  componentDidUpdate(prevProps, prevState) {
+    const { trails, hydrants, selectedTrail } = this.state;
+    /*
     localStorage.setItem('trails', JSON.stringify(trails.toJS()));
     localStorage.setItem('hydrants', JSON.stringify(hydrants.toJS()));
+    */
+    if (prevState.selectedTrail !== selectedTrail) {
+      if (prevState.selectedTrail) {
+        const feature = trails.getIn([prevState.selectedTrail, 'feature']);
+        feature.unset('selected');
+        feature.changed();
+        hydrants.filter((h) => h.get('trail') === prevState.selectedTrail)
+          .forEach((h) => {
+            const hydrantFeature = h.get('feature');
+            hydrantFeature.unset('selected');
+            hydrantFeature.changed();
+          });
+      }
+      if (selectedTrail) {
+        const feature = trails.getIn([selectedTrail, 'feature']);
+        feature.set('selected', true);
+        feature.changed();
+        hydrants.filter((h) => h.get('trail') === selectedTrail)
+          .forEach((h) => {
+            const hydrantFeature = h.get('feature');
+            hydrantFeature.set('selected', true);
+            hydrantFeature.changed();
+          });
+      }
+    }
   }
-  */
 
   modifyTrail = (trailId, editedFields, shouldDelete = false) => {
     const { trails, hydrants, selectedTrail } = this.state;
@@ -93,9 +117,12 @@ class Container extends React.Component {
       const coords = Projection.toLonLat(mapCoords);
       const name = '';
       const createdHydrant = new Hydrant({
-        id, name, coords, feature, trail: selectedTrail !== 'orphans' ? selectedTrail : null,
+        id, name, coords, feature, trail: selectedTrail,
       });
       feature.setId(`h${id}`);
+      if (selectedTrail) {
+        feature.set('selected', true);
+      }
       const newHydrants = hydrants.set(id, createdHydrant);
       this.setState({ hydrants: newHydrants });
     } else {
@@ -117,7 +144,6 @@ class Container extends React.Component {
     dont do this for now to avoid all the api calls
     lets put it in when we associate hydrants maybe?
 
-<<<<<<< HEAD
     getElevation(coords).then((data) => {
       const elevation = data[0].height;
       this.modifyHydrant(id, {elevation});
@@ -155,11 +181,11 @@ class Container extends React.Component {
   }
 
   importKMLClicked = (kmlData) => {
-    const {trails, hydrants} = this.state;
+    const { trails, hydrants } = this.state;
     this.setState({
       trails: trails.merge(kmlData.trails),
-      hydrants: hydrants.merge(kmlData.hydrants)
-    })
+      hydrants: hydrants.merge(kmlData.hydrants),
+    });
   }
 
   render(){

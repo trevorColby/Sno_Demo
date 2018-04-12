@@ -102,9 +102,9 @@ class TrailList extends React.Component {
         
           {orphanCount ? (
             <TableRow
-              className={selected==='orphans' ? 'selected' : ''}
+              className={selected === null ? 'selected' : ''}
               style={{borderTop: '2px solid black', cursor: 'pointer'}}
-              onClick={() => trailSelected(selected === 'orphans' ? null : 'orphans')}
+              onClick={() => trailSelected(null)}
             >
               <TableCell>Orphans</TableCell>
               <TableCell>{orphanCount}</TableCell>

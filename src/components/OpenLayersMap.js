@@ -28,7 +28,7 @@ class OpenLayersMap extends React.Component {
 
   componentDidMount() {
     this.setupMap();
-  };
+  }
 
   componentWillReceiveProps(nextProps) {
     const { interactions, source, map } = this.state;
@@ -55,11 +55,9 @@ class OpenLayersMap extends React.Component {
         const feature = trails.getIn([selectedTrail, 'feature']);
         modifiable.push(feature);
       } else {
-        const toCheck = selectedTrail === 'orphans' ? null : selectedTrail;
-        hydrants.filter((h) => h.get('trail') === toCheck)
+        hydrants.filter((h) => h.get('trail') === selectedTrail)
           .forEach((h) => modifiable.push(h.get('feature')));
       }
-      
       const modify = new Modify({ features: modifiable });
       modify.on('modifyend', (e) => this.endModify(e));
       newInteractions.push(modify);
@@ -72,7 +70,7 @@ class OpenLayersMap extends React.Component {
   componentDidUpdate(prevProps) {
     const { selectedTrail, trails } = this.props;
     const { map } = this.state;
-    if (selectedTrail !== prevProps.selectedTrail && selectedTrail !== 'orphans' && selectedTrail) {
+    if (selectedTrail !== prevProps.selectedTrail && selectedTrail) {
       const firstCoords = trails.getIn([selectedTrail, 'coords'])[0];
       const centerCoords = Projection.fromLonLat(firstCoords ? firstCoords : [0, 0]);
       if (firstCoords) {
