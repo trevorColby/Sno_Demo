@@ -28,13 +28,18 @@ class ImportExport extends React.Component {
     const { selectedFiles } = this.state;
     const { importKMLClicked, mode } = this.props;
     const reader = new FileReader();
+      reader.onload = function(event){
+        try {
+          const kml = new KML().readFeatures(event.target.result)
+          const kmlObj = kml[0].getGeometry().getType() === 'Polygon'? processTrails(kml) : processHydrants(kml)
+          importKMLClicked(kmlObj)
+        }
+        catch(err) {
+          // Put error wherever we want to display error msgs.
+            console.log(err)
+        }
+      }
 
-    reader.onload = function(event){
-      const kml = new KML().readFeatures(event.target.result)
-      /// Hydrant 0 type is a GeeometryCollection, Trail 0 type is a Polygon
-      const kmlObj = kml[0].getGeometry().getType() === 'Polygon'? processTrails(kml) : processHydrants(kml)
-      importKMLClicked(kmlObj)
-    }
 
     function processTrails(klm){
       const kmlMap = klm.map((feature, index) => {
@@ -63,8 +68,9 @@ class ImportExport extends React.Component {
       return {hydrants: Immutable.fromJS(_.keyBy(kmlMap, 'id'))}
     }
 
-    reader.readAsText(selectedFiles[0])
-
+    if (selectedFiles){
+        reader.readAsText(selectedFiles[0])
+      }
   }
 
   render() {
