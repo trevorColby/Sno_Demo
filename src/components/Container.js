@@ -148,7 +148,6 @@ class Container extends React.Component{
     })
   }
 
-
   render(){
     const {trails, mode, selectedTrail, hydrants} = this.state;
 
