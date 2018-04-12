@@ -2,6 +2,7 @@ import React from 'react';
 import { Button } from 'material-ui';
 import KML from 'ol/format/kml';
 import _ from 'lodash';
+import Immutable from 'immutable';
 
 
 class ImportExport extends React.Component {
@@ -30,26 +31,25 @@ class ImportExport extends React.Component {
 
     reader.onload = function(event){
       const kml = new KML().readFeatures(event.target.result)
-      const kmlMap = mode === 'trails'? processTrails(kml) : processHydrants(kml)
-      importKMLClicked(_.keyBy(kmlMap, 'id'))
+      /// Hydrant 0 type is a GeeometryCollection, Trail 0 type is a Polygon
+      const kmlObj = kml[0].getGeometry().getType() === 'Polygon'? processTrails(kml) : processHydrants(kml)
+      importKMLClicked(kmlObj)
     }
 
-
     function processTrails(klm){
-      return klm.map((feature, index) => {
-
+      const kmlMap = klm.map((feature, index) => {
         const coords = feature.get('geometry').flatCoordinates
-
         return {
           name: feature.get('description'),
           id: index,
           coords: _.chunk(coords,3),
         }
       })
+      return  {trails: Immutable.fromJS(_.keyBy(kmlMap, 'id'))}
     }
 
     function processHydrants(klm){
-      return klm.map((feature, index)=> {
+      const kmlMap = klm.map((feature, index)=> {
         const coords = feature.get('geometry').getGeometries()[0].flatCoordinates
         coords.pop()
         return {
@@ -60,7 +60,7 @@ class ImportExport extends React.Component {
           trail: null
         }
       })
-
+      return {hydrants: Immutable.fromJS(_.keyBy(kmlMap, 'id'))}
     }
 
     reader.readAsText(selectedFiles[0])
