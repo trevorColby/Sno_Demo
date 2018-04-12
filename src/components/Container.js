@@ -141,7 +141,11 @@ class Container extends React.Component{
   }
 
   importKMLClicked = (kmlData) => {
-    this.setState(kmlData)
+    const {trails, hydrants} = this.state;
+    this.setState({
+      trails: trails.merge(kmlData.trails),
+      hydrants: hydrants.merge(kmlData.hydrants)
+    })
   }
 
 
@@ -172,6 +176,8 @@ class Container extends React.Component{
 
         <ImportExport
           importKMLClicked= {this.importKMLClicked}
+          trails = {trails}
+          hydrants = {hydrants}
          />
 
         <Image style={{float: 'right', width: 300, margin: 12}} src={kill_logo} responsive />

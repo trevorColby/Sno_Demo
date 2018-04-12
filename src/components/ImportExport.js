@@ -4,6 +4,15 @@ import Hydrants from './../KML/Hydrants.kml';
 import KML from 'ol/format/kml';
 import _ from 'lodash';
 import Immutable from 'immutable';
+import Feature from 'ol/feature';
+import Point from 'ol/geom/point';
+import Projection from 'ol/proj';
+import Polygon from 'ol/geom/polygon';
+import GeometryCollection from 'ol/geom/geometrycollection';
+import downloadjs from 'downloadjs';
+import {getMapStyle} from '../utils/mapUtils';
+import Dialog, { DialogTitle } from 'material-ui/Dialog';
+import { withStyles } from 'material-ui/styles';
 
 
 class ImportExport extends React.Component {
@@ -12,11 +21,11 @@ class ImportExport extends React.Component {
     super(props);
     this.state = {
       selectedFiles: null,
+      exportType: null,
     }
     this.changeFile = this.changeFile.bind(this);
     this.importFile = this.importFile.bind(this);
   }
-
 
   changeFile(e) {
     this.setState({
@@ -24,16 +33,33 @@ class ImportExport extends React.Component {
     })
   }
 
-
   importFile = () =>  {
     const { selectedFiles } = this.state;
-    const { importKMLClicked, mode } = this.props;
+    const { importKMLClicked } = this.props;
     const reader = new FileReader();
       reader.onload = function(event){
         try {
           const kml = new KML().readFeatures(event.target.result)
-          const kmlObj = kml[0].getGeometry().getType() === 'Polygon'? processTrails(kml) : processHydrants(kml)
-          importKMLClicked(kmlObj)
+          const newTrails = {};
+          const newHydrants = {};
+
+          _.each(kml, (feature, index) => {
+              const type = feature.getGeometry().getType() === 'Polygon' ? 'trail' : 'hydrant'
+              if(type === 'trail'){
+                const trail = processTrail(feature, index);
+                newTrails[trail.id] = trail;
+              } else {
+                const hydrant = processHydrant(feature, index);
+                newHydrants[hydrant.id] = hydrant;
+              }
+          })
+          
+          // const kmlObj = kml[0].getGeometry().getType() === 'Polygon'? processTrails(kml) : processHydrants(kml)
+          importKMLClicked({
+            trails: Immutable.fromJS(newTrails),
+            hydrants:  Immutable.fromJS(newHydrants),
+          })
+          // console.log(kml[0])
         }
         catch(err) {
           // Put error wherever we want to display error msgs.
@@ -42,37 +68,90 @@ class ImportExport extends React.Component {
       }
 
 
-    function processTrails(klm){
-      const kmlMap = klm.map((feature, index) => {
-        const coords = feature.get('geometry').flatCoordinates
-        return {
-          name: feature.get('description'),
-          id: index,
-          coords: _.chunk(coords,3),
-        }
-      })
-      return  {trails: Immutable.fromJS(_.keyBy(kmlMap, 'id'))}
-    }
+      function processTrail(feature, index){
+        const name = feature.get('description')
+          return {
+            name: name,
+            id: index + name,
+            coords: feature.get('geometry').getCoordinates()[0],
+          }
+      }
 
-    function processHydrants(klm){
-      const kmlMap = klm.map((feature, index)=> {
-        const coords = feature.get('geometry').getGeometries()[0].flatCoordinates
-        coords.pop()
-        return {
-          name: feature.get('name'),
-          id: index,
-          coords: coords,
-          elevation: null,
-          trail: null
-        }
-      })
-      return {hydrants: Immutable.fromJS(_.keyBy(kmlMap, 'id'))}
-    }
+      function processHydrant(feature, index){
+        const name = feature.get('description')
+          return {
+            name: name,
+            id: index + name,
+            coords: feature.get('geometry').getGeometries()[0].flatCoordinates,
+            elevation: null,
+            trail: null
+          }
+      }
+
+    // function processTrail(kml){
+    //   const kmlMap = kml.map((feature, index) => {
+    //     return {
+    //       name: feature.get('description'),
+    //       id: index,
+    //       coords: feature.get('geometry').getCoordinates()[0],
+    //     }
+    //   })
+    //   return  {trails: Immutable.fromJS(_.keyBy(kmlMap, 'id'))}
+    // }
+    //
+    // function processHydrant(kml){
+    //   const kmlMap = kml.map((feature, index)=> {
+    //     return {
+    //       name: feature.get('name'),
+    //       id: index,
+    //       coords: feature.get('geometry').getGeometries()[0].flatCoordinates,
+    //       elevation: null,
+    //       trail: null
+    //     }
+    //   })
+    //   return {hydrants: Immutable.fromJS(_.keyBy(kmlMap, 'id'))}
+    // }
 
     if (selectedFiles){
         reader.readAsText(selectedFiles[0])
       }
   }
+
+  // exportFile = (Type) => {
+  //   const { trails, hydrants } = this.props
+  //
+  //   const trailFeatures = _.values(trails.toJS()).map((item)=> {
+  //     return new Feature ({
+  //       geometry: new Polygon([_.map(item.coords, (pt) => {
+  //         return Projection.fromLonLat(pt);
+  //       })]),
+  //       description: item.name,
+  //     })
+  //   })
+  //
+  //   const hydrantFeatures  = _.values(hydrants.toJS()).map((item)=> {
+  //     const feature =  new Feature ({
+  //       geometry: new Point(Projection.fromLonLat(item.coords)),
+  //        name: item.name,
+  //        description: item.name,
+  //       })
+  //       feature.setStyle(getMapStyle(feature))
+  //       return feature
+  //     })
+  //
+  //   const HydrantsKLM = GetKMLFromFeatures(hydrantFeatures)
+  //   downloadjs(HydrantsKLM, 'Hydrants.kml')
+  //
+  //   const TrailsKLM = GetKMLFromFeatures(trailFeatures)
+  //   downloadjs(TrailsKLM, 'Trails.kml')
+  //
+  //   function GetKMLFromFeatures(features) {
+  //         const format = new KML();
+  //         const kml = format.writeFeatures(features, {featureProjection: 'EPSG:3857'});
+  //         return kml;
+  //     }
+  //
+  // }
 
   render() {
     let style= {
@@ -83,7 +162,7 @@ class ImportExport extends React.Component {
         <div style={style}>
           <input onChange={this.changeFile} type='file' />
           <Button variant="raised" onClick={this.importFile} > Import </Button>
-          <Button variant="raised" > Export </Button>
+          <Button variant="raised"  onClick={this.exportFile} > Export </Button>
         </div>
     )
   }
