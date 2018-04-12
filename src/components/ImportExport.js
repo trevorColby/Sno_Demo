@@ -12,7 +12,10 @@ import GeometryCollection from 'ol/geom/geometrycollection';
 import downloadjs from 'downloadjs';
 import {getMapStyle} from '../utils/mapUtils';
 import Dialog, { DialogTitle } from 'material-ui/Dialog';
-import { withStyles } from 'material-ui/styles';
+import Divider from 'material-ui/Divider';
+import List, { ListItem, ListItemText } from 'material-ui/List';
+import Radio from 'material-ui/Radio';
+import { FormGroup, FormControlLabel } from 'material-ui/Form';
 
 
 class ImportExport extends React.Component {
@@ -22,6 +25,8 @@ class ImportExport extends React.Component {
     this.state = {
       selectedFiles: null,
       exportType: null,
+      dialogueMain: false,
+      selectedExport: 'trails',
     }
     this.changeFile = this.changeFile.bind(this);
     this.importFile = this.importFile.bind(this);
@@ -90,8 +95,9 @@ class ImportExport extends React.Component {
       }
   }
 
-  exportFile = (Type) => {
+  exportFile = () => {
     const { trails, hydrants } = this.props
+    const { selectedExport } = this.state
 
     const trailFeatures = _.values(trails.toJS()).map((item)=> {
       return new Feature ({
@@ -112,33 +118,99 @@ class ImportExport extends React.Component {
         return feature
       })
 
-    const HydrantsKLM = GetKMLFromFeatures(hydrantFeatures)
-    downloadjs(HydrantsKLM, 'Hydrants.kml')
 
-    const TrailsKLM = GetKMLFromFeatures(trailFeatures)
-    downloadjs(TrailsKLM, 'Trails.kml')
+   if(selectedExport === 'trails'){
+     downloadjs(GetKMLFromFeatures(trailFeatures), 'Trails.kml')
+   } else {
+     downloadjs(GetKMLFromFeatures(hydrantFeatures), 'Hydrants.kml')
+   }
 
     function GetKMLFromFeatures(features) {
           const format = new KML();
           const kml = format.writeFeatures(features, {featureProjection: 'EPSG:3857'});
           return kml;
       }
-  
+
+  }
+
+  handleClose = () => {
+    this.setState({
+      dialogueMain: false
+    })
+  }
+
+  handleOpen = () => {
+    this.setState({
+      dialogueMain: true
+    })
+  }
+
+  handleSelect = event => {
+    this.setState({
+      selectedExport: event.target.value
+    })
   }
 
   render() {
     let style= {
       float: 'left'
     }
+    const { dialogueMain, selectedExport } = this.state
 
     return (
-        <div style={style}>
-          <input onChange={this.changeFile} type='file' />
-          <Button variant="raised" onClick={this.importFile} > Import </Button>
-          <Button variant="raised"  onClick={this.exportFile} > Export </Button>
-        </div>
+      <div>
+          <div style={style}>
+            <Button variant="raised" onClick={this.handleOpen}>Import / Export</Button>
+          </div>
+          <Dialog onBackdropClick={this.handleClose} aria-labelledby="simple-dialog-title" open={dialogueMain} >
+            <DialogTitle id="simple-dialog-title">Import/Export</DialogTitle>
+            <div>
+              <List>
+                <ListItem>
+                  <ListItemText primary='Import' />
+                  <input onChange={this.changeFile} type='file' />
+                  <Button variant="raised" onClick={this.importFile} > Import </Button>
+                </ListItem>
+                <li>
+                  <Divider inset />
+                </li>
+                <ListItem>
+                  <ListItemText primary='Export' />
+                  <FormGroup row>
+                    <FormControlLabel
+                      control={
+                        <Radio
+                        checked={selectedExport === 'trails'}
+                        onChange={this.handleSelect}
+                        value='trails'
+                        />
+                      }
+                      label="Trail Layer"
+                    />
+                    <FormControlLabel
+                      control={
+                        <Radio
+                        checked={selectedExport === 'hydrants'}
+                        onChange={this.handleSelect}
+                        value='hydrants'
+                        />
+                      }
+                      label="Hydrants Layer"
+                    />
+                  </FormGroup>
+                  <Button variant="raised"  onClick={this.exportFile} > Export </Button>
+                </ListItem>
+              </List>
+            </div>
+          </Dialog>
+
+      </div>
     )
   }
 }
+
+
+
+
 
 export default ImportExport;
