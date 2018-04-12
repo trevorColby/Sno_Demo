@@ -178,9 +178,8 @@ class OpenLayersMap extends React.Component{
     });
 
     // Orientation
-    var projection = Projection.get('EPSG:3857');
-    var killingtonCoords = [-106.553668, 39.612616];
-    var killingtonCoordsWebMercator = Projection.fromLonLat(killingtonCoords);
+    const projection = Projection.get('EPSG:3857');
+    const centerCoords = [-106.553668, 39.612616];
 
     // Map
     const map = new Map({
@@ -188,9 +187,8 @@ class OpenLayersMap extends React.Component{
       target: 'map-container',
       layers: [bingMapsLayer, staticLayer, modifyingLayer],
       view: new View({
-
         projection: projection,
-        center: killingtonCoordsWebMercator,
+        center: Projection.fromLonLat(centerCoords),
         zoom: 14.2,
         rotation: 2.4
       })
