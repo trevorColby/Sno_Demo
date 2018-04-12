@@ -2,8 +2,8 @@ import React from 'react';
 import _ from 'lodash';
 import Map from 'ol/map';
 import View from 'ol/view';
-import Feature from 'ol/feature';
 import Point from 'ol/geom/point';
+import Collection from 'ol/collection';
 import Polygon from 'ol/geom/polygon';
 import TileLayer from 'ol/layer/tile';
 import LayerVector from 'ol/layer/vector';
@@ -12,158 +12,91 @@ import Projection from 'ol/proj';
 import SourceVector from 'ol/source/vector';
 import Draw from 'ol/interaction/draw';
 import Modify from 'ol/interaction/modify';
-import {mapObjects} from '../utils/constants';
-import {getFeatureStyle} from '../utils/mapUtils';
 import Geocoder from 'ol-geocoder';
+import { getMapStyle } from '../utils/mapUtils';
 
-class OpenLayersMap extends React.Component{
-  constructor(props){
+class OpenLayersMap extends React.Component {
+  constructor(props) {
     super(props);
-    this.renderTrails = this.renderTrails.bind(this);
+    this.syncFeatures = this.syncFeatures.bind(this);
     this.state = {
-      modifyingSource: new SourceVector({wrapX: false}),
-      modifying: null,
-      staticSource: new SourceVector({wrapX: false}),
-      map: null,
-      center: null,
+      source: new SourceVector({ wrapX: false }),
       interactions: [],
+      map: null,
     };
-  };
-
-  componentDidUpdate(prevProps, prevState){
-    const {selectedTrail, trails} = this.props;
-    const {map} = this.state;
-
-    if (selectedTrail !== prevProps.selectedTrail && selectedTrail ){
-      let firstCoords = trails.getIn([selectedTrail, 'coords', 0]);
-      let centerCoords = Projection.fromLonLat(firstCoords ? firstCoords.toJS() : [0,0]);
-      
-      map.getView().animate({
-        center: centerCoords,
-        duration: 500,
-        zoom: 16,
-      });
-    }
   }
 
-  renderTrails() {
-    const {trails, selectedTrail, hydrants, mode} = this.props;
-    const {modifyingSource, staticSource} = this.state;
-    staticSource.clear();
-    modifyingSource.clear();
-    // redo the trails features for unselected trails
-    const newFeatures = [];
-    trails.forEach((trail) => {
-      const t = trail.toJS();
-      if (t.coords) {
-        const featureType = t.id === selectedTrail ? 'selectedTrail' : 'trail';
-        // first add the trail itself
-        const feature = new Feature({
-          name: t.name,
-          id: t.id,
-          geometry: new Polygon([_.map(t.coords, (pt) => {
-            return Projection.fromLonLat(pt);
-          })])
-        });
-        feature.setStyle(getFeatureStyle(featureType, t.name));
-        newFeatures.push(feature);
-      }
-    });
-    hydrants.forEach((hydrant) => {
-      const h = hydrant.toJS();
-      if (h.coords) {
-        const featureType = h.trail === selectedTrail ? 'selectedHydrant' : 'hydrant';
-      //if (h.trail !== selectedTrail && h.coords) {
-        const feature = new Feature({
-          name: h.name,
-          id: h.id,
-          geometry: new Point(Projection.fromLonLat(h.coords))
-        });
-        feature.setStyle(getFeatureStyle(featureType, h.name));
-        newFeatures.push(feature);
-      }
-    });
-    staticSource.addFeatures(newFeatures);
-
-    // if trail is selected then put it in draw layer with its hydrants
-    /*if (selectedTrail && trails.get(selectedTrail)) {
-      const selectedTrailObj = trails.get(selectedTrail).toJS();
-      const drawFeatures = [];
-      drawFeatures.push(new Feature({
-        name: selectedTrailObj.name,
-        id: selectedTrailObj.id,
-        geometry: new Polygon([_.map(selectedTrailObj.coords, (pt) => {
-            return Projection.fromLonLat(pt);
-          })])
-      }));
-      hydrants.forEach((hydrant) => {
-        if (hydrant.get('trail') === selectedTrail) {
-          const h = hydrant.toJS();
-          const hydrantFeature = new Feature({
-            name: h.name || h.id,
-            id: h.id,
-            geometry: new Point(Projection.fromLonLat(h.coords))
-          });
-          drawFeatures.push(hydrantFeature);
-        }
-      });
-
-      _.each(drawFeatures, (f) => {
-        f.on('change', (e) => this.setState({modifying: e}));
-      });
-      modifyingSource.addFeatures(drawFeatures);
-    }*/
-  }
-  renderTrailsDebounce = _.debounce(this.renderTrails, 50);
-
-  componentWillReceiveProps(nextProps) {
-    const {endDraw} = this.props;
-    const {map, interactions, modifyingSource} = this.state;
-    // remove old draw interactions
-    interactions.forEach(interaction => {
-        map.removeInteraction(interaction);
-    });
-
-    // creating new draw interactions
-    const newInteractions = [];
-    const newInteractionTypes = mapObjects[nextProps.mode] || [];
-    newInteractionTypes.forEach(type => {
-      const draw = new Draw({
-        source: modifyingSource,
-        type: type,
-        geometryName: type
-      });
-      draw.on('drawend', endDraw);
-      newInteractions.push(draw);
-    });
-    newInteractions.forEach(i => {
-      if (map) {
-        map.addInteraction(i);
-      }
-    });
-    this.setState({interactions: newInteractions, modifying: null});
-
-    this.renderTrailsDebounce(nextProps.trails, nextProps.selectedTrail);
-  }
-
-  componentDidMount(){
+  componentDidMount() {
     this.setupMap();
   }
 
+  componentWillReceiveProps(nextProps) {
+    const { interactions, source, map } = this.state;
+    const { canCreate, mode, createObject, trails, hydrants, selectedTrail } = nextProps;
+    // first sync features to add or remove deleted or externally added ones
+    this.syncFeatures(trails, hydrants);
+
+    // remove all existing interactions
+    _.each(interactions, (interaction) => map.removeInteraction(interaction));
+
+    // create new draw or modify interaction depending on the props
+    const newInteractions = [];
+    if (canCreate) {
+      const type = mode === 'trails' ? 'Polygon' : 'Point';
+      const draw = new Draw({
+        source, type, geometryName: type,
+      });
+      draw.on('drawend', (e) => createObject(e.feature));
+      newInteractions.push(draw);
+    }
+    if (selectedTrail) {
+      const modifiable = new Collection([]);
+      if (mode === 'trails') {
+        const feature = trails.getIn([selectedTrail, 'feature']);
+        modifiable.push(feature);
+      } else {
+        const toCheck = selectedTrail === 'orphans' ? null : selectedTrail;
+        hydrants.filter((h) => h.get('trail') === toCheck)
+          .forEach((h) => modifiable.push(h.get('feature')));
+      }
+      
+      const modify = new Modify({ features: modifiable });
+      modify.on('modifyend', (e) => this.endModify(e));
+      newInteractions.push(modify);
+    }
+
+    _.each(newInteractions, (interaction) => map.addInteraction(interaction));
+    this.setState({ interactions: newInteractions });
+  }
+
+  componentDidUpdate(prevProps) {
+    const { selectedTrail, trails } = this.props;
+    const { map } = this.state;
+    if (selectedTrail !== prevProps.selectedTrail && selectedTrail !== 'orphans' && selectedTrail) {
+      const firstCoords = trails.getIn([selectedTrail, 'coords'])[0];
+      const centerCoords = Projection.fromLonLat(firstCoords ? firstCoords : [0, 0]);
+      if (firstCoords) {
+        map.getView().animate({
+          center: centerCoords,
+          duration: 500,
+        });
+      }
+    }
+  }
+
   setupMap() {
-    const {staticSource, modifyingSource} = this.state;
-    const {endModify} = this.props;
+    const { source } = this.state;
     const bingMapsLayer = new TileLayer({
       visible: true,
       preload: Infinity,
       source: new BingMaps({
         hidpi: true,
         key: 'ApcR8_wnFxnsXwuY_W2mPQuMb-QB0Kg-My65RJYZL2g9fN6NCFA8-s0lsvxTTs2G',
-        imagerySet: 'AerialWithLabels'
-      })
+        imagerySet: 'AerialWithLabels',
+      }),
     });
 
-    var geocoder = new Geocoder('nominatim', {
+    const geocoder = new Geocoder('nominatim', {
       provider: 'osm',
       lang: 'en',
       placeholder: 'Search for ...',
@@ -172,46 +105,90 @@ class OpenLayersMap extends React.Component{
       autoComplete: true,
     });
 
-    const modifyingLayer = new LayerVector({
-      source: modifyingSource
-    });
-
-    const staticLayer = new LayerVector({
-      source: staticSource
+    const resortLayer = new LayerVector({
+      source,
+      style: getMapStyle,
     });
 
     // Orientation
-    var projection = Projection.get('EPSG:3857');
-    var killingtonCoords = [-72.803584,43.619210];
-    var killingtonCoordsWebMercator = Projection.fromLonLat(killingtonCoords);
+    const projection = Projection.get('EPSG:3857');
+    const killingtonCoords = [-72.803584, 43.619210];
+    const killingtonCoordsWebMercator = Projection.fromLonLat(killingtonCoords);
 
     // Map
     const map = new Map({
       loadTilesWhileInteracting: false,
       target: 'map-container',
-      layers: [bingMapsLayer, staticLayer, modifyingLayer],
+      layers: [bingMapsLayer, resortLayer],
       view: new View({
-
-        projection: projection,
+        projection,
         center: killingtonCoordsWebMercator,
         zoom: 14.2,
-        rotation: 2.4
-      })
+        rotation: 2.4,
+      }),
     });
 
     //Controls
-    map.addControl(geocoder)
+    map.addControl(geocoder);
 
+    this.setState({ map });
+  }
 
-    // Modifications
-    let modify = new Modify({source: modifyingSource});
-    modify.on('modifyend', () => endModify(this.state.modifying));
-    map.addInteraction(modify);
-    this.setState({map});
+  syncFeatures(trails, hydrants) {
+    const { source } = this.state;
+    if (source.getFeatures().length !== trails.size + hydrants.size) {
+      // add new features if needed
+      const newFeatures = [];
+      trails.forEach((trail) => {
+        if (!source.getFeatureById(`t${trail.get('id')}`)) {
+          newFeatures.push(trail.get('feature'));
+        }
+      });
+      hydrants.forEach((hydrant) => {
+        if (!source.getFeatureById(`h${hydrant.get('id')}`)) {
+          newFeatures.push(hydrant.get('feature'));
+        }
+      });
+      if (newFeatures.length) {
+        source.addFeatures(newFeatures);
+      }
+
+      // remove deleted features if needed
+      _.map(source.getFeatures(), (feature) => {
+        const featureId = feature.getId();
+        if (featureId[0] === 't' && !trails.has(featureId.slice(1))) {
+          source.removeFeature(feature);
+        } else if (featureId[0] === 'h' && !hydrants.has(featureId.slice(1))) {
+          source.removeFeature(feature);
+        }
+      });
+    }
+  }
+
+  endModify = (e) => {
+    const { modifyTrail, modifyHydrant, mode, selectedTrail, hydrants } = this.props;
+    if (mode === 'trails') {
+      const newCoords = e.features.getArray()[0].getGeometry().getCoordinates()[0];
+      const lonLatCoords = _.map(newCoords, (pt) => {
+        return Projection.toLonLat(pt);
+      });
+      modifyTrail(selectedTrail, { coords: lonLatCoords });
+    } else {
+      const features = e.features.getArray();
+      _.each(features, (feature) => {
+        const hydrantId = feature.getId().slice(1);
+        const hydrantCoords = hydrants.getIn([hydrantId, 'coords']);
+        const mapCoords = feature.getGeometry().getCoordinates();
+        const lonLatCoords = Projection.toLonLat(mapCoords);
+        if (!_.isEqual(lonLatCoords, hydrantCoords)) {
+          modifyHydrant(hydrantId, { coords: lonLatCoords });
+        }
+      });
+    }
   }
 
   render() {
-    return <div id='map-container' />;
+    return <div id="map-container" />;
   }
 }
 

@@ -73,18 +73,17 @@ class TrailList extends React.Component {
 
         <TableCell>{hydrants.filter((h) => h.get('trail') === id).size}</TableCell>
         <TableCell>
-          <i onClick={() => modifyTrail(id, null, true)} style={{cursor: 'pointer'}} className="fa fa-trash-alt" />
+          <i onClick={(e) => {e.stopPropagation(); modifyTrail(id, null, true); }} style={{cursor: 'pointer'}} className="fa fa-trash-alt" />
         </TableCell>
       </TableRow>
     );
   }
 
-  render(){
-
-    const {trails} = this.props;
-
+  render() {
+    const {trails, trailSelected, selected, hydrants, mode, canCreate, toggleCreate} = this.props;
+    const orphanCount = hydrants.filter((h) => h.get('trail') === null).size;
     return (
-      <Table>
+      <Table style={{maxWidth: '100%'}}>
         <TableHead>
           <TableRow>
             <CustomTableCell>Trail Name</CustomTableCell>
@@ -93,6 +92,26 @@ class TrailList extends React.Component {
           </TableRow>
         </TableHead>
         <TableBody>
+          {mode === 'trails' ? (<TableRow
+            style={{width: '100%', cursor: 'pointer'}} 
+            className={canCreate ? 'selected' : ''} 
+            onClick={toggleCreate}
+            >
+            <TableCell>+ Add a trail</TableCell>
+          </TableRow>) : null}
+        
+          {orphanCount ? (
+            <TableRow
+              className={selected==='orphans' ? 'selected' : ''}
+              style={{borderTop: '2px solid black', cursor: 'pointer'}}
+              onClick={() => trailSelected(selected === 'orphans' ? null : 'orphans')}
+            >
+              <TableCell>Orphans</TableCell>
+              <TableCell>{orphanCount}</TableCell>
+              <TableCell />
+            </TableRow>
+            ) : null
+          }
           {_.map(trails.toJS(), (item) => this.renderTrail(item))}
         </TableBody>
       </Table>
