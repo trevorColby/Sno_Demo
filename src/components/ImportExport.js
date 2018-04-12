@@ -53,20 +53,18 @@ class ImportExport extends React.Component {
                 newHydrants[hydrant.id] = hydrant;
               }
           })
-          
-          // const kmlObj = kml[0].getGeometry().getType() === 'Polygon'? processTrails(kml) : processHydrants(kml)
+
           importKMLClicked({
             trails: Immutable.fromJS(newTrails),
             hydrants:  Immutable.fromJS(newHydrants),
           })
-          // console.log(kml[0])
+          
         }
         catch(err) {
           // Put error wherever we want to display error msgs.
             console.log(err)
         }
       }
-
 
       function processTrail(feature, index){
         const name = feature.get('description')
@@ -87,31 +85,6 @@ class ImportExport extends React.Component {
             trail: null
           }
       }
-
-    // function processTrail(kml){
-    //   const kmlMap = kml.map((feature, index) => {
-    //     return {
-    //       name: feature.get('description'),
-    //       id: index,
-    //       coords: feature.get('geometry').getCoordinates()[0],
-    //     }
-    //   })
-    //   return  {trails: Immutable.fromJS(_.keyBy(kmlMap, 'id'))}
-    // }
-    //
-    // function processHydrant(kml){
-    //   const kmlMap = kml.map((feature, index)=> {
-    //     return {
-    //       name: feature.get('name'),
-    //       id: index,
-    //       coords: feature.get('geometry').getGeometries()[0].flatCoordinates,
-    //       elevation: null,
-    //       trail: null
-    //     }
-    //   })
-    //   return {hydrants: Immutable.fromJS(_.keyBy(kmlMap, 'id'))}
-    // }
-
     if (selectedFiles){
         reader.readAsText(selectedFiles[0])
       }
