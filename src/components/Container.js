@@ -10,7 +10,7 @@ import kill_logo from './../imgs/Kill_Logo.png';
 import { Grid } from 'material-ui';
 import { Image } from 'react-bootstrap';
 import { Trail, Hydrant } from '../utils/records';
-import { makeTrailFeature, makeHydrantFeature } from '../utils/mapUtils';
+import ImportExport from './ImportExport';
 
 class Container extends React.Component {
   constructor(props) {
@@ -34,11 +34,13 @@ class Container extends React.Component {
     };
   }
 
+  /*
   componentDidUpdate() {
     const { trails, hydrants } = this.state;
-    // localStorage.setItem('trails', JSON.stringify(trails.toJS()));
-    // localStorage.setItem('hydrants', JSON.stringify(hydrants.toJS()));
+    localStorage.setItem('trails', JSON.stringify(trails.toJS()));
+    localStorage.setItem('hydrants', JSON.stringify(hydrants.toJS()));
   }
+  */
 
   modifyTrail = (trailId, editedFields, shouldDelete = false) => {
     const { trails, hydrants, selectedTrail } = this.state;
@@ -115,6 +117,7 @@ class Container extends React.Component {
     dont do this for now to avoid all the api calls
     lets put it in when we associate hydrants maybe?
 
+<<<<<<< HEAD
     getElevation(coords).then((data) => {
       const elevation = data[0].height;
       this.modifyHydrant(id, {elevation});
@@ -151,8 +154,17 @@ class Container extends React.Component {
     });
   }
 
-  render() {
+  importKMLClicked = (kmlData) => {
+    const {trails, hydrants} = this.state;
+    this.setState({
+      trails: trails.merge(kmlData.trails),
+      hydrants: hydrants.merge(kmlData.hydrants)
+    })
+  }
+
+  render(){
     const { trails, mode, selectedTrail, hydrants, canCreate } = this.state;
+
     return (
       <div>
         <Grid container spacing={0}>
@@ -185,7 +197,14 @@ class Container extends React.Component {
           mode={mode}
           changeMode={(mode) => this.setState({ mode, canCreate: false })}
         />
-        <Image style={{ float: 'right', width: 300, margin: 12 }} src={kill_logo} responsive />
+
+        <ImportExport
+          importKMLClicked= {this.importKMLClicked}
+          trails = {trails}
+          hydrants = {hydrants}
+         />
+
+        <Image style={{float: 'right', width: 300, margin: 12}} src={kill_logo} responsive />
       </div>
     );
   }

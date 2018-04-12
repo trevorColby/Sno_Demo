@@ -28,12 +28,12 @@ class OpenLayersMap extends React.Component {
 
   componentDidMount() {
     this.setupMap();
-  }
+  };
 
   componentWillReceiveProps(nextProps) {
     const { interactions, source, map } = this.state;
     const { canCreate, mode, createObject, trails, hydrants, selectedTrail } = nextProps;
-    // first sync features to add or remove deleted or externally added ones
+    // first sync to add externally-uploaded features or remove deleted ones
     this.syncFeatures(trails, hydrants);
 
     // remove all existing interactions
@@ -112,8 +112,7 @@ class OpenLayersMap extends React.Component {
 
     // Orientation
     const projection = Projection.get('EPSG:3857');
-    const killingtonCoords = [-72.803584, 43.619210];
-    const killingtonCoordsWebMercator = Projection.fromLonLat(killingtonCoords);
+    const centerCoords = [-106.553668, 39.612616];
 
     // Map
     const map = new Map({
@@ -122,13 +121,13 @@ class OpenLayersMap extends React.Component {
       layers: [bingMapsLayer, resortLayer],
       view: new View({
         projection,
-        center: killingtonCoordsWebMercator,
+        center: Projection.fromLonLat(centerCoords),
         zoom: 14.2,
         rotation: 2.4,
       }),
     });
 
-    //Controls
+    // Controls
     map.addControl(geocoder);
 
     this.setState({ map });
