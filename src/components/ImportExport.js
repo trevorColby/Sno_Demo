@@ -58,7 +58,7 @@ class ImportExport extends React.Component {
             trails: Immutable.fromJS(newTrails),
             hydrants:  Immutable.fromJS(newHydrants),
           })
-          
+
         }
         catch(err) {
           // Put error wherever we want to display error msgs.
@@ -90,41 +90,41 @@ class ImportExport extends React.Component {
       }
   }
 
-  // exportFile = (Type) => {
-  //   const { trails, hydrants } = this.props
-  //
-  //   const trailFeatures = _.values(trails.toJS()).map((item)=> {
-  //     return new Feature ({
-  //       geometry: new Polygon([_.map(item.coords, (pt) => {
-  //         return Projection.fromLonLat(pt);
-  //       })]),
-  //       description: item.name,
-  //     })
-  //   })
-  //
-  //   const hydrantFeatures  = _.values(hydrants.toJS()).map((item)=> {
-  //     const feature =  new Feature ({
-  //       geometry: new Point(Projection.fromLonLat(item.coords)),
-  //        name: item.name,
-  //        description: item.name,
-  //       })
-  //       feature.setStyle(getMapStyle(feature))
-  //       return feature
-  //     })
-  //
-  //   const HydrantsKLM = GetKMLFromFeatures(hydrantFeatures)
-  //   downloadjs(HydrantsKLM, 'Hydrants.kml')
-  //
-  //   const TrailsKLM = GetKMLFromFeatures(trailFeatures)
-  //   downloadjs(TrailsKLM, 'Trails.kml')
-  //
-  //   function GetKMLFromFeatures(features) {
-  //         const format = new KML();
-  //         const kml = format.writeFeatures(features, {featureProjection: 'EPSG:3857'});
-  //         return kml;
-  //     }
-  //
-  // }
+  exportFile = (Type) => {
+    const { trails, hydrants } = this.props
+
+    const trailFeatures = _.values(trails.toJS()).map((item)=> {
+      return new Feature ({
+        geometry: new Polygon([_.map(item.coords, (pt) => {
+          return Projection.fromLonLat(pt);
+        })]),
+        description: item.name,
+      })
+    })
+
+    const hydrantFeatures  = _.values(hydrants.toJS()).map((item)=> {
+      const feature =  new Feature ({
+        geometry: new Point(Projection.fromLonLat(item.coords)),
+         name: item.name,
+         description: item.name,
+        })
+        feature.setStyle(getMapStyle(feature))
+        return feature
+      })
+
+    const HydrantsKLM = GetKMLFromFeatures(hydrantFeatures)
+    downloadjs(HydrantsKLM, 'Hydrants.kml')
+
+    const TrailsKLM = GetKMLFromFeatures(trailFeatures)
+    downloadjs(TrailsKLM, 'Trails.kml')
+
+    function GetKMLFromFeatures(features) {
+          const format = new KML();
+          const kml = format.writeFeatures(features, {featureProjection: 'EPSG:3857'});
+          return kml;
+      }
+  
+  }
 
   render() {
     let style= {
