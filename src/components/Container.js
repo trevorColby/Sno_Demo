@@ -140,21 +140,8 @@ class Container extends React.Component{
     });
   }
 
-<<<<<<< HEAD
   importKMLClicked = (kmlData) => {
     this.setState(kmlData)
-=======
-  importKMLClicked = (klmData) => {
-    if( this.state.mode === 'trails'){
-      this.setState({
-        trails: Immutable.fromJS(klmData)
-      })
-    } else {
-      this.setState({
-        hydrants: Immutable.fromJS(klmData)
-      })
-    }
->>>>>>> Add Trail KML Upload
   }
 
 
@@ -184,11 +171,7 @@ class Container extends React.Component{
         />
 
         <ImportExport
-<<<<<<< HEAD
           importKMLClicked= {this.importKMLClicked}
-=======
-          importKLMClicked= {this.importKLMClicked}
->>>>>>> Add Trail KML Upload
          />
 
         <Image style={{float: 'right', width: 300, margin: 12}} src={kill_logo} responsive />

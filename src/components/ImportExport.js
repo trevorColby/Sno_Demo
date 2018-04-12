@@ -1,21 +1,9 @@
 import React from 'react';
 import { Button } from 'material-ui';
-<<<<<<< HEAD
-<<<<<<< HEAD
-=======
-import tj from '@mapbox/togeojson';
-import fs from 'fs';
-import DOMParser from 'xmldom';
->>>>>>> Add Trail KML Upload
 import Hydrants from './../KML/Hydrants.kml';
-=======
->>>>>>> Make suggested changes per PR#29
 import KML from 'ol/format/kml';
 import _ from 'lodash';
-<<<<<<< HEAD
 import Immutable from 'immutable';
-=======
->>>>>>> Add Trail KML Upload
 
 
 class ImportExport extends React.Component {
@@ -53,35 +41,14 @@ class ImportExport extends React.Component {
         }
       }
 
-<<<<<<< HEAD
 
     function processTrails(klm){
       const kmlMap = klm.map((feature, index) => {
         const coords = feature.get('geometry').flatCoordinates
-=======
-    reader.onload = function(event){
-      const kml = new KML().readFeatures(event.target.result)
-      const kmlMap = mode === 'trails'? processTrails(kml) : processHydrants(kml)
-      importKMLClicked(_.keyBy(kmlMap, 'id'))
-    }
-
-
-    function processTrails(klm){
-      return klm.map((feature, index) => {
-
-        const coords = feature.get('geometry').flatCoordinates
-<<<<<<< HEAD
-  
->>>>>>> Add Trail KML Upload
-=======
-
->>>>>>> Make suggested changes per PR#29
         return {
           name: feature.get('description'),
           id: index,
           coords: _.chunk(coords,3),
-<<<<<<< HEAD
-<<<<<<< HEAD
         }
       })
       return  {trails: Immutable.fromJS(_.keyBy(kmlMap, 'id'))}
@@ -89,22 +56,6 @@ class ImportExport extends React.Component {
 
     function processHydrants(klm){
       const kmlMap = klm.map((feature, index)=> {
-=======
-          hydrants: null,
-=======
->>>>>>> Make suggested changes per PR#29
-        }
-      })
-    }
-
-<<<<<<< HEAD
-    function processHydrants(kml){
-      return kml.map((feature, index)=> {
->>>>>>> Add Trail KML Upload
-=======
-    function processHydrants(klm){
-      return klm.map((feature, index)=> {
->>>>>>> Make suggested changes per PR#29
         const coords = feature.get('geometry').getGeometries()[0].flatCoordinates
         coords.pop()
         return {
@@ -115,11 +66,7 @@ class ImportExport extends React.Component {
           trail: null
         }
       })
-<<<<<<< HEAD
       return {hydrants: Immutable.fromJS(_.keyBy(kmlMap, 'id'))}
-=======
-
->>>>>>> Add Trail KML Upload
     }
 
     if (selectedFiles){
@@ -141,8 +88,5 @@ class ImportExport extends React.Component {
     )
   }
 }
-<<<<<<< HEAD
 
-=======
->>>>>>> Add Trail KML Upload
 export default ImportExport;
