@@ -37,7 +37,7 @@ class OpenLayersMap extends React.Component{
     if (selectedTrail !== prevProps.selectedTrail && selectedTrail ){
       let firstCoords = trails.getIn([selectedTrail, 'coords', 0]);
       let centerCoords = Projection.fromLonLat(firstCoords ? firstCoords.toJS() : [0,0]);
-      
+
       map.getView().animate({
         center: centerCoords,
         duration: 500,
@@ -92,7 +92,7 @@ class OpenLayersMap extends React.Component{
           })])
       }));
       hydrants.forEach((hydrant) => {
-        if (hydrant.get('trail') === selectedTrail) {
+        if (hydrant.get('trail') === selectedTrail || true) {
           const h = hydrant.toJS();
           const hydrantFeature = new Feature({
             name: h.name || h.id,
@@ -114,6 +114,7 @@ class OpenLayersMap extends React.Component{
   componentWillReceiveProps(nextProps) {
     const {endDraw} = this.props;
     const {map, interactions, modifyingSource} = this.state;
+    console.log(map);
     // remove old draw interactions
     interactions.forEach(interaction => {
         map.removeInteraction(interaction);
@@ -178,19 +179,17 @@ class OpenLayersMap extends React.Component{
     });
 
     // Orientation
-    var projection = Projection.get('EPSG:3857');
-    var killingtonCoords = [-72.803584,43.619210];
-    var killingtonCoordsWebMercator = Projection.fromLonLat(killingtonCoords);
-
+    const projection = Projection.get('EPSG:3857');
+    const centerCoords = [-106.553668, 39.612616];
+    
     // Map
     const map = new Map({
       loadTilesWhileInteracting: false,
       target: 'map-container',
       layers: [bingMapsLayer, staticLayer, modifyingLayer],
       view: new View({
-
         projection: projection,
-        center: killingtonCoordsWebMercator,
+        center: Projection.fromLonLat(centerCoords),
         zoom: 14.2,
         rotation: 2.4
       })

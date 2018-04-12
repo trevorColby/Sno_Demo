@@ -8,6 +8,7 @@ import TrailList from './TrailList';
 import {getElevation} from '../utils/mapUtils';
 import kill_logo from './../imgs/Kill_Logo.png'
 import {Image} from 'react-bootstrap';
+import ImportExport from './ImportExport';
 
 class Container extends React.Component{
   constructor(props){
@@ -27,7 +28,7 @@ class Container extends React.Component{
     const trails = savedTrails ? JSON.parse(savedTrails) : {};
     const hydrants = savedHydrants ? JSON.parse(savedHydrants) : {};
     this.setState({
-      trails: Immutable.fromJS(trails), 
+      trails: Immutable.fromJS(trails),
       hydrants: Immutable.fromJS(hydrants)
     });
   }
@@ -101,8 +102,8 @@ class Container extends React.Component{
       case 'hydrants': {
         const coords = Projection.toLonLat(_.get(drawEvent, 'target.sketchCoords_'));
         const createdHydrant = Immutable.fromJS({
-          id: id, 
-          coords: coords, 
+          id: id,
+          coords: coords,
           trail: selectedTrail
         });
         let newHydrants = hydrants.set(createdHydrant.get('id'), createdHydrant);
@@ -139,6 +140,14 @@ class Container extends React.Component{
     });
   }
 
+  importKMLClicked = (kmlData) => {
+    const {trails, hydrants} = this.state;
+    this.setState({
+      trails: trails.merge(kmlData.trails),
+      hydrants: hydrants.merge(kmlData.hydrants)
+    })
+  }
+
   render(){
     const {trails, mode, selectedTrail, hydrants} = this.state;
 
@@ -163,6 +172,13 @@ class Container extends React.Component{
           selected={selectedTrail}
           trailSelected={(id) => this.setState({selectedTrail: id})}
         />
+
+        <ImportExport
+          importKMLClicked= {this.importKMLClicked}
+          trails = {trails}
+          hydrants = {hydrants}
+         />
+
         <Image style={{float: 'right', width: 300, margin: 12}} src={kill_logo} responsive />
       </div>
     )
