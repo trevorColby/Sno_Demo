@@ -1,4 +1,5 @@
 import React from 'react';
+import {Input} from 'material-ui';
 
 class TrailNameForm extends React.Component {
   constructor(props) {
@@ -8,17 +9,14 @@ class TrailNameForm extends React.Component {
     this.handleSubmit = this.handleSubmit.bind(this);
   }
 
-  componentDidMount() {
-    this.editTrail.focus();
-  }
-
   handleChange(e) {
     this.setState({ value: e.target.value });
   }
 
-  handleSubmit() {
+  handleSubmit(e) {
     const { trailName, onSubmit } = this.props;
     const { value } = this.state;
+    e.preventDefault();
     if (value !== trailName) {
       onSubmit(value);
     }
@@ -26,18 +24,12 @@ class TrailNameForm extends React.Component {
 
   render() {
     return (
-      <form
-        onSubmit={this.handleSubmit}
-        onBlur={this.handleSubmit}
-      >
-        <input
-          ref={(i) => { this.editTrail = i; }}
+        <Input
           type="text"
           onChange={this.handleChange}
           value={this.state.value}
-          name="name"
+          onBlur={this.handleSubmit}
         />
-      </form>
     );
   }
 }
