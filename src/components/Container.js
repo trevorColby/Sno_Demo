@@ -197,15 +197,16 @@ class Container extends React.Component {
     })
   }
 
-  changeMode = () => {
+  changeMode = (mode) => {
     this.setState({
-      mode: false
+      mode,
+      canCreate: false
     })
   }
 
-  trailSelected = () => {
+  trailSelected = (id) => {
     this.setState({
-      selectedTrail: this.state.id,
+      selectedTrail: id,
       canCreate: false
     })
   }
