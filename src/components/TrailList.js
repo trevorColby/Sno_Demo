@@ -83,7 +83,7 @@ class TrailList extends React.Component {
     const {trails, trailSelected, selected, hydrants, mode, canCreate, toggleCreate} = this.props;
     const orphanCount = hydrants.filter((h) => h.get('trail') === null).size;
     return (
-      <Table style={{maxWidth: '100%'}}>
+      <Table style={{height: '100%'}}>
         <TableHead>
           <TableRow>
             <CustomTableCell>Trail Name</CustomTableCell>
@@ -91,15 +91,16 @@ class TrailList extends React.Component {
             <CustomTableCell  />
           </TableRow>
         </TableHead>
-        <TableBody>
-          {mode === 'trails' ? (<TableRow
-            style={{width: '100%', cursor: 'pointer'}} 
-            className={canCreate ? 'selected' : ''} 
-            onClick={toggleCreate}
-            >
-            <TableCell>+ Add a trail</TableCell>
-          </TableRow>) : null}
-        
+        <TableBody style={{overflowY: 'auto', height: '100%', width: '95%'}}>
+          {mode === 'trails' ? (
+            <TableRow
+              style={{width: '100%', cursor: 'pointer'}} 
+              className={canCreate ? 'selected' : ''} 
+              onClick={toggleCreate}
+              >
+              <TableCell>+ Add a trail</TableCell>
+            </TableRow>) : null
+          }
           {orphanCount ? (
             <TableRow
               className={selected === null ? 'selected' : ''}
@@ -112,7 +113,7 @@ class TrailList extends React.Component {
             </TableRow>
             ) : null
           }
-          {_.map(trails.toJS(), (item) => this.renderTrail(item))}
+          {_(trails.toJS()).values().orderBy('name').map((item) => this.renderTrail(item)).value()}
         </TableBody>
       </Table>
     )

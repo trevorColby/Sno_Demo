@@ -35,7 +35,7 @@ class ImportExport extends React.Component {
 
   importFile = () =>  {
     const { selectedFiles } = this.state;
-    const { importKMLClicked } = this.props;
+    const { importKMLClicked, trails } = this.props;
     const reader = new FileReader();
     reader.onload = function(event) {
       try {
@@ -67,7 +67,8 @@ class ImportExport extends React.Component {
     }
 
     function processTrail(feature, index) {
-      const name = feature.get('description');
+      let [name, ...otherThings] = feature.get('description').split(',');
+      name = _.words(name).join(' ');
       const id = index + name;
       const coords = feature.getGeometry().getCoordinates()[0];
       const lonLatCoords = _.map(coords, (pt) => Projection.fromLonLat(pt.slice(0,2)));
@@ -77,14 +78,17 @@ class ImportExport extends React.Component {
     }
 
     function processHydrant(feature, index) {
-      const name = feature.get('description');
+      let [trailName, hydrantIndex, name]  = feature.get('description').split(',');
+      trailName = _.words(trailName).join(' ');
+      const trailObj = trails.find((t) => t.get('name') === trailName)
+      const trailId = trailObj ? trailObj.get('id') || null;
       const id = index + name;
       const geometry = feature.getGeometry().getGeometries()[0];
       feature.setGeometry(geometry);
       const coords = geometry.getCoordinates();
       feature.getGeometry().setCoordinates(Projection.fromLonLat(coords.slice(0,2)));
       feature.setId(`h${id}`);
-      return new Hydrant({ id, name, coords, feature });
+      return new Hydrant({ id, name, coords, feature, trail: trailId });
     }
 
     if (selectedFiles) {

@@ -1,14 +1,12 @@
 import React from 'react';
 import _ from 'lodash';
 import Immutable from 'immutable';
+import { Grid } from 'material-ui';
 import Projection from 'ol/proj';
 import MapControls from './MapControls';
 import OpenLayersMap from './OpenLayersMap';
 import TrailList from './TrailList';
-import {getElevation, getMapStyle} from '../utils/mapUtils';
-import kill_logo from './../imgs/Kill_Logo.png';
-import { Grid } from 'material-ui';
-import { Image } from 'react-bootstrap';
+import { getElevation, getMapStyle } from '../utils/mapUtils';
 import { Trail, Hydrant } from '../utils/records';
 import ImportExport from './ImportExport';
 
@@ -43,8 +41,10 @@ class Container extends React.Component {
     if (prevState.selectedTrail !== selectedTrail) {
       if (prevState.selectedTrail) {
         const feature = trails.getIn([prevState.selectedTrail, 'feature']);
-        feature.unset('selected');
-        feature.changed();
+        if (feature) {
+          feature.unset('selected');
+          feature.changed();
+        }
         hydrants.filter((h) => h.get('trail') === prevState.selectedTrail)
           .forEach((h) => {
             const hydrantFeature = h.get('feature');
@@ -54,8 +54,10 @@ class Container extends React.Component {
       }
       if (selectedTrail) {
         const feature = trails.getIn([selectedTrail, 'feature']);
-        feature.set('selected', true);
-        feature.changed();
+        if (feature) {
+          feature.set('selected', true);
+          feature.changed();
+        }
         hydrants.filter((h) => h.get('trail') === selectedTrail)
           .forEach((h) => {
             const hydrantFeature = h.get('feature');
@@ -193,7 +195,7 @@ class Container extends React.Component {
 
     return (
       <div>
-        <Grid container spacing={0}>
+        <Grid container spacing={0} style={{maxHeight: '600px'}}>
           <Grid item xs={3}>
             <TrailList
               modifyTrail={this.modifyTrail}
@@ -229,9 +231,7 @@ class Container extends React.Component {
           trails = {trails}
           hydrants = {hydrants}
          />
-
-        <Image style={{float: 'right', width: 300, margin: 12}} src={kill_logo} responsive />
-      </div>
+        </div>
     );
   }
 }

@@ -72,8 +72,8 @@ class OpenLayersMap extends React.Component {
     const { map } = this.state;
     if (selectedTrail !== prevProps.selectedTrail && selectedTrail) {
       const firstCoords = trails.getIn([selectedTrail, 'coords'])[0];
-      const centerCoords = Projection.fromLonLat(firstCoords ? firstCoords : [0, 0]);
-      if (firstCoords) {
+      if (firstCoords.length) {
+        const centerCoords = Projection.fromLonLat(firstCoords);
         map.getView().animate({
           center: centerCoords,
           duration: 500,
@@ -120,8 +120,7 @@ class OpenLayersMap extends React.Component {
       view: new View({
         projection,
         center: Projection.fromLonLat(centerCoords),
-        zoom: 14.2,
-        rotation: 2.4,
+        zoom: 14.2
       }),
     });
 
