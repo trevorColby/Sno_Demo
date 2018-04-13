@@ -9,6 +9,7 @@ import TrailList from './TrailList';
 import { getElevation, getMapStyle } from '../utils/mapUtils';
 import { Trail, Hydrant } from '../utils/records';
 import ImportExport from './ImportExport';
+import Drawer from './Drawer';
 
 class Container extends React.Component {
   constructor(props) {
@@ -190,10 +191,52 @@ class Container extends React.Component {
     });
   }
 
-  render(){
+  toggleCreate = () => {
+    this.setState({
+      canCreate: !this.state.canCreate
+    })
+  }
+
+  changeMode = () => {
+    this.setState({
+      mode: false
+    })
+  }
+
+  trailSelected = () => {
+    this.setState({
+      selectedTrail: this.state.id,
+      canCreate: false
+    })
+  }
+
+  render() {
     const { trails, mode, selectedTrail, hydrants, canCreate } = this.state;
 
     return (
+      <Drawer
+        mode={mode}
+        canCreate={canCreate || mode === 'hydrants'}
+        toggleCreate={this.toggleCreate}
+        trailSelected={this.trailSelected}
+        createObject={this.createObject}
+        modifyTrail={this.modifyTrail}
+        modifyHydrant={this.modifyHydrant}
+        trails={trails}
+        hydrants={hydrants}
+        selectedTrail={selectedTrail}
+        changeMode={this.changeMode}
+        importKMLClicked={this.importKMLClicked}
+      />
+    );
+  }
+}
+
+export default Container;
+
+
+
+/*
       <div>
         <Grid container spacing={0} style={{maxHeight: '600px'}}>
           <Grid item xs={3}>
@@ -233,7 +276,29 @@ class Container extends React.Component {
          />
         </div>
     );
-  }
-}
 
-export default Container;
+
+    <div>
+      <OpenLayersMap
+        mode={mode}
+        canCreate={canCreate || mode === 'hydrants'}
+        createObject={this.createObject}
+        modifyTrail={this.modifyTrail}
+        modifyHydrant={this.modifyHydrant}
+        trails={trails}
+        hydrants={hydrants}
+        selectedTrail={selectedTrail}
+      />
+
+      <MapControls
+        mode={mode}
+        changeMode={(mode) => this.setState({ mode, canCreate: false })}
+      />
+
+      <ImportExport
+        importKMLClicked= {this.importKMLClicked}
+        trails = {trails}
+        hydrants = {hydrants}
+       />
+     </div>
+        */
