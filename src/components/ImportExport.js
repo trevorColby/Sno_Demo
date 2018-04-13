@@ -11,14 +11,13 @@ import Polygon from 'ol/geom/polygon';
 import GeometryCollection from 'ol/geom/geometrycollection';
 import {getMapStyle} from '../utils/mapUtils';
 import Dialog, { DialogTitle } from 'material-ui/Dialog';
-
 import Divider from 'material-ui/Divider';
 import List, { ListItem, ListItemText } from 'material-ui/List';
 import Radio from 'material-ui/Radio';
 import { FormGroup, FormControlLabel } from 'material-ui/Form';
-
 import { withStyles } from 'material-ui/styles';
 import {Trail, Hydrant} from '../utils/records';
+import downloadjs from 'downloadjs';
 
 
 
@@ -69,11 +68,10 @@ class ImportExport extends React.Component {
           })
 
         }
-      }
-      catch(err) {
-        // Put error wherever we want to display error msgs.
-          console.log(err);
-      }
+        catch(err) {
+          // Put error wherever we want to display error msgs.
+            console.log(err);
+        }
     }
 
     function processTrail(feature, index) {
@@ -91,7 +89,7 @@ class ImportExport extends React.Component {
       let [trailName, hydrantIndex, name]  = feature.get('description').split(',');
       trailName = _.words(trailName).join(' ');
       const trailObj = trails.find((t) => t.get('name') === trailName)
-      const trailId = trailObj ? trailObj.get('id') || null;
+      const trailId = trailObj ? trailObj.get('id') : null;
       const id = index + name;
       const geometry = feature.getGeometry().getGeometries()[0];
       feature.setGeometry(geometry);
