@@ -105,8 +105,6 @@ class OpenLayersMap extends React.Component {
 
     geocoder.setTarget(document.getElementById('searchLocations'))
 
-    console.log(geocoder)
-
     const resortLayer = new LayerVector({
       source,
       style: getMapStyle,

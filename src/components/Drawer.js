@@ -26,6 +26,12 @@ const styles = theme => ({
   root: {
     flexGrow: 1,
   },
+  paperAnchorDockedLeft: {
+    background: 'black',
+  },
+  drawerPaper: {
+    background: '#ffffffde',
+  },
   appBar: {
     background: '#040404',
     position: 'absolute',
@@ -57,6 +63,7 @@ const styles = theme => ({
     justifyContent: 'flex-end',
     padding: '0 8px',
     ...theme.mixins.toolbar,
+    background: 'white'
   }
 });
 
@@ -87,6 +94,12 @@ class PersistentDrawer extends React.Component {
       selectedTrail, toggleCreate, createObject, modifyHydrant, changeMode, importKMLClicked,
       trailSelected } = this.props
 
+
+    const drawerHeaderTitle = {
+      'trails': 'Trails',
+      'hydrants': 'Hydrants',
+    }
+
     const { anchor, open } = this.state;
 
     const drawer = (
@@ -99,10 +112,21 @@ class PersistentDrawer extends React.Component {
         }}
       >
         <div className={classes.drawerHeader}>
+        <Typography variant="title" color="inherit">
+          {drawerHeaderTitle[mode]}
+        </Typography>
+
           <IconButton onClick={this.handleDrawerClose}>
             {theme.direction === 'rtl' ? <ChevronRightIcon /> : <ChevronLeftIcon />}
           </IconButton>
         </div>
+
+        <ImportExport
+          importKMLClicked={importKMLClicked}
+          trails={trails}
+          hydrants={hydrants}
+        />
+
         <TrailList
           modifyTrail={modifyTrail}
           canCreate={canCreate}
@@ -147,6 +171,10 @@ class PersistentDrawer extends React.Component {
               <Typography variant="title" color="inherit" noWrap>
                 SnoTrack
               </Typography>
+              <MapControls
+                mode={mode}
+                changeMode={changeMode}
+              />
             </Toolbar>
             <div id="searchLocations"></div>
           </AppBar>
@@ -168,17 +196,6 @@ class PersistentDrawer extends React.Component {
               trails={trails}
               hydrants={hydrants}
               selectedTrail={selectedTrail}
-            />
-
-            <MapControls
-              mode={mode}
-              changeMode={changeMode}
-            />
-
-            <ImportExport
-              importKMLClicked={importKMLClicked}
-              trails={trails}
-              hydrants={hydrants}
             />
 
           </main>
