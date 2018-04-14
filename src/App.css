@@ -39,11 +39,16 @@ table, thead, tbody {
   position: unset !important;
 }
 
+.gcd-gl-btn{
+  height:2em !important;
+  width: 2em !important;
+}
+
 .gcd-gl-control{
   position: relative;
   float: left;
   width: 16.5em !important;
-  background: none
+  background: none !important;
 }
 
 .gcd-gl-input{
