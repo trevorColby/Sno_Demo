@@ -20,18 +20,11 @@ import OpenLayersMap from './OpenLayersMap';
 import MapControls from './MapControls';
 import ImportExport from './ImportExport';
 
-const drawerWidth = 350;
+const drawerWidth = 300;
 
 const styles = theme => ({
   root: {
     flexGrow: 1,
-  },
-  appFrame: {
-    zIndex: 1,
-    overflow: 'hidden',
-    position: 'relative',
-    display: 'flex',
-    width: '100%',
   },
   appBar: {
     background: '#040404',
@@ -48,9 +41,6 @@ const styles = theme => ({
       duration: theme.transitions.duration.enteringScreen,
     }),
   },
-  'appBarShift-left': {
-    marginLeft: drawerWidth,
-  },
   'appBarShift-right': {
     marginRight: drawerWidth,
   },
@@ -61,44 +51,15 @@ const styles = theme => ({
   hide: {
     display: 'none',
   },
-  drawerPaper: {
-    position: 'relative',
-    width: drawerWidth,
-  },
   drawerHeader: {
     display: 'flex',
     alignItems: 'center',
     justifyContent: 'flex-end',
     padding: '0 8px',
     ...theme.mixins.toolbar,
-  },
-  content: {
-    flexGrow: 1,
-    backgroundColor: theme.palette.background.default,
-    transition: theme.transitions.create('margin', {
-      easing: theme.transitions.easing.sharp,
-      duration: theme.transitions.duration.leavingScreen,
-    }),
-  },
-  'content-left': {
-    marginLeft: -drawerWidth,
-  },
-  'content-right': {
-    marginRight: -drawerWidth,
-  },
-  contentShift: {
-    transition: theme.transitions.create('margin', {
-      easing: theme.transitions.easing.easeOut,
-      duration: theme.transitions.duration.enteringScreen,
-    }),
-  },
-  'contentShift-left': {
-    marginLeft: 0,
-  },
-  'contentShift-right': {
-    marginRight: 0,
-  },
+  }
 });
+
 
 class PersistentDrawer extends React.Component {
   state = {
@@ -187,6 +148,7 @@ class PersistentDrawer extends React.Component {
                 SnoTrack
               </Typography>
             </Toolbar>
+            <div id="searchLocations"></div>
           </AppBar>
           {before}
           <main
@@ -228,32 +190,3 @@ class PersistentDrawer extends React.Component {
 }
 
 export default withStyles(styles, { withTheme: true })(PersistentDrawer);
-
-
-//
-// const { classes, theme, modifyTrail, canCreate, trails, mode, hydrants,
-//   selectedTrail, toggleCreate, createObject, modifyHydrant, changeMode, importKMLClicked,
-//   trailSelected } = this.props;
-//
-// <OpenLayersMap
-//   mode={mode}
-//   canCreate={canCreate}
-//   createObject={createObject}
-//   modifyTrail={modifyTrail}
-//   modifyHydrant={modifyHydrant}
-//   trails={trails}
-//   hydrants={hydrants}
-//   selectedTrail={selectedTrail}
-// />
-//
-// <MapControls
-//   mode={mode}
-//   changeMode={changeMode}
-// />
-//
-// <ImportExport
-//   importKMLClicked= {importKMLClicked}
-//   trails = {trails}
-//   hydrants = {hydrants}
-//  />
-//

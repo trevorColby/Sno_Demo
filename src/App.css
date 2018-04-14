@@ -21,3 +21,39 @@
 table, thead, tbody {
 	display: block !important;
 }
+
+.ol-control{
+  background-color: rgba(0, 0, 0, 0.4);
+}
+
+.ol-zoom{
+  left: unset;
+  right: .5em;
+}
+
+.ol-rotate{
+  top: 4.875em;
+}
+
+.ol-geocoder{
+  position: unset !important;
+}
+
+.gcd-gl-control{
+  position: relative;
+  float: left;
+  width: 16.5em !important;
+  background: none
+}
+
+.gcd-gl-input{
+  width: 16em !important;
+}
+
+
+
+#searchLocations{
+  position: absolute;
+  right: 4em;
+  top: 1em;
+}
