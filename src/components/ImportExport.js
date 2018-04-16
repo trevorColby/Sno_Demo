@@ -82,6 +82,8 @@ class ImportExport extends React.Component {
       const lonLatCoords = _.map(coords, (pt) => Projection.fromLonLat(pt.slice(0,2)));
       feature.getGeometry().setCoordinates([lonLatCoords]);
       feature.setId(`t${id}`);
+      feature.set('name', name);
+      feature.setStyle(getMapStyle);
       return new Trail({ id, name, coords, feature });
     }
 
@@ -91,11 +93,13 @@ class ImportExport extends React.Component {
       const trailObj = trails.find((t) => t.get('name') === trailName)
       const trailId = trailObj ? trailObj.get('id') : null;
       const id = index + name;
-      const geometry = feature.getGeometry().getGeometries()[0];
+      const geometry = feature.getGeometry().getType() === 'Point' ?
+        feature.getGeometry() : feature.getGeometry().getGeometries()[0];
       feature.setGeometry(geometry);
       const coords = geometry.getCoordinates();
       feature.getGeometry().setCoordinates(Projection.fromLonLat(coords.slice(0,2)));
       feature.setId(`h${id}`);
+      feature.setStyle(getMapStyle)
       return new Hydrant({ id, name, coords, feature, trail: trailId });
     }
 
@@ -108,23 +112,13 @@ class ImportExport extends React.Component {
     const { trails, hydrants } = this.props
     const { selectedExport } = this.state
 
+
     const trailFeatures = _.values(trails.toJS()).map((item)=> {
-      return new Feature ({
-        geometry: new Polygon([_.map(item.coords, (pt) => {
-          return Projection.fromLonLat(pt);
-        })]),
-        description: item.name,
-      })
+      return item.feature
     })
 
     const hydrantFeatures  = _.values(hydrants.toJS()).map((item)=> {
-      const feature =  new Feature ({
-        geometry: new Point(Projection.fromLonLat(item.coords)),
-         name: item.name,
-         description: item.name,
-        })
-        feature.setStyle(getMapStyle(feature))
-        return feature
+      return item.feature
       })
 
 
