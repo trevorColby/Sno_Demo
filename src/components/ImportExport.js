@@ -28,7 +28,7 @@ class ImportExport extends React.Component {
     this.state = {
       selectedFiles: null,
       exportType: null,
-      dialogueMain: false,
+      dialogOpen: false,
       selectedExport: 'trails',
     }
     this.changeFile = this.changeFile.bind(this);
@@ -138,13 +138,13 @@ class ImportExport extends React.Component {
 
   handleClose = () => {
     this.setState({
-      dialogueMain: false
+      dialogOpen: false
     })
   }
 
   handleOpen = () => {
     this.setState({
-      dialogueMain: true
+      dialogOpen: true
     })
   }
 
@@ -158,15 +158,15 @@ class ImportExport extends React.Component {
     let style= {
       float: 'left'
     }
-    const { dialogueMain, selectedExport } = this.state
+    const { dialogOpen, selectedExport } = this.state
 
     return (
       <div>
           <div style={style}>
             <Button variant="raised" onClick={this.handleOpen}>Import / Export</Button>
           </div>
-          <Dialog onBackdropClick={this.handleClose} aria-labelledby="simple-dialog-title" open={dialogueMain} >
-            <DialogTitle id="simple-dialog-title">Import/Export</DialogTitle>
+          <Dialog onBackdropClick={this.handleClose} open={dialogOpen} >
+            <DialogTitle >Import/Export</DialogTitle>
             <div>
               <List>
                 <ListItem>
@@ -211,9 +211,5 @@ class ImportExport extends React.Component {
     )
   }
 }
-
-
-
-
 
 export default ImportExport;
