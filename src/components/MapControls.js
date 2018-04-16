@@ -4,7 +4,7 @@ import { Button } from 'material-ui';
 class MapControls extends React.Component{
   render(){
     let style= {
-      float: 'left'
+      margin: '0 auto'
     }
 
     const {changeMode, mode} = this.props;
@@ -23,7 +23,6 @@ class MapControls extends React.Component{
             onClick={()=> changeMode('hydrants')}>
             Hydrants
           </Button>
-          <Button variant="raised">Auto-associate hydrants</Button>
         </div>
     )
   }

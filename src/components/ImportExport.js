@@ -18,7 +18,9 @@ import { FormGroup, FormControlLabel } from 'material-ui/Form';
 import { withStyles } from 'material-ui/styles';
 import {Trail, Hydrant} from '../utils/records';
 import downloadjs from 'downloadjs';
-
+import ImportExportIcon from '@material-ui/icons/ImportExport';
+import Tooltip from 'material-ui/Tooltip';
+import IconButton from 'material-ui/IconButton';
 
 
 class ImportExport extends React.Component {
@@ -169,7 +171,11 @@ class ImportExport extends React.Component {
     return (
       <div>
           <div style={style}>
-            <Button variant="raised" onClick={this.handleOpen}>Import / Export</Button>
+          <Tooltip title="Import/Export" placement="top-start">
+          <IconButton onClick={this.handleOpen}>
+             <ImportExportIcon />
+            </IconButton>
+          </Tooltip>
           </div>
           <Dialog onBackdropClick={this.handleClose} aria-labelledby="simple-dialog-title" open={dialogueMain} >
             <DialogTitle id="simple-dialog-title">Import/Export</DialogTitle>

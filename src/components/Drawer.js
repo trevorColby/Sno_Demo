@@ -13,7 +13,8 @@ import IconButton from 'material-ui/IconButton';
 import MenuIcon from '@material-ui/icons/Menu';
 import ChevronLeftIcon from '@material-ui/icons/ChevronLeft';
 import ChevronRightIcon from '@material-ui/icons/ChevronRight';
-
+import Tooltip from 'material-ui/Tooltip';
+import CallMerge from '@material-ui/icons/CallMerge';
 
 import TrailList from './TrailList';
 import OpenLayersMap from './OpenLayersMap';
@@ -112,20 +113,27 @@ class PersistentDrawer extends React.Component {
         }}
       >
         <div className={classes.drawerHeader}>
-        <Typography variant="title" color="inherit">
-          {drawerHeaderTitle[mode]}
-        </Typography>
 
-          <IconButton onClick={this.handleDrawerClose}>
-            {theme.direction === 'rtl' ? <ChevronRightIcon /> : <ChevronLeftIcon />}
+        <Tooltip title="Auto Associate Hydrants" placement="top-start">
+          <IconButton>
+            <CallMerge />
           </IconButton>
-        </div>
+        </Tooltip>
 
         <ImportExport
           importKMLClicked={importKMLClicked}
           trails={trails}
           hydrants={hydrants}
         />
+
+        <Typography variant="title" color="inherit">
+          {drawerHeaderTitle[mode]}
+        </Typography>
+          <IconButton onClick={this.handleDrawerClose}>
+            {theme.direction === 'rtl' ? <ChevronRightIcon /> : <ChevronLeftIcon />}
+          </IconButton>
+
+        </div>
 
         <TrailList
           modifyTrail={modifyTrail}
