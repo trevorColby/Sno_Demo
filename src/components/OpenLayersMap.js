@@ -66,7 +66,8 @@ class OpenLayersMap extends React.Component {
 
     if (mode === 'trails') {
       const snap = new Snap({
-        source
+        source,
+        pixelTolerance: 5
       })
       newInteractions.push(snap);
     }
