@@ -72,7 +72,6 @@ const styles = theme => ({
 class PersistentDrawer extends React.Component {
   state = {
     open: false,
-    anchor: 'left',
   };
 
   handleDrawerOpen = () => {
@@ -81,12 +80,6 @@ class PersistentDrawer extends React.Component {
 
   handleDrawerClose = () => {
     this.setState({ open: false });
-  };
-
-  handleChangeAnchor = event => {
-    this.setState({
-      anchor: event.target.value,
-    });
   };
 
   render() {
@@ -101,12 +94,12 @@ class PersistentDrawer extends React.Component {
       'hydrants': 'Hydrants',
     }
 
-    const { anchor, open } = this.state;
+    const { open } = this.state;
 
     const drawer = (
       <Drawer
         variant="persistent"
-        anchor={anchor}
+        anchor='left'
         open={open}
         classes={{
           paper: classes.drawerPaper,
@@ -114,21 +107,21 @@ class PersistentDrawer extends React.Component {
       >
         <div className={classes.drawerHeader}>
 
-        <Tooltip title="Auto Associate Hydrants" placement="top-start">
-          <IconButton>
-            <CallMerge />
-          </IconButton>
-        </Tooltip>
+          <Tooltip title="Auto Associate Hydrants" placement="top-start">
+            <IconButton>
+              <CallMerge />
+            </IconButton>
+          </Tooltip>
 
-        <ImportExport
-          importKMLClicked={importKMLClicked}
-          trails={trails}
-          hydrants={hydrants}
-        />
+          <ImportExport
+            importKMLClicked={importKMLClicked}
+            trails={trails}
+            hydrants={hydrants}
+          />
 
-        <Typography variant="title" color="inherit">
-          {drawerHeaderTitle[mode]}
-        </Typography>
+          <Typography variant="title" color="inherit">
+            {drawerHeaderTitle[mode]}
+          </Typography>
           <IconButton onClick={this.handleDrawerClose}>
             {theme.direction === 'rtl' ? <ChevronRightIcon /> : <ChevronLeftIcon />}
           </IconButton>
@@ -148,23 +141,13 @@ class PersistentDrawer extends React.Component {
       </Drawer>
     );
 
-
-    let before = null;
-    let after = null;
-
-    if (anchor === 'left') {
-      before = drawer;
-    } else {
-      after = drawer;
-    }
-
     return (
       <div className={classes.root}>
         <div className={classes.appFrame}>
           <AppBar
             className={classNames(classes.appBar, {
               [classes.appBarShift]: open,
-              [classes[`appBarShift-${anchor}`]]: open,
+              [classes[`appBarShift-left`]]: open,
             })}
           >
             <Toolbar disableGutters={!open}>
@@ -186,11 +169,11 @@ class PersistentDrawer extends React.Component {
             </Toolbar>
             <div id="searchLocations"></div>
           </AppBar>
-          {before}
+          {drawer}
           <main
-            className={classNames(classes.content, classes[`content-${anchor}`], {
+            className={classNames(classes.content, classes[`content-left`], {
               [classes.contentShift]: open,
-              [classes[`contentShift-${anchor}`]]: open,
+              [classes[`contentShift-left`]]: open,
             })}
           >
             <div className={classes.drawerHeader} />
@@ -207,7 +190,7 @@ class PersistentDrawer extends React.Component {
             />
 
           </main>
-          {after}
+          {drawer}
         </div>
       </div>
     );
