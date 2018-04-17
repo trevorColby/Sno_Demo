@@ -7,7 +7,8 @@ import axios from 'axios';
 import _ from 'lodash';
 
 export function getMapStyle(feature, resolution) {
-  if (feature.getGeometryName() === 'Point') {
+
+  if (feature.getGeometry().getType() === 'Point') {
     // hydrant styling defaults
     const fill = new Fill({ color: 'rgba(222, 49, 33, 0.4)' });
     const stroke = new Stroke({
@@ -38,7 +39,7 @@ export function getMapStyle(feature, resolution) {
       }),
       text,
     });
-  } else if (feature.getGeometryName() === 'Polygon') {
+  } else if (feature.getGeometry().getType() === 'Polygon') {
     // trail styling defaults
     const text = new Text({
       overflow: true,
