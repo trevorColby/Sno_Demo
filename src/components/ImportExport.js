@@ -39,49 +39,20 @@ class ImportExport extends React.Component {
 
   changeFile(e) {
     this.setState({
-      selectedFiles: e.target.files
-    })
+      selectedFiles: e.target.files,
+    });
   }
 
-  importFile = () =>  {
+  importFile = () => {
     const { selectedFiles } = this.state;
-    const { importKMLClicked, trails } = this.props;
-    const reader = new FileReader();
-    reader.onload = function(event) {
-      try {
-        const kml = new KML().readFeatures(event.target.result)
-        const newTrails = {};
-        const newHydrants = {};
-
-        _.each(kml, (feature, index) => {
-            const type = feature.getGeometry().getType() === 'Polygon' ? 'trail' : 'hydrant';
-            if(type === 'trail'){
-              const trail = processTrail(feature, index);
-              newTrails[trail.get('id')] = trail;
-            } else {
-              const hydrant = processHydrant(feature, index);
-              newHydrants[hydrant.get('id')] = hydrant;
-            }
-        });
-
-          importKMLClicked({
-            trails: Immutable.fromJS(newTrails),
-            hydrants:  Immutable.fromJS(newHydrants),
-          })
-
-        }
-        catch(err) {
-          // Put error wherever we want to display error msgs.
-            console.log(err);
-        }
-    }
+    const { importKMLClicked, trails, hydrants } = this.props;
 
     function processTrail(feature, index) {
       let [name, ...otherThings] = feature.get('description').split(',');
       name = _.words(name).join(' ');
       const id = index + name;
       const coords = feature.getGeometry().getCoordinates()[0];
-      const lonLatCoords = _.map(coords, (pt) => Projection.fromLonLat(pt.slice(0,2)));
+      const lonLatCoords = _.map(coords, pt => Projection.fromLonLat(pt.slice(0,2)));
       feature.getGeometry().setCoordinates([lonLatCoords]);
       feature.setId(`t${id}`);
       feature.set('name', name);
@@ -92,7 +63,7 @@ class ImportExport extends React.Component {
     function processHydrant(feature, index) {
       let [trailName, hydrantIndex, name]  = feature.get('description').split(',');
       trailName = _.words(trailName).join(' ');
-      const trailObj = trails.find((t) => t.get('name') === trailName)
+      const trailObj = trails.find(t => t.get('name') === trailName);
       const trailId = trailObj ? trailObj.get('id') : null;
       const id = index + name;
       const geometry = feature.getGeometry().getType() === 'Point' ?
@@ -101,9 +72,43 @@ class ImportExport extends React.Component {
       const coords = geometry.getCoordinates();
       feature.getGeometry().setCoordinates(Projection.fromLonLat(coords.slice(0,2)));
       feature.setId(`h${id}`);
+      feature.set('trailName', trailName);
       feature.setStyle(getMapStyle)
       return new Hydrant({ id, name, coords, feature, trail: trailId });
     }
+
+    const reader = new FileReader();
+    reader.onload = (event) => {
+      try {
+        const kml = new KML().readFeatures(event.target.result);
+        const newTrails = {};
+        const newHydrants = {};
+
+        _.each(kml, (feature, index) => {
+          const type = feature.getGeometry().getType() === 'Polygon' ? 'trail' : 'hydrant';
+          if (type === 'trail') {
+            const trail = processTrail(feature, index);
+            newTrails[trail.get('id')] = trail;
+            hydrants
+              .filter(h => h.get('feature').get('trailName') === trail.get('name'))
+              .forEach((h) => {
+                newHydrants[h.get('id')] = h.set('trail', trail.get('id'));
+              });
+          } else {
+            const hydrant = processHydrant(feature, index);
+            newHydrants[hydrant.get('id')] = hydrant;
+          }
+        });
+
+        importKMLClicked({
+          trails: Immutable.Map(newTrails),
+          hydrants:  Immutable.Map(newHydrants),
+        });
+      } catch (err) {
+        // Put error wherever we want to display error msgs.
+        console.log(err);
+      }
+    };
 
     if (selectedFiles) {
       reader.readAsText(selectedFiles[0]);
@@ -158,7 +163,7 @@ class ImportExport extends React.Component {
 
   render() {
     let style= {
-      float: 'left'
+      float: 'left',
     }
     const { dialogOpen, selectedExport } = this.state
 
