@@ -12,6 +12,7 @@ import Projection from 'ol/proj';
 import SourceVector from 'ol/source/vector';
 import Draw from 'ol/interaction/draw';
 import Modify from 'ol/interaction/modify';
+import Snap from 'ol/interaction/snap';
 import Geocoder from 'ol-geocoder';
 import { getMapStyle } from '../utils/mapUtils';
 
@@ -61,6 +62,14 @@ class OpenLayersMap extends React.Component {
       const modify = new Modify({ features: modifiable });
       modify.on('modifyend', (e) => this.endModify(e));
       newInteractions.push(modify);
+    }
+
+    if (mode === 'trails') {
+      const snap = new Snap({
+        source,
+        pixelTolerance: 5
+      })
+      newInteractions.push(snap);
     }
 
     _.each(newInteractions, (interaction) => map.addInteraction(interaction));
