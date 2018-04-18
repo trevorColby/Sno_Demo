@@ -75,7 +75,7 @@ class ImportExport extends React.Component {
     reader.onload = (event) => {
       try {
         const kml = new KML().readFeatures(event.target.result);
-        let newTrails = {};
+        const newTrails = {};
         const newHydrants = {};
 
         _.each(kml, (feature, index) => {
@@ -95,7 +95,6 @@ class ImportExport extends React.Component {
                   newHydrants[h.get('id')] = h.set('trail', trail.get('id'));
                 });
             }
-            
           } else {
             const hydrant = processHydrant(feature, index);
             newHydrants[hydrant.get('id')] = hydrant;
