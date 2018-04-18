@@ -3,7 +3,6 @@ import { Record } from 'immutable';
 export const Trail = Record({
   id: null,
   name: null,
-  coords: [],
   feature: null,
 });
 

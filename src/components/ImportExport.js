@@ -2,25 +2,20 @@ import React from 'react';
 import { Button } from 'material-ui';
 import KML from 'ol/format/kml';
 import _ from 'lodash';
-import {Coordinate} from 'ol';
 import Immutable from 'immutable';
-import Feature from 'ol/feature';
-import Point from 'ol/geom/point';
 import Projection from 'ol/proj';
-import Polygon from 'ol/geom/polygon';
-import GeometryCollection from 'ol/geom/geometrycollection';
-import {getMapStyle} from '../utils/mapUtils';
+import MultiPolygon from 'ol/geom/multipolygon';
 import Dialog, { DialogTitle } from 'material-ui/Dialog';
 import Divider from 'material-ui/Divider';
 import List, { ListItem, ListItemText } from 'material-ui/List';
 import Radio from 'material-ui/Radio';
 import { FormGroup, FormControlLabel } from 'material-ui/Form';
-import { withStyles } from 'material-ui/styles';
-import {Trail, Hydrant} from '../utils/records';
 import downloadjs from 'downloadjs';
 import ImportExportIcon from '@material-ui/icons/ImportExport';
 import Tooltip from 'material-ui/Tooltip';
 import IconButton from 'material-ui/IconButton';
+import { getMapStyle } from '../utils/mapUtils';
+import { Trail, Hydrant } from '../utils/records';
 
 
 class ImportExport extends React.Component {
@@ -32,7 +27,7 @@ class ImportExport extends React.Component {
       exportType: null,
       dialogOpen: false,
       selectedExport: 'trails',
-    }
+    };
     this.changeFile = this.changeFile.bind(this);
     this.importFile = this.importFile.bind(this);
   }
@@ -51,13 +46,27 @@ class ImportExport extends React.Component {
       let [name, ...otherThings] = feature.get('description').split(',');
       name = _.words(name).join(' ');
       const id = index + name;
-      const coords = feature.getGeometry().getCoordinates()[0];
-      const lonLatCoords = _.map(coords, pt => Projection.fromLonLat(pt.slice(0,2)));
-      feature.getGeometry().setCoordinates([lonLatCoords]);
+      if (feature.getGeometry().getType() !== 'MultiPolygon') {
+        const newGeometry = new MultiPolygon();
+        newGeometry.appendPolygon(feature.getGeometry());
+        feature.setGeometry(newGeometry);
+      }
+      _.each(feature.getGeometry().getPolygons(), (polygon) => {
+        // make correction if coordinates are returned in 3d
+        // but the geometry is expecting 2d
+        if (polygon.flatCoordinates[2] === 0 && polygon.getLayout() !== "XYZ") {
+          polygon.setLayout("XYZ");
+        }
+        const coords = polygon.getCoordinates()[0];
+        const lonLatCoords = _.map(coords, pt => Projection.fromLonLat(pt.slice(0,2)));
+        polygon.setCoordinates([lonLatCoords]);
+        polygon.setLayout("XY");
+      });
       feature.setId(`t${id}`);
       feature.set('name', name);
+      console.log(getMapStyle);
       feature.setStyle(getMapStyle);
-      return new Trail({ id, name, coords, feature });
+      return new Trail({ id, name, feature });
     }
 
     function processHydrant(feature, index) {
@@ -73,7 +82,7 @@ class ImportExport extends React.Component {
       feature.getGeometry().setCoordinates(Projection.fromLonLat(coords.slice(0,2)));
       feature.setId(`h${id}`);
       feature.set('trailName', trailName);
-      feature.setStyle(getMapStyle)
+      feature.setStyle(getMapStyle);
       return new Hydrant({ id, name, coords, feature, trail: trailId });
     }
 
@@ -116,43 +125,35 @@ class ImportExport extends React.Component {
   }
 
   exportFile = () => {
-    const { trails, hydrants } = this.props
-    const { selectedExport } = this.state
+    const { trails, hydrants } = this.props;
+    const { selectedExport } = this.state;
 
-
-    const trailFeatures = _.values(trails.toJS()).map((item)=> {
-      return item.feature
-    })
-
-    const hydrantFeatures  = _.values(hydrants.toJS()).map((item)=> {
-      return item.feature
-      })
-
-
-   if(selectedExport === 'trails'){
-     downloadjs(GetKMLFromFeatures(trailFeatures), 'Trails.kml')
-   } else {
-     downloadjs(GetKMLFromFeatures(hydrantFeatures), 'Hydrants.kml')
-   }
+    const trailFeatures = _.values(trails.toJS()).map(item => item.feature);
+    const hydrantFeatures = _.values(hydrants.toJS()).map(item => item.feature);
 
     function GetKMLFromFeatures(features) {
-          const format = new KML();
-          const kml = format.writeFeatures(features, {featureProjection: 'EPSG:3857'});
-          return kml;
-      }
+      const format = new KML();
+      const kml = format.writeFeatures(features, {featureProjection: 'EPSG:3857'});
+      return kml;
+    }
 
+    if (selectedExport === 'trails') {
+      downloadjs(GetKMLFromFeatures(trailFeatures), 'Trails.kml');
+    } else {
+      downloadjs(GetKMLFromFeatures(hydrantFeatures), 'Hydrants.kml');
+    }
   }
 
   handleClose = () => {
     this.setState({
-      dialogOpen: false
-    })
+      dialogOpen: false,
+    });
   }
 
   handleOpen = () => {
     this.setState({
-      dialogOpen: true
-    })
+      dialogOpen: true,
+    });
   }
 
   handleSelect = event => {
@@ -182,7 +183,7 @@ class ImportExport extends React.Component {
               <List>
                 <ListItem>
                   <ListItemText primary='Import' />
-                  <input onChange={this.changeFile} type='file' />
+                  <input onChange={this.changeFile} type="file" accept=".kml" />
                   <Button variant="raised" onClick={this.importFile} > Import </Button>
                 </ListItem>
                 <li>
@@ -217,7 +218,6 @@ class ImportExport extends React.Component {
               </List>
             </div>
           </Dialog>
-
       </div>
     )
   }
