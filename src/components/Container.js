@@ -1,15 +1,25 @@
 import React from 'react';
+import {connect} from 'react-redux';
 import _ from 'lodash';
 import Immutable from 'immutable';
 import { Grid } from 'material-ui';
 import Projection from 'ol/proj';
-import MapControls from './MapControls';
-import OpenLayersMap from './OpenLayersMap';
-import TrailList from './TrailList';
+
 import { getElevation, getMapStyle } from '../utils/mapUtils';
 import { Trail, Hydrant } from '../utils/records';
 import ImportExport from './ImportExport';
 import Drawer from './Drawer';
+import ActionTypes from '../redux/ActionTypes';
+
+const {
+  DATA_IMPORTED,
+  TRAIL_ADDED,
+  TRAIL_MODIFIED,
+  TRAIL_SELECTED,
+  TRAIL_DELETED,
+  HYDRANT_ADDED,
+  HYDRANT_MODIFIED,
+} = ActionTypes;
 
 
 class Container extends React.Component {
@@ -27,91 +37,13 @@ class Container extends React.Component {
 
     this.state = {
       mode: 'trails',
-      selectedTrail: null,
       canCreate: false,
-      trails: Immutable.Map(),
-      hydrants: Immutable.Map(),
     };
   }
 
-  componentDidUpdate(prevProps, prevState) {
-    const { trails, hydrants, selectedTrail } = this.state;
-    /*
-    localStorage.setItem('trails', JSON.stringify(trails.toJS()));
-    localStorage.setItem('hydrants', JSON.stringify(hydrants.toJS()));
-    */
-    if (prevState.selectedTrail !== selectedTrail) {
-      if (prevState.selectedTrail) {
-        const feature = trails.getIn([prevState.selectedTrail, 'feature']);
-        if (feature) {
-          feature.unset('selected');
-          feature.changed();
-        }
-        hydrants.filter((h) => h.get('trail') === prevState.selectedTrail)
-          .forEach((h) => {
-            const hydrantFeature = h.get('feature');
-            hydrantFeature.unset('selected');
-            hydrantFeature.changed();
-          });
-      }
-      if (selectedTrail) {
-        const feature = trails.getIn([selectedTrail, 'feature']);
-        if (feature) {
-          feature.set('selected', true);
-          feature.changed();
-        }
-        hydrants.filter((h) => h.get('trail') === selectedTrail)
-          .forEach((h) => {
-            const hydrantFeature = h.get('feature');
-            hydrantFeature.set('selected', true);
-            hydrantFeature.changed();
-          });
-      }
-    }
-  }
-
-  modifyTrail = (trailId, editedFields, shouldDelete = false) => {
-    const { trails, hydrants, selectedTrail } = this.state;
-    if (shouldDelete) {
-      const newHydrants = hydrants.map((h) => {
-        if (h.get('trail') === trailId) {
-          return h.set('trail', null);
-        }
-        return h;
-      });
-      this.setState({
-        trails: trails.delete(trailId),
-        hydrants: newHydrants,
-        selectedTrail: trailId === selectedTrail ? null : selectedTrail,
-      });
-    } else {
-      const newTrail = trails.get(trailId)
-        .withMutations((tr) => {
-          _.each(editedFields, (val, key) => tr.set(key, val));
-        });
-      newTrail.get('feature').setProperties(editedFields);
-      newTrail.get('feature').changed();
-      this.setState({ trails: trails.set(trailId, newTrail) });
-    }
-  }
-
-  modifyHydrant = (hydrantId, editedFields, shouldDelete = false) => {
-    const { hydrants } = this.state;
-    if (shouldDelete) {
-      this.setState({ hydrants: hydrants.delete(hydrantId) });
-    } else {
-      const newHydrant = hydrants.get(hydrantId)
-        .withMutations((h) => {
-          _.each(editedFields, (val, key) => h.set(key, val));
-        });
-      newHydrant.get('feature').setProperties(editedFields);
-      newHydrant.get('feature').changed();
-      this.setState({ hydrants: hydrants.set(hydrantId, newHydrant) });
-    }
-  }
-
   createObject = (feature) => {
-    const { hydrants, trails, selectedTrail, mode } = this.state;
+    const { mode } = this.state;
+    const { trails, hydrants, selectedTrail, addTrail, addHydrant } = this.props;
     feature.setStyle(getMapStyle);
     let id = new Date().getTime();
     id = id.toString();
@@ -120,15 +52,14 @@ class Container extends React.Component {
       const mapCoords = feature.getGeometry().getCoordinates();
       const coords = Projection.toLonLat(mapCoords);
       const name = '';
-      const createdHydrant = new Hydrant({
+      const newHydrant = new Hydrant({
         id, name, coords, feature, trail: selectedTrail,
       });
       feature.setId(`h${id}`);
       if (selectedTrail) {
         feature.set('selected', true);
       }
-      const newHydrants = hydrants.set(id, createdHydrant);
-      this.setState({ hydrants: newHydrants });
+      addHydrant(newHydrant);
     } else {
       const mapCoords = feature.getGeometry().getCoordinates()[0];
       // >1 point, create a trail
@@ -140,8 +71,8 @@ class Container extends React.Component {
         id, name, coords, feature,
       });
       feature.setId(`t${id}`);
-      const newTrails = trails.set(id, newTrail);
-      this.setState({ trails: newTrails, selectedTrail: id, canCreate: false });
+      addTrail(newTrail);
+      this.setState({ canCreate: false });
     }
   }
   /*
@@ -153,7 +84,7 @@ class Container extends React.Component {
       this.modifyHydrant(id, {elevation});
       this.renameHydrantsByElevation(selectedTrail);
     });
-  }*/
+  }
 
   renameHydrantsByElevation = (trailId) => {
     if (!trailId) {
@@ -182,15 +113,7 @@ class Container extends React.Component {
     this.setState({
       hydrants: newHydrants,
     });
-  }
-
-  importKMLClicked = (kmlData) => {
-    const { trails, hydrants } = this.state;
-    this.setState({
-      trails: trails.merge(kmlData.trails),
-      hydrants: hydrants.merge(kmlData.hydrants),
-    });
-  }
+  }*/
 
   toggleCreate = () => {
     this.setState({
@@ -206,15 +129,13 @@ class Container extends React.Component {
   }
 
   trailSelected = (id) => {
-    this.setState({
-      selectedTrail: id,
-      canCreate: false
-    })
+    this.props.trailSelected(this.props.selectedTrail, id),
+    this.setState({canCreate: false});
   }
 
   render() {
-    const { trails, mode, selectedTrail, hydrants, canCreate } = this.state;
-
+    const { mode, canCreate } = this.state;
+    const { hydrants, trails, selectedTrail, modifyTrail, modifyHydrant, dataImported } = this.props;
     return (
       <Drawer
         mode={mode}
@@ -222,85 +143,43 @@ class Container extends React.Component {
         toggleCreate={this.toggleCreate}
         trailSelected={this.trailSelected}
         createObject={this.createObject}
-        modifyTrail={this.modifyTrail}
-        modifyHydrant={this.modifyHydrant}
+        modifyTrail={modifyTrail}
+        modifyHydrant={modifyHydrant}
         trails={trails}
         hydrants={hydrants}
         selectedTrail={selectedTrail}
         changeMode={this.changeMode}
-        importKMLClicked={this.importKMLClicked}
+        importKMLClicked={dataImported}
       />
     );
   }
 }
 
-export default Container;
+const mapStateToProps = state => ({
+  trails: state.trails.trails,
+  hydrants: state.hydrants.hydrants,
+  selectedTrail: state.selectedTrail,
+});
 
+const mapDispatchToProps = dispatch => ({
+  modifyTrail: (trailId, editedFields) => dispatch({
+    type: TRAIL_MODIFIED, data: { id: trailId, editedFields },
+  }),
+  modifyHydrant: (hydrantId, editedFields) => dispatch({
+    type: HYDRANT_MODIFIED, data: { id: hydrantId, editedFields },
+  }),
+  addTrail: trail => dispatch({
+    type: TRAIL_ADDED, data: trail,
+  }),
+  addHydrant: hydrant => dispatch({
+    type: HYDRANT_ADDED, data: hydrant,
+  }),
+  trailSelected: (prevSelected, id) => dispatch({
+    type: TRAIL_SELECTED, data: { prevSelected, selected: id },
+  }),
+  dataImported: data => ({
+    type: DATA_IMPORTED, data,
+  }),
+});
 
-
-/*
-      <div>
-        <Grid container spacing={0} style={{maxHeight: '600px'}}>
-          <Grid item xs={3}>
-            <TrailList
-              modifyTrail={this.modifyTrail}
-              canCreate={canCreate}
-              toggleCreate={() => this.setState({canCreate: !canCreate})}
-              trails={trails}
-              mode={mode}
-              hydrants={hydrants}
-              selected={selectedTrail}
-              trailSelected={(id) => this.setState({ selectedTrail: id, canCreate: false })}
-            />
-          </Grid>
-          <Grid item xs={9}>
-            <OpenLayersMap
-              mode={mode}
-              canCreate={canCreate || mode === 'hydrants'}
-              createObject={this.createObject}
-              modifyTrail={this.modifyTrail}
-              modifyHydrant={this.modifyHydrant}
-              trails={trails}
-              hydrants={hydrants}
-              selectedTrail={selectedTrail}
-            />
-          </Grid>
-        </Grid>
-        <MapControls
-          mode={mode}
-          changeMode={(mode) => this.setState({ mode, canCreate: false })}
-        />
-
-        <ImportExport
-          importKMLClicked= {this.importKMLClicked}
-          trails = {trails}
-          hydrants = {hydrants}
-         />
-        </div>
-    );
-
-
-    <div>
-      <OpenLayersMap
-        mode={mode}
-        canCreate={canCreate || mode === 'hydrants'}
-        createObject={this.createObject}
-        modifyTrail={this.modifyTrail}
-        modifyHydrant={this.modifyHydrant}
-        trails={trails}
-        hydrants={hydrants}
-        selectedTrail={selectedTrail}
-      />
-
-      <MapControls
-        mode={mode}
-        changeMode={(mode) => this.setState({ mode, canCreate: false })}
-      />
-
-      <ImportExport
-        importKMLClicked= {this.importKMLClicked}
-        trails = {trails}
-        hydrants = {hydrants}
-       />
-     </div>
-        */
+export default connect(mapStateToProps, mapDispatchToProps)(Container);
