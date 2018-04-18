@@ -19,6 +19,8 @@ const {
   TRAIL_DELETED,
   HYDRANT_ADDED,
   HYDRANT_MODIFIED,
+  HYDRANT_SELECTED,
+  HYDRANT_DELETED
 } = ActionTypes;
 
 
@@ -134,14 +136,13 @@ class Container extends React.Component {
   }
 
   hydrantSelected = (id) => {
-    this.setState({
-      selectedHydrant: id
-    });
+    this.props.hydrantSelected(this.props.selectedHydrant, id)
   }
+
 
   render() {
     const { mode, canCreate } = this.state;
-    const { hydrants, trails, selectedTrail, modifyTrail, modifyHydrant, dataImported } = this.props;
+    const { hydrants, trails, selectedTrail, selectedHydrant, modifyTrail, modifyHydrant, dataImported, hydrantDeleted } = this.props;
     return (
       <Drawer
         mode={mode}
@@ -154,6 +155,9 @@ class Container extends React.Component {
         trails={trails}
         hydrants={hydrants}
         selectedTrail={selectedTrail}
+        selectedHydrant={selectedHydrant}
+        hydrantSelected={this.hydrantSelected}
+        hydrantDeleted={hydrantDeleted}
         changeMode={this.changeMode}
         importKMLClicked={dataImported}
       />
@@ -165,6 +169,7 @@ const mapStateToProps = state => ({
   trails: state.trails.trails,
   hydrants: state.hydrants.hydrants,
   selectedTrail: state.selectedTrail,
+  selectedHydrant: state.selectedHydrant
 });
 
 const mapDispatchToProps = dispatch => ({
@@ -183,9 +188,16 @@ const mapDispatchToProps = dispatch => ({
   trailSelected: (prevSelected, id) => dispatch({
     type: TRAIL_SELECTED, data: { prevSelected, selected: id },
   }),
-  dataImported: data => ({
+  hydrantSelected: (prevSelected, id) => dispatch({
+    type: HYDRANT_SELECTED, data: { prevSelected, selected: id },
+  }),
+  dataImported: data => dispatch({
     type: DATA_IMPORTED, data,
   }),
+  hydrantDeleted: id => dispatch({
+    type: HYDRANT_DELETED, data: { selected: id }
+  }),
+
 });
 
 export default connect(mapStateToProps, mapDispatchToProps)(Container);

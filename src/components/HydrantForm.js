@@ -4,6 +4,7 @@ import Card, { CardActions, CardContent } from 'material-ui/Card';
 import Button from 'material-ui/Button';
 import Typography from 'material-ui/Typography';
 import TextField from 'material-ui/TextField';
+import Delete from '@material-ui/icons/Delete';
 
 const styles = {
   card: {
@@ -30,12 +31,13 @@ const styles = {
 
 function HydrantForm(props) {
 
-const { classes, selectedHydrant, modifyHydrant, hydrantSelected } = props;
+const { classes, selectedHydrant, modifyHydrant, hydrantDeleted } = props;
 
-const handleChange = (e) => {
-    modifyHydrant(selectedHydrant.get('id'), { name: e.target.value });
-}
-
+// const handleChange = (e) => {
+//   console.log(selectedHydrant)
+//     modifyHydrant(selectedHydrant.get('id'), { name: e.target.value });
+// }
+//
 
 
 return (
@@ -50,26 +52,42 @@ return (
           id="name"
           label="Name"
           className={classes.textField}
-          onChange={handleChange}
-          value={selectedHydrant.get('name')}
+          onChange={(e) => { modifyHydrant(selectedHydrant.get('id'), { name: e.target.value }); }}
+          value={selectedHydrant.get('name') || ''}
           margin="normal"
         />
 
         <TextField
-          id="name"
+          id="trail"
+          label="Trail"
+          className={classes.textField}
+          onChange={(e) => { modifyHydrant(selectedHydrant.get('trail'), { trail: e.target.value }); }}
+          value={selectedHydrant.get('trail') || ''}
+          margin="normal"
+        />
+
+        <TextField
+          id="coords"
           label="Coordinates"
           className={classes.textField}
-          value={selectedHydrant.get('coords')}
+          onChange={(e) => { modifyHydrant(selectedHydrant.get('id'), { coords: e.target.value }); }}
+          value={selectedHydrant.get('coords') || ''}
           margin="normal"
         />
 
         <TextField
-          id="name"
+          id="elevation"
           label="Elevation"
           className={classes.textField}
-          value={selectedHydrant.get('elevation')}
+          onChange={(e) => { modifyHydrant(selectedHydrant.get('id'), { elevation: e.target.value }); }}
+          value={selectedHydrant.get('elevation') || ''}
           margin="normal"
         />
+
+        <Button variant="raised" color="secondary" onClick={() => { hydrantDeleted(selectedHydrant.get('id')); }} >
+          Delete
+          <Delete />
+        </Button>
 
       </CardContent>
     </Card>

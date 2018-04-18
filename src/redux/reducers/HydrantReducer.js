@@ -1,4 +1,4 @@
-import _ from 'lodash'; 
+import _ from 'lodash';
 import Immutable from 'immutable';
 import ActionTypes from '../ActionTypes';
 
@@ -6,6 +6,8 @@ const {
   DATA_IMPORTED,
   HYDRANT_ADDED,
   HYDRANT_MODIFIED,
+  HYDRANT_SELECTED,
+  HYDRANT_DELETED,
   TRAIL_SELECTED,
   TRAIL_DELETED,
 } = ActionTypes;
@@ -24,6 +26,28 @@ export default (state = initialState, action) => {
         ...state,
         hydrants: newHydrants,
       };
+    }
+    case HYDRANT_DELETED: {
+      const hydrantId = action.data.selected;
+      return {
+        ...state,
+        hydrants: state.hydrants.delete(hydrantId)
+      };
+    }
+    case HYDRANT_MODIFIED: {
+      const { id, editedFields } = action.data;
+      const newHydrant = state.hydrants.get(id)
+        .withMutations((h) => {
+          _.each(editedFields, (val, key) => h.set(key, val));
+        });
+      newHydrant.get('feature').setProperties(editedFields);
+      /// Coords also needs to be set on the feature here I think.
+      // When Edited in field they don't update location.
+      newHydrant.get('feature').changed();
+      return {
+        ...state,
+        hydrants: state.hydrants.set(id, newHydrant)
+      }
     }
     case TRAIL_SELECTED: {
       // this is actually bad because state shouldnt cause side effects

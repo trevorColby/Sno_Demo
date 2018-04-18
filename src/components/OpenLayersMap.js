@@ -139,19 +139,23 @@ class OpenLayersMap extends React.Component {
     // Controls
     map.addControl(geocoder);
 
-    //Hydrant Form Popup
+    //Events
     map.on('click', (e) => {
-      const feature = map.getFeaturesAtPixel(e.pixel);
-      if (feature && feature[0].getGeometry().getType() === 'Point') {
-        hydrantSelected(feature[0].getId().slice(1))
-      } else {
-        hydrantSelected(null)
+      const features = map.getFeaturesAtPixel(e.pixel);
+      let selectedHydrantId = null
+      if (features) {
+        features.forEach((f) => {
+          if (f.getId() && f.getId()[0] === 'h') {
+            selectedHydrantId = f.getId().slice(1)
+          }
+        });
       }
+      hydrantSelected(selectedHydrantId)
     });
-
-
     this.setState({ map });
+
   }
+
 
   syncFeatures(trails, hydrants) {
     const { source } = this.state;

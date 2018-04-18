@@ -87,7 +87,7 @@ class PersistentDrawer extends React.Component {
 
     const { classes, theme, modifyTrail, canCreate, trails, mode, hydrants,
       selectedTrail, toggleCreate, createObject, modifyHydrant, changeMode, importKMLClicked,
-      trailSelected, selectedHydrant, hydrantSelected } = this.props
+      trailSelected, hydrantDeleted, selectedHydrant, hydrantSelected } = this.props
 
 
     const drawerHeaderTitle = {
@@ -148,6 +148,7 @@ class PersistentDrawer extends React.Component {
         <HydrantForm
           selectedHydrant={hydrants.get(selectedHydrant)}
           modifyHydrant={modifyHydrant}
+          hydrantDeleted={hydrantDeleted}
           hydrantSelected={hydrantSelected}
         />
       )
