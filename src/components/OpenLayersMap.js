@@ -80,13 +80,14 @@ class OpenLayersMap extends React.Component {
     const { selectedTrail, trails } = this.props;
     const { map } = this.state;
     if (selectedTrail !== prevProps.selectedTrail && selectedTrail) {
-      const firstCoords = trails.getIn([selectedTrail, 'features'])[0].getGeometry().getFirstCoordinate();
-      if (firstCoords.length) {
-        const centerCoords = Projection.fromLonLat(firstCoords);
+      try {
+        const firstCoords = trails.getIn([selectedTrail, 'features'])[0].getGeometry().getInteriorPoint().getCoordinates();
         map.getView().animate({
-          center: centerCoords,
+          center: firstCoords,
           duration: 500,
         });
+      } catch (err) {
+        console.log('No coordinates found for this trail');
       }
     }
   }
@@ -99,7 +100,7 @@ class OpenLayersMap extends React.Component {
       source: new BingMaps({
         hidpi: true,
         key: 'ApcR8_wnFxnsXwuY_W2mPQuMb-QB0Kg-My65RJYZL2g9fN6NCFA8-s0lsvxTTs2G',
-        imagerySet: 'AerialWithLabels',
+        imagerySet: 'Aerial',
       }),
     });
 
