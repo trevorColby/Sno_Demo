@@ -1,4 +1,7 @@
 import React, { Component } from 'react';
+import 'bootstrap/dist/css/bootstrap.css';
+import 'ol-geocoder/dist/ol-geocoder.css';
+
 import './App.css';
 import Container from './components/Container';
 
