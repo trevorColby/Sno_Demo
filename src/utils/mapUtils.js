@@ -7,7 +7,6 @@ import axios from 'axios';
 import _ from 'lodash';
 
 export function getMapStyle(feature, resolution) {
-
   if (feature.getGeometry().getType() === 'Point') {
     // hydrant styling defaults
     const fill = new Fill({ color: 'rgba(222, 49, 33, 0.4)' });

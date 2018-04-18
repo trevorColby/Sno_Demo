@@ -68,7 +68,7 @@ class Container extends React.Component {
       });
       const name = 'New Trail';
       const newTrail = new Trail({
-        id, name, coords, feature,
+        id, name, feature,
       });
       feature.setId(`t${id}`);
       addTrail(newTrail);
@@ -117,20 +117,20 @@ class Container extends React.Component {
 
   toggleCreate = () => {
     this.setState({
-      canCreate: !this.state.canCreate
-    })
+      canCreate: !this.state.canCreate,
+    });
   }
 
   changeMode = (mode) => {
     this.setState({
       mode,
-      canCreate: false
-    })
+      canCreate: false,
+    });
   }
 
   trailSelected = (id) => {
-    this.props.trailSelected(this.props.selectedTrail, id),
-    this.setState({canCreate: false});
+    this.props.trailSelected(this.props.selectedTrail, id);
+    this.setState({ canCreate: false });
   }
 
   render() {
@@ -177,7 +177,7 @@ const mapDispatchToProps = dispatch => ({
   trailSelected: (prevSelected, id) => dispatch({
     type: TRAIL_SELECTED, data: { prevSelected, selected: id },
   }),
-  dataImported: data => ({
+  dataImported: data => dispatch({
     type: DATA_IMPORTED, data,
   }),
 });

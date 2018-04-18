@@ -31,7 +31,7 @@ export default (state = initialState, action) => {
       const { prevSelected, selected } = action.data;
       if (prevSelected) {
         state.hydrants
-          .filter(hydrant => hydrant.get('id') === prevSelected)
+          .filter(hydrant => hydrant.get('trail') === prevSelected)
           .forEach(hydrant => {
             const feature = hydrant.get('feature');
             feature.unset('selected');
@@ -40,7 +40,7 @@ export default (state = initialState, action) => {
       }
       if (selected) {
         state.hydrants
-          .filter(hydrant => hydrant.get('id') === selected)
+          .filter(hydrant => hydrant.get('trail') === selected)
           .forEach(hydrant => {
             const feature = hydrant.get('feature');
             feature.set('selected', true);
