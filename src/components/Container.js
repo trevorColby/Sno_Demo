@@ -28,6 +28,7 @@ class Container extends React.Component {
     this.state = {
       mode: 'trails',
       selectedTrail: null,
+      selectedHydrant: null,
       canCreate: false,
       trails: Immutable.Map(),
       hydrants: Immutable.Map(),
@@ -212,8 +213,14 @@ class Container extends React.Component {
     })
   }
 
+  hydrantSelected = (id) => {
+    this.setState({
+      selectedHydrant: id
+    });
+  }
+
   render() {
-    const { trails, mode, selectedTrail, hydrants, canCreate } = this.state;
+    const { selectedHydrant, trails, mode, selectedTrail, hydrants, canCreate } = this.state;
 
     return (
       <Drawer
@@ -229,78 +236,11 @@ class Container extends React.Component {
         selectedTrail={selectedTrail}
         changeMode={this.changeMode}
         importKMLClicked={this.importKMLClicked}
+        hydrantSelected={this.hydrantSelected}
+        selectedHydrant={selectedHydrant}
       />
     );
   }
 }
 
 export default Container;
-
-
-
-/*
-      <div>
-        <Grid container spacing={0} style={{maxHeight: '600px'}}>
-          <Grid item xs={3}>
-            <TrailList
-              modifyTrail={this.modifyTrail}
-              canCreate={canCreate}
-              toggleCreate={() => this.setState({canCreate: !canCreate})}
-              trails={trails}
-              mode={mode}
-              hydrants={hydrants}
-              selected={selectedTrail}
-              trailSelected={(id) => this.setState({ selectedTrail: id, canCreate: false })}
-            />
-          </Grid>
-          <Grid item xs={9}>
-            <OpenLayersMap
-              mode={mode}
-              canCreate={canCreate || mode === 'hydrants'}
-              createObject={this.createObject}
-              modifyTrail={this.modifyTrail}
-              modifyHydrant={this.modifyHydrant}
-              trails={trails}
-              hydrants={hydrants}
-              selectedTrail={selectedTrail}
-            />
-          </Grid>
-        </Grid>
-        <MapControls
-          mode={mode}
-          changeMode={(mode) => this.setState({ mode, canCreate: false })}
-        />
-
-        <ImportExport
-          importKMLClicked= {this.importKMLClicked}
-          trails = {trails}
-          hydrants = {hydrants}
-         />
-        </div>
-    );
-
-
-    <div>
-      <OpenLayersMap
-        mode={mode}
-        canCreate={canCreate || mode === 'hydrants'}
-        createObject={this.createObject}
-        modifyTrail={this.modifyTrail}
-        modifyHydrant={this.modifyHydrant}
-        trails={trails}
-        hydrants={hydrants}
-        selectedTrail={selectedTrail}
-      />
-
-      <MapControls
-        mode={mode}
-        changeMode={(mode) => this.setState({ mode, canCreate: false })}
-      />
-
-      <ImportExport
-        importKMLClicked= {this.importKMLClicked}
-        trails = {trails}
-        hydrants = {hydrants}
-       />
-     </div>
-        */

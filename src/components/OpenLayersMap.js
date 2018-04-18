@@ -93,6 +93,7 @@ class OpenLayersMap extends React.Component {
 
   setupMap() {
     const { source } = this.state;
+    const { hydrantSelected } = this.props;
     const bingMapsLayer = new TileLayer({
       visible: true,
       preload: Infinity,
@@ -137,6 +138,17 @@ class OpenLayersMap extends React.Component {
 
     // Controls
     map.addControl(geocoder);
+
+    //Hydrant Form Popup
+    map.on('click', (e) => {
+      const feature = map.getFeaturesAtPixel(e.pixel);
+      if (feature && feature[0].getGeometry().getType() === 'Point') {
+        hydrantSelected(feature[0].getId().slice(1))
+      } else {
+        hydrantSelected(null)
+      }
+    });
+
 
     this.setState({ map });
   }
