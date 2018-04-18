@@ -20,6 +20,7 @@ import TrailList from './TrailList';
 import OpenLayersMap from './OpenLayersMap';
 import MapControls from './MapControls';
 import ImportExport from './ImportExport';
+import HydrantForm from './HydrantForm';
 
 const drawerWidth = 300;
 
@@ -86,7 +87,7 @@ class PersistentDrawer extends React.Component {
 
     const { classes, theme, modifyTrail, canCreate, trails, mode, hydrants,
       selectedTrail, toggleCreate, createObject, modifyHydrant, changeMode, importKMLClicked,
-      trailSelected } = this.props
+      trailSelected, hydrantDeleted, selectedHydrant, hydrantSelected } = this.props
 
 
     const drawerHeaderTitle = {
@@ -140,6 +141,19 @@ class PersistentDrawer extends React.Component {
         />
       </Drawer>
     );
+    console.log("updatess")
+    let hydrantForm;
+    if (selectedHydrant) {
+      hydrantForm = (
+        <HydrantForm
+          selectedHydrant={hydrants.get(selectedHydrant)}
+          modifyHydrant={modifyHydrant}
+          hydrantDeleted={hydrantDeleted}
+          hydrantSelected={hydrantSelected}
+          trails={trails}
+        />
+      )
+    }
 
     return (
       <div className={classes.root}>
@@ -187,7 +201,10 @@ class PersistentDrawer extends React.Component {
               trails={trails}
               hydrants={hydrants}
               selectedTrail={selectedTrail}
+              hydrantSelected={hydrantSelected}
             />
+
+            {hydrantForm}
 
           </main>
           {drawer}

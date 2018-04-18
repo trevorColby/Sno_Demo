@@ -33,7 +33,7 @@ class OpenLayersMap extends React.Component {
 
   componentWillReceiveProps(nextProps) {
     const { interactions, source, map } = this.state;
-    const { canCreate, mode, createObject, trails, hydrants, selectedTrail } = nextProps;
+    const { canCreate, mode ,createObject, trails, hydrants, selectedTrail } = nextProps;
     // first sync to add externally-uploaded features or remove deleted ones
     this.syncFeatures(trails, hydrants);
 
@@ -47,7 +47,7 @@ class OpenLayersMap extends React.Component {
       const draw = new Draw({
         source, type, geometryName: type,
       });
-      draw.on('drawend', (e) => createObject(e.feature));
+      draw.on('drawend', (e) => {createObject(e.feature)});
       newInteractions.push(draw);
     }
     if (selectedTrail) {
@@ -94,6 +94,7 @@ class OpenLayersMap extends React.Component {
 
   setupMap() {
     const { source } = this.state;
+    const { hydrantSelected } = this.props;
     const bingMapsLayer = new TileLayer({
       visible: true,
       preload: Infinity,
@@ -139,8 +140,23 @@ class OpenLayersMap extends React.Component {
     // Controls
     map.addControl(geocoder);
 
+    //Events
+    map.on('click', (e) => {
+      const features = map.getFeaturesAtPixel(e.pixel);
+      let selectedHydrantId = null
+      if (features) {
+        features.forEach((f) => {
+          if (f.getId() && f.getId()[0] === 'h') {
+            selectedHydrantId = f.getId().slice(1)
+          }
+        });
+      }
+      hydrantSelected(selectedHydrantId)
+    });
     this.setState({ map });
+
   }
+
 
   syncFeatures(trails, hydrants) {
     const { source } = this.state;
