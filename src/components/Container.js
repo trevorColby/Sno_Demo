@@ -140,13 +140,8 @@ class Container extends React.Component {
   }
 
   render() {
-<<<<<<< HEAD
-    const { selectedHydrant, trails, mode, selectedTrail, hydrants, canCreate } = this.state;
-
-=======
     const { mode, canCreate } = this.state;
     const { hydrants, trails, selectedTrail, modifyTrail, modifyHydrant, dataImported } = this.props;
->>>>>>> master
     return (
       <Drawer
         mode={mode}
@@ -160,21 +155,12 @@ class Container extends React.Component {
         hydrants={hydrants}
         selectedTrail={selectedTrail}
         changeMode={this.changeMode}
-<<<<<<< HEAD
-        importKMLClicked={this.importKMLClicked}
-        hydrantSelected={this.hydrantSelected}
-        selectedHydrant={selectedHydrant}
-=======
         importKMLClicked={dataImported}
->>>>>>> master
       />
     );
   }
 }
 
-<<<<<<< HEAD
-export default Container;
-=======
 const mapStateToProps = state => ({
   trails: state.trails.trails,
   hydrants: state.hydrants.hydrants,
@@ -203,4 +189,3 @@ const mapDispatchToProps = dispatch => ({
 });
 
 export default connect(mapStateToProps, mapDispatchToProps)(Container);
->>>>>>> master
