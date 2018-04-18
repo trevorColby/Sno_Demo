@@ -1,6 +1,8 @@
 import _ from 'lodash';
 import Immutable from 'immutable';
 import ActionTypes from '../ActionTypes';
+import Projection from 'ol/proj';
+
 
 const {
   DATA_IMPORTED,
@@ -40,10 +42,13 @@ export default (state = initialState, action) => {
         .withMutations((h) => {
           _.each(editedFields, (val, key) => h.set(key, val));
         });
+      // console.log(newHydrant.toJS())
       newHydrant.get('feature').setProperties(editedFields);
-      /// Coords also needs to be set on the feature here I think.
-      // When Edited in field they don't update location.
+      if (editedFields.coords) {
+        newHydrant.get('feature').getGeometry().setCoordinates(Projection.fromLonLat(editedFields.coords));
+      }
       newHydrant.get('feature').changed();
+
       return {
         ...state,
         hydrants: state.hydrants.set(id, newHydrant)

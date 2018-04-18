@@ -141,7 +141,7 @@ class PersistentDrawer extends React.Component {
         />
       </Drawer>
     );
-
+    console.log("updatess")
     let hydrantForm;
     if (selectedHydrant) {
       hydrantForm = (
@@ -150,6 +150,7 @@ class PersistentDrawer extends React.Component {
           modifyHydrant={modifyHydrant}
           hydrantDeleted={hydrantDeleted}
           hydrantSelected={hydrantSelected}
+          trails={trails}
         />
       )
     }

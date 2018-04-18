@@ -33,7 +33,7 @@ class OpenLayersMap extends React.Component {
 
   componentWillReceiveProps(nextProps) {
     const { interactions, source, map } = this.state;
-    const { canCreate, mode, createObject, trails, hydrants, selectedTrail } = nextProps;
+    const { canCreate, mode ,createObject, trails, hydrants, selectedTrail } = nextProps;
     // first sync to add externally-uploaded features or remove deleted ones
     this.syncFeatures(trails, hydrants);
 
@@ -47,7 +47,7 @@ class OpenLayersMap extends React.Component {
       const draw = new Draw({
         source, type, geometryName: type,
       });
-      draw.on('drawend', (e) => createObject(e.feature));
+      draw.on('drawend', (e) => {createObject(e.feature)});
       newInteractions.push(draw);
     }
     if (selectedTrail) {
