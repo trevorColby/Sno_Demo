@@ -46,7 +46,9 @@ const updateCoords = (e, coordIndex) => {
   modifyHydrant(selectedHydrant.get('id'), { coords: newCoords })
 }
 
-console.log(selectedHydrant.toJS())
+console.log(selectedHydrant)
+
+
 
 const selections = (trail) => {
     return (

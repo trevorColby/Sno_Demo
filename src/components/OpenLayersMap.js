@@ -147,7 +147,7 @@ class OpenLayersMap extends React.Component {
       if (features) {
         features.forEach((f) => {
           if (f.getId() && f.getId()[0] === 'h') {
-            selectedHydrantId = f.getId().slice(1)
+            selectedHydrantId = f.getId().split('-')[1]
           }
         });
       }
