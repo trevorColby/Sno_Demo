@@ -45,28 +45,13 @@ class ImportExport extends React.Component {
     function processTrail(feature, index) {
       let [name, ...otherThings] = feature.get('description').split(',');
       name = _.words(name).join(' ');
-      const id = index + name;
-      if (feature.getGeometry().getType() !== 'MultiPolygon') {
-        const newGeometry = new MultiPolygon();
-        newGeometry.appendPolygon(feature.getGeometry());
-        feature.setGeometry(newGeometry);
-      }
-      _.each(feature.getGeometry().getPolygons(), (polygon) => {
-        // make correction if coordinates are returned in 3d
-        // but the geometry is expecting 2d
-        if (polygon.flatCoordinates[2] === 0 && polygon.getLayout() !== "XYZ") {
-          polygon.setLayout("XYZ");
-        }
-        const coords = polygon.getCoordinates()[0];
-        const lonLatCoords = _.map(coords, pt => Projection.fromLonLat(pt.slice(0,2)));
-        polygon.setCoordinates([lonLatCoords]);
-        polygon.setLayout("XY");
-      });
-      feature.setId(`t${id}`);
+      const coords = feature.getGeometry().getCoordinates()[0];
+      const lonLatCoords = _.map(coords, pt => Projection.fromLonLat(pt.slice(0, 2)));
+      feature.getGeometry().setCoordinates([lonLatCoords]);
+      feature.setId(`t-${name}-${index}`);
       feature.set('name', name);
-      console.log(getMapStyle);
       feature.setStyle(getMapStyle);
-      return new Trail({ id, name, feature });
+      return new Trail({ name, features: [feature] });
     }
 
     function processHydrant(feature, index) {
@@ -80,7 +65,7 @@ class ImportExport extends React.Component {
       feature.setGeometry(geometry);
       const coords = geometry.getCoordinates();
       feature.getGeometry().setCoordinates(Projection.fromLonLat(coords.slice(0,2)));
-      feature.setId(`h${id}`);
+      feature.setId(`h-${id}-${index}`);
       feature.set('trailName', trailName);
       feature.setStyle(getMapStyle);
       return new Hydrant({ id, name, coords, feature, trail: trailId });
@@ -90,19 +75,27 @@ class ImportExport extends React.Component {
     reader.onload = (event) => {
       try {
         const kml = new KML().readFeatures(event.target.result);
-        const newTrails = {};
+        let newTrails = {};
         const newHydrants = {};
 
         _.each(kml, (feature, index) => {
           const type = feature.getGeometry().getType() === 'Polygon' ? 'trail' : 'hydrant';
           if (type === 'trail') {
-            const trail = processTrail(feature, index);
-            newTrails[trail.get('id')] = trail;
-            hydrants
-              .filter(h => h.get('feature').get('trailName') === trail.get('name'))
-              .forEach((h) => {
-                newHydrants[h.get('id')] = h.set('trail', trail.get('id'));
-              });
+            let trail = processTrail(feature, index);
+            const existing = newTrails[trail.get('name')];
+            if (existing) {
+              const newFeatures = existing.get('features').concat(trail.get('features')[0]);
+              newTrails[existing.get('id')] = existing.set('features', newFeatures);
+            } else {
+              trail = trail.set('id', trail.get('name'));
+              newTrails[trail.get('id')] = trail;
+              hydrants
+                .filter(h => h.get('feature').get('trailName') === trail.get('name'))
+                .forEach((h) => {
+                  newHydrants[h.get('id')] = h.set('trail', trail.get('id'));
+                });
+            }
+            
           } else {
             const hydrant = processHydrant(feature, index);
             newHydrants[hydrant.get('id')] = hydrant;

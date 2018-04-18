@@ -7,8 +7,6 @@ import axios from 'axios';
 import _ from 'lodash';
 
 export function getMapStyle(feature, resolution) {
-  console.log("tears");
-  console.log(feature.getGeometry().getType());
   if (feature.getGeometry().getType() === 'Point') {
     // hydrant styling defaults
     const fill = new Fill({ color: 'rgba(222, 49, 33, 0.4)' });
@@ -40,8 +38,7 @@ export function getMapStyle(feature, resolution) {
       }),
       text,
     });
-  } else if (feature.getGeometry().getType() === 'MultiPolygon' || feature.getGeometry().getType() === 'Polygon') {
-    console.log("here");
+  } else if (feature.getGeometry().getType() === 'Polygon') {
     // trail styling defaults
     const text = new Text({
       overflow: true,

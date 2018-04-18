@@ -30,14 +30,18 @@ export default (state = initialState, action) => {
       // but this map stuff is a little wack
       const { prevSelected, selected } = action.data;
       if (prevSelected && state.trails.get(prevSelected)) {
-        const feature = state.trails.getIn([prevSelected, 'feature']);
-        feature.unset('selected');
-        feature.changed();
+        const features = state.trails.getIn([prevSelected, 'features']);
+        _.each(features, (f) => {
+          f.unset('selected');
+          f.changed();
+        });
       }
       if (selected && state.trails.get(selected)) {
-        const feature = state.trails.getIn([selected, 'feature']);
-        feature.set('selected', true);
-        feature.changed();
+        const features = state.trails.getIn([selected, 'features']);
+        _.each(features, (f) => {
+          f.set('selected', true);
+          f.changed();
+        });
       }
       return state;
     }
@@ -67,9 +71,9 @@ export default (state = initialState, action) => {
       return {
         ...state,
         trails: state.trails.merge(trails),
-      }
+      };
     }
     default:
       return state;
   }
-}
+};

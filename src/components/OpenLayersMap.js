@@ -53,8 +53,8 @@ class OpenLayersMap extends React.Component {
     if (selectedTrail) {
       const modifiable = new Collection([]);
       if (mode === 'trails') {
-        const feature = trails.getIn([selectedTrail, 'feature']);
-        modifiable.push(feature);
+        const features = trails.getIn([selectedTrail, 'features']);
+        _.each(features, f => modifiable.push(f));
       } else {
         hydrants.filter((h) => h.get('trail') === selectedTrail)
           .forEach((h) => modifiable.push(h.get('feature')));
@@ -80,7 +80,7 @@ class OpenLayersMap extends React.Component {
     const { selectedTrail, trails } = this.props;
     const { map } = this.state;
     if (selectedTrail !== prevProps.selectedTrail && selectedTrail) {
-      const firstCoords = trails.getIn([selectedTrail, 'feature']).getGeometry().getFirstCoordinate();
+      const firstCoords = trails.getIn([selectedTrail, 'features'])[0].getGeometry().getFirstCoordinate();
       if (firstCoords.length) {
         const centerCoords = Projection.fromLonLat(firstCoords);
         map.getView().animate({
@@ -143,13 +143,18 @@ class OpenLayersMap extends React.Component {
 
   syncFeatures(trails, hydrants) {
     const { source } = this.state;
-    if (source.getFeatures().length !== trails.size + hydrants.size) {
+    const totalFeatures = trails.reduce((features, t) => {
+      return features + t.get('features').length;
+    }, 0) + hydrants.size;
+    if (source.getFeatures().length !== totalFeatures) {
       // add new features if needed
       const newFeatures = [];
       trails.forEach((trail) => {
-        if (!source.getFeatureById(`t${trail.get('id')}`)) {
-          newFeatures.push(trail.get('feature'));
-        }
+        _.each(trail.get('features'), (feature) => {
+          if (!source.getFeatureById(feature.getId())) {
+            newFeatures.push(feature);
+          }
+        });
       });
       hydrants.forEach((hydrant) => {
         if (!source.getFeatureById(`h${hydrant.get('id')}`)) {
@@ -163,9 +168,13 @@ class OpenLayersMap extends React.Component {
       // remove deleted features if needed
       _.map(source.getFeatures(), (feature) => {
         const featureId = feature.getId();
-        if (featureId[0] === 't' && !trails.has(featureId.slice(1))) {
-          source.removeFeature(feature);
-        } else if (featureId[0] === 'h' && !hydrants.has(featureId.slice(1))) {
+        const [type, id, number] = featureId.split('-');
+        if (type === 't') {
+          if (!trails.has(id) || !_.find(trails.get(id).features, f => f.getId() === featureId)) {
+            source.removeFeature(feature);
+          }
+        }
+        else if (type === 'h' && !hydrants.has(id)) {
           source.removeFeature(feature);
         }
       });

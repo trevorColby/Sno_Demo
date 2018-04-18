@@ -1,9 +1,9 @@
-import { Record } from 'immutable';
+import { Record, List } from 'immutable';
 
 export const Trail = Record({
   id: null,
   name: null,
-  feature: null,
+  features: [],
 });
 
 export const Hydrant = Record({
