@@ -11,7 +11,7 @@ import SourceVector from 'ol/source/vector';
 import Draw from 'ol/interaction/draw';
 import Modify from 'ol/interaction/modify';
 import Snap from 'ol/interaction/snap';
-import Geocoder from 'ol-geocoder';
+//import Geocoder from 'ol-geocoder';
 import { getMapStyle } from '../utils/mapUtils';
 
 class OpenLayersMap extends React.Component {
@@ -76,8 +76,7 @@ class OpenLayersMap extends React.Component {
         imagerySet: 'Aerial',
       }),
     });
-
-    const geocoder = new Geocoder('nominatim', {
+    /*const geocoder = new Geocoder('nominatim', {
       provider: 'osm',
       lang: 'en',
       placeholder: 'Search for ...',
@@ -86,7 +85,7 @@ class OpenLayersMap extends React.Component {
       autoComplete: true,
     });
 
-    geocoder.setTarget(document.getElementById('searchLocations'))
+    geocoder.setTarget(document.getElementById('searchLocations'));*/
 
     const resortLayer = new LayerVector({
       source,
@@ -110,7 +109,7 @@ class OpenLayersMap extends React.Component {
     });
 
     // Controls
-    map.addControl(geocoder);
+    // map.addControl(geocoder);
     map.on('click', this.onMapClick);
     this.setState({ map });
   }
@@ -119,11 +118,11 @@ class OpenLayersMap extends React.Component {
     const {
       trails, hydrants,
       selectedTrail, interaction,
-      modifyEnd
+      modifyEnd,
     } = this.props;
     const { source, map, mapInteractions } = this.state;
     _.each(mapInteractions, i => map.removeInteraction(i));
-    
+
     const newInteractions = [];
     // create new draw or modify interactions
     let type = null;
