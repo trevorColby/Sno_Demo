@@ -39,25 +39,36 @@ class OpenLayersMap extends React.Component {
   componentDidUpdate(prevProps) {
     const { selectedTrail, trails, interaction, hydrants } = this.props;
     const { map } = this.state;
-    
+
     // update interactions
     if (
-      interaction !== prevProps.interaction || 
-      selectedTrail !== prevProps.selectedTrail || 
-      hydrants.size !== prevProps.hydrants.size || 
-      (selectedTrail === prevProps.selectedTrail && 
+      interaction !== prevProps.interaction ||
+      selectedTrail !== prevProps.selectedTrail ||
+      hydrants.size !== prevProps.hydrants.size ||
+      (selectedTrail === prevProps.selectedTrail &&
         trails.getIn([selectedTrail, 'features'], []).length !== prevProps.trails.getIn([selectedTrail, 'features'], []).length)) {
       this.updateInteractions();
     }
 
     // pan to new selectedTrail
     if (selectedTrail !== prevProps.selectedTrail && selectedTrail) {
+
       try {
-        const firstCoords = trails.getIn([selectedTrail, 'features'])[0].getGeometry().getInteriorPoint().getCoordinates();
+        const firstTrailGeom = trails.getIn([selectedTrail, 'features'])[0].getGeometry()
+        const geomExtent = firstTrailGeom.getExtent()
+        const view = map.getView()
+        const zoomResolution = view.getResolutionForExtent(geomExtent)
+        const zoomLevel = view.getZoomForResolution(zoomResolution)
+
+        const firstCoords = firstTrailGeom.getInteriorPoint().getCoordinates();
         map.getView().animate({
           center: firstCoords,
           duration: 500,
+          zoom: zoomLevel,
         });
+        // Instead of Panning the below code will jerk to the trail
+        // and will fit the trail but is not as smooth.
+        // map.getView().fit(firstTrailGeom, map.getSize());
       } catch (err) {
         console.log('No coordinates found for this trail');
       }
