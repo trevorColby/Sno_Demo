@@ -162,13 +162,14 @@ class ImportExport extends React.Component {
     };
     return (
       <div>
-        <div style={style}>
-        <Tooltip title="Import/Export" placement="top-start">
-        <IconButton onClick={this.handleOpen}>
+        <Tooltip title="Import/Export" placement="top-start" style={{marginLeft: '250px'}}>
+        {/*<IconButton onClick={this.handleOpen}>
            <ImportExportIcon />
-          </IconButton>
+          </IconButton>*/}
+        <Button onClick={this.handleOpen} 
+          style={{color: 'rgba(0,0,0,0.87)', backgroundColor: '#e0e0e0'}}
+        >Import/Export</Button>
         </Tooltip>
-        </div>
         <Dialog onBackdropClick={this.handleClose} open={dialogOpen} >
           <DialogTitle >Import/Export</DialogTitle>
           <div>

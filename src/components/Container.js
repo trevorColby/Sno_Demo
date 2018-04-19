@@ -20,6 +20,7 @@ import appStyles from '../styles/drawer';
 import TrailList from './TrailList';
 import OpenLayersMap from './OpenLayersMap';
 import ImportExport from './ImportExport';
+import HydrantForm from './HydrantForm';
 
 import ActionTypes from '../redux/ActionTypes';
 
@@ -32,6 +33,8 @@ const {
   HYDRANT_ADDED,
   HYDRANT_MODIFIED,
   INTERACTION_CHANGED,
+  HYDRANT_SELECTED,
+  HYDRANT_DELETED, 
 } = ActionTypes;
 
 
@@ -50,7 +53,7 @@ class Container extends React.Component {
     let id = new Date().getTime();
     id = id.toString();
     const name = 'New Trail';
-    const trail = new Trail({id, name, features: []});
+    const trail = new Trail({ id, name, features: [] });
     addTrail(trail);
   }
 
@@ -78,7 +81,11 @@ class Container extends React.Component {
       const name = '';
       let id = new Date().getTime();
       id = id.toString();
-      const newHydrant = new Hydrant({id, name, coords, feature, trail: selectedTrail})
+      const newHydrant = new Hydrant({
+        id, name,
+        coords, feature,
+        trail: selectedTrail,
+      });
       feature.setId(`h-${id}-0`);
       if (selectedTrail) {
         feature.set('selected', true);
@@ -87,13 +94,14 @@ class Container extends React.Component {
     }
   }
 
-  modifyEnd(features) {
-    const {interaction} = this.props;
+  modifyEnd(e) {
+    const { interaction, modifyHydrant } = this.props;
+    const features = e.features;
     if (interaction === 'DRAW_MODIFY_HYDRANTS') {
-      const feature = features[0];
+      const feature = _.find(features.getArray(), f => f.getId() && f.getId()[0] === 'h');
       const hydrantId = feature.getId().split('-')[1];
-      const mapCoords = feature.getCoordinates();
-      const coords = Projection.toLonLat(coords);
+      const mapCoords = feature.getGeometry().getCoordinates();
+      const coords = Projection.toLonLat(mapCoords);
       // do a projection and save them with modifyHyrant
       modifyHydrant(hydrantId, { coords });
     }
@@ -144,7 +152,8 @@ class Container extends React.Component {
       selectedTrail, trailSelected,
       modifyTrail, modifyHydrant,
       dataImported, interaction, interactionChanged,
-      classes, theme,
+      classes, theme, selectedHydrant, hydrantDeleted,
+      hydrantSelected,
     } = this.props;
     const { drawerOpen } = this.state;
     return (
@@ -169,18 +178,16 @@ class Container extends React.Component {
                 SnoTrack
               </Typography>
               <div>
-                {_.map(['DRAW_MODIFY_TRAIL', 'DRAW_MODIFY_HYDRANTS'], (item) => {
-                  return (
-                    <Button
-                      key={item}
-                      variant="raised"
-                      color={interaction === item ? 'primary' : 'default'}
-                      onClick={() => interactionChanged(item)}
-                    >
-                      {item}
-                    </Button>
-                  );
-                })}
+                {/*<Tooltip title="Auto Associate Hydrants" placement="top-start">
+                  <IconButton>
+                    <CallMerge />
+                  </IconButton>
+                </Tooltip>*/}
+                <ImportExport
+                  importKMLClicked={dataImported}
+                  trails={trails}
+                  hydrants={hydrants}
+                />
               </div>
             </Toolbar>
             <div id="searchLocations"></div>
@@ -194,29 +201,22 @@ class Container extends React.Component {
             }}
           >
           <div className={classes.drawerHeader}>
+            <Button
+              variant="raised"
+              color={interaction === 'DRAW_MODIFY_TRAIL' ? 'primary' : 'default'}
+              onClick={() => interactionChanged('DRAW_MODIFY_TRAIL')}
+            >Trails</Button>
+            <Button
+              variant="raised"
+              color={interaction === 'DRAW_MODIFY_HYDRANTS' ? 'primary' : 'default'}
+              onClick={() => interactionChanged('DRAW_MODIFY_HYDRANTS')}
+            >Hydrants</Button>
 
-            <Tooltip title="Auto Associate Hydrants" placement="top-start">
-              <IconButton>
-                <CallMerge />
-              </IconButton>
-            </Tooltip>
-
-            <ImportExport
-              importKMLClicked={dataImported}
-              trails={trails}
-              hydrants={hydrants}
-            />
-
-            <Typography variant="title" color="inherit">
-              {//drawerHeaderTitle[mode]}
-            }
-            </Typography>
             <IconButton onClick={() => this.setState({ drawerOpen: false })}>
               {theme.direction === 'rtl' ? <ChevronRightIcon /> : <ChevronLeftIcon />}
             </IconButton>
 
           </div>
-
           <TrailList
             newTrailClicked={this.newTrailClicked}
             modifyTrail={modifyTrail}
@@ -241,7 +241,15 @@ class Container extends React.Component {
             trails={trails}
             hydrants={hydrants}
             selectedTrail={selectedTrail}
+            hydrantSelected={hydrantSelected}
           />
+          <HydrantForm
+            hydrant={hydrants.get(selectedHydrant)}
+            modifyHydrant={modifyHydrant}
+            hydrantDeleted={hydrantDeleted}
+            trails={trails}
+          />
+      )
         </main>
       </div>
     </div>
@@ -254,6 +262,7 @@ const mapStateToProps = state => ({
   hydrants: state.hydrants.hydrants,
   selectedTrail: state.selectedTrail,
   interaction: state.interaction,
+  selectedHydrant: state.selectedHydrant,
 });
 
 const mapDispatchToProps = dispatch => ({
@@ -272,11 +281,17 @@ const mapDispatchToProps = dispatch => ({
   trailSelected: (prevSelected, id) => dispatch({
     type: TRAIL_SELECTED, data: { prevSelected, selected: id },
   }),
+  hydrantSelected: id => dispatch({
+    type: HYDRANT_SELECTED, data: id,
+  }),
   dataImported: data => dispatch({
     type: DATA_IMPORTED, data,
   }),
   interactionChanged: data => dispatch({
     type: INTERACTION_CHANGED, data,
+  }),
+  hydrantDeleted: id => dispatch({
+    type: HYDRANT_DELETED, data: { selected: id }
   }),
 });
 

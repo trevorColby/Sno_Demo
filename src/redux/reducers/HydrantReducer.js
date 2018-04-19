@@ -1,11 +1,15 @@
-import _ from 'lodash'; 
+import _ from 'lodash';
 import Immutable from 'immutable';
 import ActionTypes from '../ActionTypes';
+import Projection from 'ol/proj';
+
 
 const {
   DATA_IMPORTED,
   HYDRANT_ADDED,
   HYDRANT_MODIFIED,
+  HYDRANT_SELECTED,
+  HYDRANT_DELETED,
   TRAIL_SELECTED,
   TRAIL_DELETED,
 } = ActionTypes;
@@ -23,6 +27,34 @@ export default (state = initialState, action) => {
       return {
         ...state,
         hydrants: newHydrants,
+      };
+    }
+    case HYDRANT_DELETED: {
+      const hydrantId = action.data.selected;
+      return {
+        ...state,
+        hydrants: state.hydrants.delete(hydrantId)
+      };
+    }
+    case HYDRANT_MODIFIED: {
+      const { id, editedFields } = action.data;
+      const newHydrant = state.hydrants.get(id)
+        .withMutations((h) => {
+          _.each(editedFields, (val, key) => h.set(key, val));
+        });
+      // console.log(newHydrant.toJS())
+      newHydrant.get('feature').setProperties(editedFields);
+      if (editedFields.coords) {
+        newHydrant.get('feature').getGeometry().setCoordinates(Projection.fromLonLat(editedFields.coords));
+      }
+      if (_.has(editedFields, 'trail') && newHydrant.get('feature').get('selected')) {
+        newHydrant.get('feature').unset('selected');
+      }
+      newHydrant.get('feature').changed();
+
+      return {
+        ...state,
+        hydrants: state.hydrants.set(id, newHydrant),
       };
     }
     case TRAIL_SELECTED: {

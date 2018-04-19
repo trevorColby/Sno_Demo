@@ -22,57 +22,12 @@ class OpenLayersMap extends React.Component {
     this.state = {
       source: new SourceVector({ wrapX: false }),
       map: null,
+      mapInteractions: [],
     };
   }
 
   componentDidMount() {
     this.setupMap();
-  }
-
-  updateInteractions() {
-    const {
-      trails, hydrants, 
-      selectedTrail, interaction, 
-      drawEnd, modifyEnd 
-    } = this.props;
-    const { source, map } = this.state;
-    _.each(map.getInteractions().getArray(), i => {
-      if (i instanceof Draw || i instanceof Modify) {
-        map.removeInteraction(i);
-      }
-    });
-
-    // create new draw or modify interactions
-    let type = null;
-    const modifiable = new Collection([]);
-    if (interaction === 'DRAW_MODIFY_TRAIL' && selectedTrail) {
-      type = 'Polygon';
-      _.each(trails.getIn([selectedTrail, 'features']), f => modifiable.push(f));
-    } else if (interaction === 'DRAW_MODIFY_HYDRANTS') {
-      type = 'Point';
-      hydrants.filter(h => h.get('trail') === selectedTrail)
-        .forEach(h => modifiable.push(h.get('feature')));
-    }
-    if (type) {
-      const draw = new Draw({
-        source, type, geometryName: type,
-      });
-      draw.on('drawend', e => drawEnd(e.feature));
-      map.addInteraction(draw)
-    }
-    if (modifiable) {
-      const modify = new Modify({ features: modifiable });
-      modify.on('modifyend', e => modifyEnd(e));
-      map.addInteraction(modify);
-    }
-
-    if (interaction === 'DRAW_MODIFY_TRAIL') {
-      const snap = new Snap({
-        source,
-        pixelTolerance: 5,
-      });
-      map.addInteraction(snap);
-    }
   }
 
   componentWillReceiveProps(nextProps) {
@@ -82,10 +37,18 @@ class OpenLayersMap extends React.Component {
   }
 
   componentDidUpdate(prevProps) {
-    const { selectedTrail, trails } = this.props;
+    const { selectedTrail, trails, interaction, hydrants } = this.props;
     const { map } = this.state;
+    
     // update interactions
-    this.updateInteractions();
+    if (
+      interaction !== prevProps.interaction || 
+      selectedTrail !== prevProps.selectedTrail || 
+      hydrants.size !== prevProps.hydrants.size || 
+      (selectedTrail === prevProps.selectedTrail && 
+        trails.getIn([selectedTrail, 'features'], []).length !== prevProps.trails.getIn([selectedTrail, 'features'], []).length)) {
+      this.updateInteractions();
+    }
 
     // pan to new selectedTrail
     if (selectedTrail !== prevProps.selectedTrail && selectedTrail) {
@@ -103,6 +66,7 @@ class OpenLayersMap extends React.Component {
 
   setupMap() {
     const { source } = this.state;
+    const { hydrantSelected } = this.props;
     const bingMapsLayer = new TileLayer({
       visible: true,
       preload: Infinity,
@@ -147,8 +111,115 @@ class OpenLayersMap extends React.Component {
 
     // Controls
     map.addControl(geocoder);
-
+    map.on('click', this.onMapClick);
     this.setState({ map });
+  }
+
+  updateInteractions() {
+    const {
+      trails, hydrants,
+      selectedTrail, interaction,
+      modifyEnd
+    } = this.props;
+    const { source, map, mapInteractions } = this.state;
+    _.each(mapInteractions, i => map.removeInteraction(i));
+    
+    const newInteractions = [];
+    // create new draw or modify interactions
+    let type = null;
+    const modifiable = new Collection([]);
+    if (interaction === 'DRAW_MODIFY_TRAIL' && selectedTrail) {
+      type = 'Polygon';
+      _.each(trails.getIn([selectedTrail, 'features']), f => modifiable.push(f));
+    } else if (interaction === 'DRAW_MODIFY_HYDRANTS') {
+      type = 'Point';
+      hydrants.filter(h => h.get('trail') === selectedTrail)
+        .forEach(h => modifiable.push(h.get('feature')));
+    }
+    if (type) {
+      const draw = new Draw({
+        source, type, geometryName: type,
+      });
+      draw.on('drawend', this.drawEnd);
+      newInteractions.push(draw);
+    }
+    if (modifiable.getLength()) {
+      const modify = new Modify({ features: modifiable });
+      modify.on('modifyend', modifyEnd);
+      modify.on('modifystart', this.modifyStart);
+      newInteractions.push(modify);
+    }
+
+    if (interaction === 'DRAW_MODIFY_TRAIL') {
+      const snap = new Snap({
+        source,
+        pixelTolerance: 5,
+      });
+      newInteractions.push(snap);
+    }
+
+    _.each(newInteractions, i => map.addInteraction(i));
+    this.setState({ mapInteractions: newInteractions });
+  }
+
+  drawEnd = (e) => {
+    const { drawEnd, interaction, hydrantSelected } = this.props;
+    const { map } = this.state;
+    if (interaction === 'DRAW_MODIFY_HYDRANTS') {
+      const coords = e.feature.getGeometry().getCoordinates();
+      const pixel = map.getPixelFromCoordinate(coords);
+      const features = map.getFeaturesAtPixel(pixel);
+      if (features) {
+        const match = _.reduce(features, (curr, f) => {
+          if (curr) {
+            return curr;
+          } else {
+            const featureId = f.getId() || '';
+            const [type, hydrantId, number] = featureId.split('-');
+            return type === 'h' ? hydrantId : curr;
+          }
+        }, null);
+        if (match) {
+          return;
+        }
+      }
+    }
+    return drawEnd(e.feature);
+  }
+
+  modifyStart = (e) => {
+    const { interaction, hydrantSelected } = this.props;
+    const { map } = this.state;
+    if (interaction === 'DRAW_MODIFY_HYDRANTS') {
+      const pixel = e.target.lastPixel_;
+      const features = map.getFeaturesAtPixel(pixel);
+      if (features) {
+        const match = _.reduce(features, (curr, f) => {
+          if (curr) {
+            return curr;
+          } else {
+            const featureId = f.getId() || '';
+            const [type, hydrantId, number] = featureId.split('-');
+            return type === 'h' ? hydrantId : curr;
+          }
+        }, null);
+        if (match) {
+          hydrantSelected(match);
+        }
+      }
+    }
+  }
+
+  onMapClick = (e) => {
+    const { interaction, hydrantSelected } = this.props;
+    const { map } = this.state;
+    const features = map.getFeaturesAtPixel(e.pixel);
+    if (features && interaction === 'DRAW_MODIFY_HYDRANTS') {
+      const match = _.find(features, f => f.getId() && f.getId()[0] === 'h');
+      if (match) {
+        hydrantSelected(match.getId().split('-')[1]);
+      }
+    }
   }
 
   syncFeatures(trails, hydrants) {
@@ -177,7 +248,7 @@ class OpenLayersMap extends React.Component {
 
       // remove deleted features if needed
       _.map(source.getFeatures(), (feature) => {
-        const featureId = feature.getId();
+        const featureId = feature.getId() || '';
         const [type, id, number] = featureId.split('-');
         if (type === 't') {
           if (!trails.has(id) || !_.find(trails.get(id).features, f => f.getId() === featureId)) {
