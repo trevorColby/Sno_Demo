@@ -59,8 +59,10 @@ export default (state = initialState, action) => {
         .withMutations((tr) => {
           _.each(editedFields, (val, key) => tr.set(key, val));
         });
-      newTrail.get('feature').setProperties(editedFields);
-      newTrail.get('feature').changed();
+      _.each(newTrail.get('features'), (f) => {
+        f.setProperties(editedFields);
+        f.changed();
+      });
       return {
         ...state,
         trails: state.trails.set(id, newTrail),

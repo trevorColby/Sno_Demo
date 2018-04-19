@@ -1,4 +1,6 @@
 import React from 'react';
+import _ from 'lodash';
+import { Button } from 'material-ui';
 import { withStyles } from 'material-ui/styles';
 import classNames from 'classnames';
 import Drawer from 'material-ui/Drawer';
@@ -18,56 +20,7 @@ import CallMerge from '@material-ui/icons/CallMerge';
 
 import TrailList from './TrailList';
 import OpenLayersMap from './OpenLayersMap';
-import MapControls from './MapControls';
 import ImportExport from './ImportExport';
-
-const drawerWidth = 300;
-
-const styles = theme => ({
-  root: {
-    flexGrow: 1,
-  },
-  paperAnchorDockedLeft: {
-    background: 'black',
-  },
-  drawerPaper: {
-    background: '#ffffffde',
-  },
-  appBar: {
-    background: '#040404',
-    position: 'absolute',
-    transition: theme.transitions.create(['margin', 'width'], {
-      easing: theme.transitions.easing.sharp,
-      duration: theme.transitions.duration.leavingScreen,
-    }),
-  },
-  appBarShift: {
-    width: `calc(100% - ${drawerWidth}px)`,
-    transition: theme.transitions.create(['margin', 'width'], {
-      easing: theme.transitions.easing.easeOut,
-      duration: theme.transitions.duration.enteringScreen,
-    }),
-  },
-  'appBarShift-right': {
-    marginRight: drawerWidth,
-  },
-  menuButton: {
-    marginLeft: 12,
-    marginRight: 20,
-  },
-  hide: {
-    display: 'none',
-  },
-  drawerHeader: {
-    display: 'flex',
-    alignItems: 'center',
-    justifyContent: 'flex-end',
-    padding: '0 8px',
-    ...theme.mixins.toolbar,
-    background: 'white'
-  }
-});
-
 
 class PersistentDrawer extends React.Component {
   state = {
@@ -86,7 +39,7 @@ class PersistentDrawer extends React.Component {
 
     const { classes, theme, modifyTrail, canCreate, trails, mode, hydrants,
       selectedTrail, toggleCreate, createObject, modifyHydrant, changeMode, importKMLClicked,
-      trailSelected } = this.props
+      trailSelected, interaction, interactionChanged, drawEnd } = this.props
 
 
     const drawerHeaderTitle = {
@@ -94,104 +47,8 @@ class PersistentDrawer extends React.Component {
       'hydrants': 'Hydrants',
     }
 
-    const { open } = this.state;
-
-    const drawer = (
-      <Drawer
-        variant="persistent"
-        anchor='left'
-        open={open}
-        classes={{
-          paper: classes.drawerPaper,
-        }}
-      >
-        <div className={classes.drawerHeader}>
-
-          <Tooltip title="Auto Associate Hydrants" placement="top-start">
-            <IconButton>
-              <CallMerge />
-            </IconButton>
-          </Tooltip>
-
-          <ImportExport
-            importKMLClicked={importKMLClicked}
-            trails={trails}
-            hydrants={hydrants}
-          />
-
-          <Typography variant="title" color="inherit">
-            {drawerHeaderTitle[mode]}
-          </Typography>
-          <IconButton onClick={this.handleDrawerClose}>
-            {theme.direction === 'rtl' ? <ChevronRightIcon /> : <ChevronLeftIcon />}
-          </IconButton>
-
-        </div>
-
-        <TrailList
-          modifyTrail={modifyTrail}
-          canCreate={canCreate}
-          toggleCreate={toggleCreate}
-          trails={trails}
-          trailSelected={trailSelected}
-          mode={mode}
-          hydrants={hydrants}
-          selected={selectedTrail}
-        />
-      </Drawer>
-    );
-
     return (
-      <div className={classes.root}>
-        <div className={classes.appFrame}>
-          <AppBar
-            className={classNames(classes.appBar, {
-              [classes.appBarShift]: open,
-              [classes[`appBarShift-left`]]: open,
-            })}
-          >
-            <Toolbar disableGutters={!open}>
-              <IconButton
-                color="inherit"
-                aria-label="open drawer"
-                onClick={this.handleDrawerOpen}
-                className={classNames(classes.menuButton, open && classes.hide)}
-              >
-                <MenuIcon />
-              </IconButton>
-              <Typography variant="title" color="inherit" noWrap>
-                SnoTrack
-              </Typography>
-              <MapControls
-                mode={mode}
-                changeMode={changeMode}
-              />
-            </Toolbar>
-            <div id="searchLocations"></div>
-          </AppBar>
-          {drawer}
-          <main
-            className={classNames(classes.content, classes[`content-left`], {
-              [classes.contentShift]: open,
-              [classes[`contentShift-left`]]: open,
-            })}
-          >
-            <div className={classes.drawerHeader} />
-
-            <OpenLayersMap
-              mode={mode}
-              canCreate={canCreate}
-              createObject={createObject}
-              modifyTrail={modifyTrail}
-              modifyHydrant={modifyHydrant}
-              trails={trails}
-              hydrants={hydrants}
-              selectedTrail={selectedTrail}
-            />
-
-          </main>
-          {drawer}
-        </div>
+      <div>
       </div>
     );
   }

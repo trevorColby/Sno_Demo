@@ -1,6 +1,9 @@
 import React from 'react'
 import _ from 'lodash';
-import { Icon, Table, TableBody, TableHead, TableCell, TableRow, withStyles } from 'material-ui';
+import { 
+  Icon, Table, TableBody, 
+  TableHead, TableCell, 
+  TableRow, withStyles, Button } from 'material-ui';
 import TrailNameForm from './TrailNameForm';
 
 
@@ -14,33 +17,17 @@ const CustomTableCell = withStyles(theme => ({
   },
 }))(TableCell);
 
-const styles = theme => ({
-  root: {
-    width: '100%',
-    marginTop: theme.spacing.unit * 3,
-    overflowX: 'auto',
-  },
-  table: {
-    minWidth: 700,
-  },
-  row: {
-    '&:nth-of-type(odd)': {
-      backgroundColor: theme.palette.background.default,
-    },
-  },
-});
-
 class TrailList extends React.Component {
   constructor(props) {
     super(props);
     this.state = {
-      editableTrail: null
-    }
+      editableTrail: null,
+    };
   }
 
   renderTrail = (trail) => {
-    const {selected, trailSelected, modifyTrail, hydrants} = this.props;
-    const {editableTrail} = this.state;
+    const { selected, trailSelected, modifyTrail, hydrants } = this.props;
+    const { editableTrail } = this.state;
 
     const id = trail.id;
     const isSelected = selected === id;
@@ -52,10 +39,9 @@ class TrailList extends React.Component {
       <TableRow
         key={id}
         className={rowClass}
-        style={{borderTop: '2px solid black', cursor: 'pointer'}}
+        style={{ borderTop: '2px solid black', cursor: 'pointer' }}
         onClick={() => trailSelected(isSelected ? null : id)}
       >
-
        {isEditable ?
         (<TableCell >
           <TrailNameForm 
@@ -80,7 +66,7 @@ class TrailList extends React.Component {
   }
 
   render() {
-    const {trails, trailSelected, selected, hydrants, mode, canCreate, toggleCreate} = this.props;
+    const {trails, trailSelected, selected, hydrants, newTrailClicked} = this.props;
     const orphanCount = hydrants.filter((h) => h.get('trail') === null).size;
     return (
       <Table style={{height: '100%'}}>
@@ -92,15 +78,9 @@ class TrailList extends React.Component {
           </TableRow>
         </TableHead>
         <TableBody style={{overflowY: 'auto', height: '100%', width: '95%'}}>
-          {mode === 'trails' ? (
-            <TableRow
-              style={{width: '100%', cursor: 'pointer'}} 
-              className={canCreate ? 'selected' : ''} 
-              onClick={toggleCreate}
-              >
-              <TableCell>+ Add a trail</TableCell>
-            </TableRow>) : null
-          }
+          <TableRow><TableCell><Button onClick={newTrailClicked}>
+            CREATE NEW TRAIL
+          </Button></TableCell></TableRow>
           {orphanCount ? (
             <TableRow
               className={selected === null ? 'selected' : ''}
@@ -116,7 +96,7 @@ class TrailList extends React.Component {
           {_(trails.toJS()).values().orderBy('name').map((item) => this.renderTrail(item)).value()}
         </TableBody>
       </Table>
-    )
+    );
   }
 }
 
