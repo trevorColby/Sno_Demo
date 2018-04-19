@@ -39,9 +39,6 @@ class AutoAssociate extends React.Component {
         if (matches.length > 1) {
           // This shouldn't happen, it means we have overlapping trail polygons
           multiple += 1;
-          let t = matches[0].getId().split('-')[1];
-          h.get('feature').set('selected', true);
-          h.get('feature').changed();
         } else {
           match += 1;
         }
