@@ -21,6 +21,7 @@ import TrailList from './TrailList';
 import OpenLayersMap from './OpenLayersMap';
 import ImportExport from './ImportExport';
 import HydrantForm from './HydrantForm';
+import AutoAssociate from './AutoAssociate';
 
 import ActionTypes from '../redux/ActionTypes';
 
@@ -177,12 +178,12 @@ class Container extends React.Component {
               <Typography variant="title" color="inherit" noWrap>
                 SnoTrack
               </Typography>
-              <div>
-                {/*<Tooltip title="Auto Associate Hydrants" placement="top-start">
-                  <IconButton>
-                    <CallMerge />
-                  </IconButton>
-                </Tooltip>*/}
+              <div style={{ marginLeft: '200px' }}>
+                <AutoAssociate
+                  trails={trails}
+                  hydrants={hydrants}
+                  modifyHydrant={modifyHydrant}
+                />
                 <ImportExport
                   importKMLClicked={dataImported}
                   trails={trails}

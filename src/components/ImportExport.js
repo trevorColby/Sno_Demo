@@ -58,7 +58,8 @@ class ImportExport extends React.Component {
       let [trailName, hydrantIndex, name]  = feature.get('description').split(',');
       trailName = _.words(trailName).join(' ');
       const trailObj = trails.find(t => t.get('name') === trailName);
-      const trailId = trailObj ? trailObj.get('id') : null;
+      //const trailId = trailObj ? trailObj.get('id') : null;
+      const trailId = null;
       const id = index + name;
       const geometry = feature.getGeometry().getType() === 'Point' ?
         feature.getGeometry() : feature.getGeometry().getGeometries()[0];
@@ -161,8 +162,8 @@ class ImportExport extends React.Component {
       float: 'left',
     };
     return (
-      <div>
-        <Tooltip title="Import/Export" placement="top-start" style={{marginLeft: '250px'}}>
+      <div style={{display: 'inline', margin: '20px'}}>
+        <Tooltip title="Import/Export" placement="top-start">
         {/*<IconButton onClick={this.handleOpen}>
            <ImportExportIcon />
           </IconButton>*/}
