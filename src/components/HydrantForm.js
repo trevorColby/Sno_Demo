@@ -36,93 +36,94 @@ const styles = {
 };
 
 
-function HydrantForm(props) {
+class HydrantForm extends React.Component {
+  render() {
+    const { 
+      classes, hydrant, 
+      modifyHydrant, hydrantDeleted, 
+      trails 
+    } = this.props;
 
-const { classes, selectedHydrant, modifyHydrant, hydrantDeleted, trails } = props;
+    const updateCoords = (e, coordIndex) => {
+      const newCoords = _.clone(hydrant.get('coords'));
+      newCoords.splice(coordIndex, 1, Number(e.target.value))
+      modifyHydrant(hydrant.get('id'), { coords: newCoords })
+    };
 
-const updateCoords = (e, coordIndex) => {
-  const newCoords = _.clone(selectedHydrant.get('coords'));
-  newCoords.splice(coordIndex, 1, Number(e.target.value))
-  modifyHydrant(selectedHydrant.get('id'), { coords: newCoords })
-}
+    const selections = (trail) => {
+      return (
+        <MenuItem key={trail.id} value={trail.id}> {trail.name} </MenuItem>
+      );
+    };
+    if (!hydrant) {
+      return null;
+    }
 
-console.log(selectedHydrant)
-
-
-
-const selections = (trail) => {
     return (
-      <MenuItem key={trail.id} value={trail.id}> {trail.name} </MenuItem>
+      <div>
+        <Card className={classes.card}>
+          <CardContent>
+            <Typography className={classes.title} color="textSecondary">
+              Hydrant
+            </Typography>
+
+            <FormControl>
+              <InputLabel htmlFor="trail-simple'"> Trail Name </InputLabel>
+              <Select
+                onChange={(e) => { modifyHydrant(hydrant.get('id'), { trail: e.target.value }); }}
+                value={hydrant.get('trail') || null}
+                inputProps={{
+                  name: 'trail',
+                  id: 'trail-simple',
+                }}
+              >
+              <MenuItem value={null}> None </MenuItem>
+              {_(trails.toJS()).values().orderBy('name').map((item) => selections(item)).value()}
+              </Select>
+            </FormControl>
+
+            <TextField
+              id="name"
+              label="Name"
+              className={classes.textField}
+              onChange={(e) => { modifyHydrant(hydrant.get('id'), { name: e.target.value }); }}
+              value={hydrant.get('name') || 'Unnamed'}
+              margin="normal"
+            />
+
+            <FormControl fullWidth>
+              <InputLabel> Coordinates </InputLabel>
+              <Input
+                type="number"
+                value={hydrant.get('coords')[1]}
+                onChange={(e) => { updateCoords(e, 1); }}
+              />
+              <FormHelperText>Lat.</FormHelperText>
+              <Input
+                type="number"
+                value={hydrant.get('coords')[0]}
+                onChange={(e)=> { updateCoords(e, 0); }}
+              />
+              <FormHelperText>Lng.</FormHelperText>
+            </FormControl>
+
+            <TextField
+              id="elevation"
+              label="Elevation"
+              className={classes.textField}
+              onChange={(e) => { modifyHydrant(hydrant.get('id'), { elevation: e.target.value }); }}
+              value={hydrant.get('elevation') || 'Null'}
+              margin="normal"
+            />
+            <Button variant="raised" color="secondary" onClick={() => { hydrantDeleted(hydrant.get('id')); }} >
+              Delete
+              <Delete />
+            </Button>
+          </CardContent>
+        </Card>
+      </div>
     );
-};
-
-return (
-  <div>
-    <Card className={classes.card}>
-      <CardContent>
-        <Typography className={classes.title} color="textSecondary">
-          Hydrant
-        </Typography>
-
-        <FormControl>
-          <InputLabel htmlFor="trail-simple'"> Trail Name </InputLabel>
-          <Select
-            onChange={(e) => { modifyHydrant(selectedHydrant.get('id'), { trail: e.target.value }); }}
-            value={selectedHydrant.get('trail') || 'Null'}
-            inputProps={{
-              name: 'trail',
-              id: 'trail-simple'
-            }}
-          >
-          <MenuItem value={null}> None </MenuItem>
-          {_(trails.toJS()).values().orderBy('name').map((item) => selections(item)).value()}
-          </Select>
-        </FormControl>
-
-        <TextField
-          id="name"
-          label="Name"
-          className={classes.textField}
-          onChange={(e) => { modifyHydrant(selectedHydrant.get('id'), { name: e.target.value }); }}
-          value={selectedHydrant.get('name') || 'Null'}
-          margin="normal"
-        />
-
-        <FormControl fullWidth>
-          <InputLabel> Coordinates </InputLabel>
-          <Input
-            type="number"
-            value={selectedHydrant.get('coords')[1]}
-            onChange={(e) => { updateCoords(e, 1); }}
-          />
-          <FormHelperText>Lat.</FormHelperText>
-          <Input
-            type="number"
-            value={selectedHydrant.get('coords')[0]}
-            onChange={(e)=> { updateCoords(e, 0); }}
-          />
-          <FormHelperText>Lng.</FormHelperText>
-        </FormControl>
-
-        <TextField
-          id="elevation"
-          label="Elevation"
-          className={classes.textField}
-          onChange={(e) => { modifyHydrant(selectedHydrant.get('id'), { elevation: e.target.value }); }}
-          value={selectedHydrant.get('elevation') || 'Null'}
-          margin="normal"
-        />
-
-        <Button variant="raised" color="secondary" onClick={() => { hydrantDeleted(selectedHydrant.get('id')); }} >
-          Delete
-          <Delete />
-        </Button>
-
-      </CardContent>
-    </Card>
-  </div>
-)
-
+  }
 }
 
 export default withStyles(styles)(HydrantForm);

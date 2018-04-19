@@ -148,70 +148,71 @@ class ImportExport extends React.Component {
     });
   }
 
-  handleSelect = event => {
+  handleSelect = (event) => {
     this.setState({
       selectedExport: event.target.value
     })
   }
 
   render() {
-    let style= {
-      float: 'left',
-    }
-    const { dialogOpen, selectedExport } = this.state
+    const { dialogOpen, selectedExport } = this.state;
 
+    const style = {
+      float: 'left',
+    };
     return (
       <div>
-          <div style={style}>
-          <Tooltip title="Import/Export" placement="top-start">
-          <IconButton onClick={this.handleOpen}>
-             <ImportExportIcon />
-            </IconButton>
-          </Tooltip>
+        <Tooltip title="Import/Export" placement="top-start" style={{marginLeft: '250px'}}>
+        {/*<IconButton onClick={this.handleOpen}>
+           <ImportExportIcon />
+          </IconButton>*/}
+        <Button onClick={this.handleOpen} 
+          style={{color: 'rgba(0,0,0,0.87)', backgroundColor: '#e0e0e0'}}
+        >Import/Export</Button>
+        </Tooltip>
+        <Dialog onBackdropClick={this.handleClose} open={dialogOpen} >
+          <DialogTitle >Import/Export</DialogTitle>
+          <div>
+            <List>
+              <ListItem>
+                <ListItemText primary='Import' />
+                <input onChange={this.changeFile} type="file" accept=".kml" />
+                <Button variant="raised" onClick={this.importFile} > Import </Button>
+              </ListItem>
+              <li>
+                <Divider inset />
+              </li>
+              <ListItem>
+                <ListItemText primary='Export' />
+                <FormGroup row>
+                  <FormControlLabel
+                    control={
+                      <Radio
+                      checked={selectedExport === 'trails'}
+                      onChange={this.handleSelect}
+                      value='trails'
+                      />
+                    }
+                    label="Trail Layer"
+                  />
+                  <FormControlLabel
+                    control={
+                      <Radio
+                      checked={selectedExport === 'hydrants'}
+                      onChange={this.handleSelect}
+                      value='hydrants'
+                      />
+                    }
+                    label="Hydrants Layer"
+                  />
+                </FormGroup>
+                <Button variant="raised"  onClick={this.exportFile} > Export </Button>
+              </ListItem>
+            </List>
           </div>
-          <Dialog onBackdropClick={this.handleClose} open={dialogOpen} >
-            <DialogTitle >Import/Export</DialogTitle>
-            <div>
-              <List>
-                <ListItem>
-                  <ListItemText primary='Import' />
-                  <input onChange={this.changeFile} type="file" accept=".kml" />
-                  <Button variant="raised" onClick={this.importFile} > Import </Button>
-                </ListItem>
-                <li>
-                  <Divider inset />
-                </li>
-                <ListItem>
-                  <ListItemText primary='Export' />
-                  <FormGroup row>
-                    <FormControlLabel
-                      control={
-                        <Radio
-                        checked={selectedExport === 'trails'}
-                        onChange={this.handleSelect}
-                        value='trails'
-                        />
-                      }
-                      label="Trail Layer"
-                    />
-                    <FormControlLabel
-                      control={
-                        <Radio
-                        checked={selectedExport === 'hydrants'}
-                        onChange={this.handleSelect}
-                        value='hydrants'
-                        />
-                      }
-                      label="Hydrants Layer"
-                    />
-                  </FormGroup>
-                  <Button variant="raised"  onClick={this.exportFile} > Export </Button>
-                </ListItem>
-              </List>
-            </div>
-          </Dialog>
+        </Dialog>
       </div>
-    )
+    );
   }
 }
 

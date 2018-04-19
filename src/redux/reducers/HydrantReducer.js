@@ -47,12 +47,15 @@ export default (state = initialState, action) => {
       if (editedFields.coords) {
         newHydrant.get('feature').getGeometry().setCoordinates(Projection.fromLonLat(editedFields.coords));
       }
+      if (_.has(editedFields, 'trail') && newHydrant.get('feature').get('selected')) {
+        newHydrant.get('feature').unset('selected');
+      }
       newHydrant.get('feature').changed();
 
       return {
         ...state,
-        hydrants: state.hydrants.set(id, newHydrant)
-      }
+        hydrants: state.hydrants.set(id, newHydrant),
+      };
     }
     case TRAIL_SELECTED: {
       // this is actually bad because state shouldnt cause side effects

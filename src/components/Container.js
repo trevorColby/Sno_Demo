@@ -1,14 +1,27 @@
 import React from 'react';
-import {connect} from 'react-redux';
+import { compose } from 'redux';
+import { connect } from 'react-redux';
 import _ from 'lodash';
 import Immutable from 'immutable';
-import { Grid } from 'material-ui';
+import { 
+  withStyles,
+  IconButton, Tooltip, Drawer, Button, Typography,
+  Toolbar, AppBar
+} from 'material-ui';
+import classNames from 'classnames';
+import MenuIcon from '@material-ui/icons/Menu';
+import ChevronLeftIcon from '@material-ui/icons/ChevronLeft';
+import ChevronRightIcon from '@material-ui/icons/ChevronRight';
+import CallMerge from '@material-ui/icons/CallMerge';
 import Projection from 'ol/proj';
-
-import { getElevation, getMapStyle } from '../utils/mapUtils';
 import { Trail, Hydrant } from '../utils/records';
+import appStyles from '../styles/drawer';
+
+import TrailList from './TrailList';
+import OpenLayersMap from './OpenLayersMap';
 import ImportExport from './ImportExport';
-import Drawer from './Drawer';
+import HydrantForm from './HydrantForm';
+
 import ActionTypes from '../redux/ActionTypes';
 
 const {
@@ -19,62 +32,78 @@ const {
   TRAIL_DELETED,
   HYDRANT_ADDED,
   HYDRANT_MODIFIED,
+  INTERACTION_CHANGED,
   HYDRANT_SELECTED,
-  HYDRANT_DELETED
+  HYDRANT_DELETED, 
 } = ActionTypes;
 
 
 class Container extends React.Component {
   constructor(props) {
     super(props);
-    /*
-    const savedTrails = localStorage.getItem('trails');
-    const savedHydrants = localStorage.getItem('hydrants');
-    let trails = savedTrails ? JSON.parse(savedTrails) : {};
-    let hydrants = savedHydrants ? JSON.parse(savedHydrants) : {};
-
-    let trails = Immutable.fromJS(trails)
-    let hydrants = Immutable.fromJS(hydrants)
-    */
-
+    this.drawEnd = this.drawEnd.bind(this);
+    this.modifyEnd = this.modifyEnd.bind(this);
     this.state = {
-      mode: 'trails',
-      canCreate: false,
+      drawerOpen: true,
     };
   }
 
-  createObject = (feature) => {
-    const { mode } = this.state;
-    const { trails, hydrants, selectedTrail, addTrail, addHydrant } = this.props;
-    feature.setStyle(getMapStyle);
+  newTrailClicked = () => {
+    const { addTrail } = this.props;
     let id = new Date().getTime();
     id = id.toString();
-    if (mode === 'hydrants') {
-      // 1 point, create a hydrant
+    const name = 'New Trail';
+    const trail = new Trail({ id, name, features: [] });
+    addTrail(trail);
+  }
+
+  drawEnd(feature) {
+    const { interaction, selectedTrail, trails, addTrail, addHydrant, modifyTrail } = this.props;
+    if (interaction === 'DRAW_MODIFY_TRAIL') {
+      const trail = trails.get(selectedTrail);
+      // set attributes on the feature, create a unique feature id
+      _.each(trail.get('features'), (f, index) => {
+        const id = `t-${trail.get('id')}-${index}`;
+        if (f.getId() !== id) {
+          f.setId(id);
+        }
+      });
+      const id = `t-${trail.get('id')}-${trail.get('features').length}`;
+      feature.set('name', trail.get('name'));
+      feature.set('selected', true);
+      feature.setId(id);
+      // modify the trail with new features array
+      const newFeatures = trail.get('features').concat(feature);
+      modifyTrail(trail.get('id'), { features: newFeatures });
+    } else if (interaction === 'DRAW_MODIFY_HYDRANTS') {
       const mapCoords = feature.getGeometry().getCoordinates();
       const coords = Projection.toLonLat(mapCoords);
       const name = '';
+      let id = new Date().getTime();
+      id = id.toString();
       const newHydrant = new Hydrant({
-        id, name, coords, feature, trail: selectedTrail,
+        id, name,
+        coords, feature,
+        trail: selectedTrail,
       });
-      feature.setId(`h${id}`);
+      feature.setId(`h-${id}-0`);
       if (selectedTrail) {
         feature.set('selected', true);
       }
       addHydrant(newHydrant);
-    } else {
-      const mapCoords = feature.getGeometry().getCoordinates()[0];
-      // >1 point, create a trail
-      const coords = _.map(mapCoords, (pt) => {
-        return Projection.toLonLat(pt);
-      });
-      const name = 'New Trail';
-      const newTrail = new Trail({
-        id, name, feature,
-      });
-      feature.setId(`t${id}`);
-      addTrail(newTrail);
-      this.setState({ canCreate: false });
+    }
+  }
+
+  modifyEnd(e) {
+    const { interaction, modifyHydrant } = this.props;
+    const features = e.features;
+    if (interaction === 'DRAW_MODIFY_HYDRANTS') {
+      const feature = _.find(features.getArray(), f => f.getId() && f.getId()[0] === 'h');
+      const hydrantId = feature.getId().split('-')[1];
+      const mapCoords = feature.getGeometry().getCoordinates();
+      const coords = Projection.toLonLat(mapCoords);
+      // do a projection and save them with modifyHyrant
+      modifyHydrant(hydrantId, { coords });
     }
   }
   /*
@@ -117,50 +146,113 @@ class Container extends React.Component {
     });
   }*/
 
-  toggleCreate = () => {
-    this.setState({
-      canCreate: !this.state.canCreate,
-    });
-  }
-
-  changeMode = (mode) => {
-    this.setState({
-      mode,
-      canCreate: false,
-    });
-  }
-
-  trailSelected = (id) => {
-    this.props.trailSelected(this.props.selectedTrail, id);
-    this.setState({ canCreate: false });
-  }
-
-  hydrantSelected = (id) => {
-    this.props.hydrantSelected(this.props.selectedHydrant, id)
-  }
-
-
   render() {
-    const { mode, canCreate } = this.state;
-    const { hydrants, trails, selectedTrail, selectedHydrant, modifyTrail, modifyHydrant, dataImported, hydrantDeleted } = this.props;
+    const {
+      hydrants, trails,
+      selectedTrail, trailSelected,
+      modifyTrail, modifyHydrant,
+      dataImported, interaction, interactionChanged,
+      classes, theme, selectedHydrant, hydrantDeleted,
+      hydrantSelected,
+    } = this.props;
+    const { drawerOpen } = this.state;
     return (
-      <Drawer
-        mode={mode}
-        canCreate={canCreate || mode === 'hydrants'}
-        toggleCreate={this.toggleCreate}
-        trailSelected={this.trailSelected}
-        createObject={this.createObject}
-        modifyTrail={modifyTrail}
-        modifyHydrant={modifyHydrant}
-        trails={trails}
-        hydrants={hydrants}
-        selectedTrail={selectedTrail}
-        selectedHydrant={selectedHydrant}
-        hydrantSelected={this.hydrantSelected}
-        hydrantDeleted={hydrantDeleted}
-        changeMode={this.changeMode}
-        importKMLClicked={dataImported}
-      />
+      <div className={classes.root}>
+        <div className={classes.appFrame}>
+          <AppBar
+            className={classNames(classes.appBar, {
+              [classes.appBarShift]: drawerOpen,
+              [classes[`appBarShift-left`]]: drawerOpen,
+            })}
+          >
+            <Toolbar disableGutters={!drawerOpen}>
+              <IconButton
+                color="inherit"
+                aria-label="open drawer"
+                onClick={() => this.setState({drawerOpen: true})}
+                className={classNames(classes.menuButton, drawerOpen && classes.hide)}
+              >
+                <MenuIcon />
+              </IconButton>
+              <Typography variant="title" color="inherit" noWrap>
+                SnoTrack
+              </Typography>
+              <div>
+                {/*<Tooltip title="Auto Associate Hydrants" placement="top-start">
+                  <IconButton>
+                    <CallMerge />
+                  </IconButton>
+                </Tooltip>*/}
+                <ImportExport
+                  importKMLClicked={dataImported}
+                  trails={trails}
+                  hydrants={hydrants}
+                />
+              </div>
+            </Toolbar>
+            <div id="searchLocations"></div>
+          </AppBar>
+          <Drawer
+            variant="persistent"
+            anchor='left'
+            open={drawerOpen}
+            classes={{
+              paper: classes.drawerPaper,
+            }}
+          >
+          <div className={classes.drawerHeader}>
+            <Button
+              variant="raised"
+              color={interaction === 'DRAW_MODIFY_TRAIL' ? 'primary' : 'default'}
+              onClick={() => interactionChanged('DRAW_MODIFY_TRAIL')}
+            >Trails</Button>
+            <Button
+              variant="raised"
+              color={interaction === 'DRAW_MODIFY_HYDRANTS' ? 'primary' : 'default'}
+              onClick={() => interactionChanged('DRAW_MODIFY_HYDRANTS')}
+            >Hydrants</Button>
+
+            <IconButton onClick={() => this.setState({ drawerOpen: false })}>
+              {theme.direction === 'rtl' ? <ChevronRightIcon /> : <ChevronLeftIcon />}
+            </IconButton>
+
+          </div>
+          <TrailList
+            newTrailClicked={this.newTrailClicked}
+            modifyTrail={modifyTrail}
+            trails={trails}
+            trailSelected={(id) => trailSelected(selectedTrail, id)}
+            hydrants={hydrants}
+            selected={selectedTrail}
+          />
+        </Drawer>
+        <main
+          className={classNames(classes.content, classes[`content-left`], {
+            [classes.contentShift]: drawerOpen,
+            [classes[`contentShift-left`]]: drawerOpen,
+          })}
+        >
+          <div className={classes.drawerHeader} />
+
+          <OpenLayersMap
+            interaction={interaction}
+            drawEnd={this.drawEnd}
+            modifyEnd={this.modifyEnd}
+            trails={trails}
+            hydrants={hydrants}
+            selectedTrail={selectedTrail}
+            hydrantSelected={hydrantSelected}
+          />
+          <HydrantForm
+            hydrant={hydrants.get(selectedHydrant)}
+            modifyHydrant={modifyHydrant}
+            hydrantDeleted={hydrantDeleted}
+            trails={trails}
+          />
+      )
+        </main>
+      </div>
+    </div>
     );
   }
 }
@@ -169,7 +261,8 @@ const mapStateToProps = state => ({
   trails: state.trails.trails,
   hydrants: state.hydrants.hydrants,
   selectedTrail: state.selectedTrail,
-  selectedHydrant: state.selectedHydrant
+  interaction: state.interaction,
+  selectedHydrant: state.selectedHydrant,
 });
 
 const mapDispatchToProps = dispatch => ({
@@ -188,16 +281,21 @@ const mapDispatchToProps = dispatch => ({
   trailSelected: (prevSelected, id) => dispatch({
     type: TRAIL_SELECTED, data: { prevSelected, selected: id },
   }),
-  hydrantSelected: (prevSelected, id) => dispatch({
-    type: HYDRANT_SELECTED, data: { prevSelected, selected: id },
+  hydrantSelected: id => dispatch({
+    type: HYDRANT_SELECTED, data: id,
   }),
   dataImported: data => dispatch({
     type: DATA_IMPORTED, data,
   }),
+  interactionChanged: data => dispatch({
+    type: INTERACTION_CHANGED, data,
+  }),
   hydrantDeleted: id => dispatch({
     type: HYDRANT_DELETED, data: { selected: id }
   }),
-
 });
 
-export default connect(mapStateToProps, mapDispatchToProps)(Container);
+export default compose(
+  withStyles(appStyles, { withTheme: true }),
+  connect(mapStateToProps, mapDispatchToProps),
+)(Container);
