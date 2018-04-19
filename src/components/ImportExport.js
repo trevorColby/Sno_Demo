@@ -77,7 +77,6 @@ class ImportExport extends React.Component {
         const kml = new KML().readFeatures(event.target.result);
         const newTrails = {};
         const newHydrants = {};
-
         _.each(kml, (feature, index) => {
           const type = feature.getGeometry().getType() === 'Polygon' ? 'trail' : 'hydrant';
           if (type === 'trail') {
@@ -120,12 +119,13 @@ class ImportExport extends React.Component {
     const { trails, hydrants } = this.props;
     const { selectedExport } = this.state;
 
-    const trailFeatures = _.values(trails.toJS()).map(item => item.feature);
-    const hydrantFeatures = _.values(hydrants.toJS()).map(item => item.feature);
+    const trailFeatures = _.flatMap(_.values(trails.toJS()), item => item.features);
+    const hydrantFeatures = _.flatMap(_.values(hydrants.toJS()),item => item.features);
+
 
     function GetKMLFromFeatures(features) {
       const format = new KML();
-      const kml = format.writeFeatures(features, {featureProjection: 'EPSG:3857'});
+      const kml = format.writeFeatures(features, { featureProjection: 'EPSG:3857' });
       return kml;
     }
 
@@ -166,7 +166,7 @@ class ImportExport extends React.Component {
         {/*<IconButton onClick={this.handleOpen}>
            <ImportExportIcon />
           </IconButton>*/}
-        <Button onClick={this.handleOpen} 
+        <Button onClick={this.handleOpen}
           style={{color: 'rgba(0,0,0,0.87)', backgroundColor: '#e0e0e0'}}
         >Import/Export</Button>
         </Tooltip>
