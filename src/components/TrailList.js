@@ -1,11 +1,11 @@
 import React from 'react'
 import _ from 'lodash';
-import { 
-  Icon, Table, TableBody, 
-  TableHead, TableCell, 
+import {
+  Icon, Table, TableBody,
+  TableHead, TableCell,
   TableRow, withStyles, Button } from 'material-ui';
 import TrailNameForm from './TrailNameForm';
-
+import ModeEdit from '@material-ui/icons/ModeEdit';
 
 const CustomTableCell = withStyles(theme => ({
   head: {
@@ -18,16 +18,9 @@ const CustomTableCell = withStyles(theme => ({
 }))(TableCell);
 
 class TrailList extends React.Component {
-  constructor(props) {
-    super(props);
-    this.state = {
-      editableTrail: null,
-    };
-  }
 
   renderTrail = (trail) => {
-    const { selected, trailSelected, modifyTrail, hydrants } = this.props;
-    const { editableTrail } = this.state;
+    const { selected, trailSelected, modifyTrail, hydrants, trailEditable, editableTrail } = this.props;
 
     const id = trail.id;
     const isSelected = selected === id;
@@ -42,25 +35,17 @@ class TrailList extends React.Component {
         style={{ borderTop: '2px solid black', cursor: 'pointer' }}
         onClick={() => trailSelected(isSelected ? null : id)}
       >
-       {isEditable ?
-        (<TableCell >
-          <TrailNameForm 
-            onSubmit={(name) => {modifyTrail(id, {name}); this.setState({editableTrail: null})}} 
-            trailName={trail.name} 
-          />
-         </TableCell>
-        ) : (
-         <TableCell>
-          {trail.name}
-          {isSelected ? (<Icon className="fa-xs fa fa-pencil-alt" onClick={(e) => {this.setState({editableTrail: id})}} />) : null}
-        </TableCell>
-        )
-       }
-
+      <TableCell>
+        {trail.name}
+      </TableCell>
         <TableCell>{hydrants.filter((h) => h.get('trail') === id).size}</TableCell>
         <TableCell>
-          <i onClick={(e) => {e.stopPropagation(); modifyTrail(id, null, true); }} style={{cursor: 'pointer'}} className="fa fa-trash-alt" />
+          {isSelected ? (
+            <Icon className="fa-xs fa fa-pencil-alt" style={{ fontSize: 20 }} onClick={(e) => { trailEditable(id); }} />
+          ) : null
+          }
         </TableCell>
+
       </TableRow>
     );
   }

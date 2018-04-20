@@ -14,6 +14,7 @@ const ActionTypes = keyMirror({
   TRAIL_SELECTED: null,
   INTERACTION_CHANGED: null,
   HYDRANT_SELECTED: null,
+  EDIT_TRAIL: null,
 });
 
 export default ActionTypes;

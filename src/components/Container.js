@@ -19,6 +19,7 @@ import TrailList from './TrailList';
 import OpenLayersMap from './OpenLayersMap';
 import ImportExport from './ImportExport';
 import HydrantForm from './HydrantForm';
+import TrailForm from './TrailForm';
 import AutoAssociate from './AutoAssociate';
 
 import ActionTypes from '../redux/ActionTypes';
@@ -33,7 +34,8 @@ const {
   HYDRANT_MODIFIED,
   INTERACTION_CHANGED,
   HYDRANT_SELECTED,
-  HYDRANT_DELETED, 
+  HYDRANT_DELETED,
+  EDIT_TRAIL
 } = ActionTypes;
 
 
@@ -58,9 +60,9 @@ class Container extends React.Component {
 
   drawEnd(e) {
     const { feature } = e;
-    const { interaction, selectedTrail, trails, addTrail, addHydrant, modifyTrail } = this.props;
+    const { interaction, selectedTrail, editableTrail, trails, addTrail, addHydrant, modifyTrail } = this.props;
     if (interaction === 'DRAW_MODIFY_TRAIL') {
-      const trail = trails.get(selectedTrail);
+      const trail = trails.get(editableTrail);
       // set attributes on the feature, create a unique feature id
       _.each(trail.get('features'), (f, index) => {
         const id = `t-${trail.get('id')}-${index}`;
@@ -149,6 +151,8 @@ class Container extends React.Component {
 
   render() {
     const {
+      trailEditable,
+      editableTrail,
       hydrants, trails,
       selectedTrail, trailSelected,
       modifyTrail, modifyHydrant,
@@ -157,6 +161,8 @@ class Container extends React.Component {
       hydrantSelected,
     } = this.props;
     const { drawerOpen } = this.state;
+
+    console.log(editableTrail)
     return (
       <div className={classes.root}>
         <div className={classes.appFrame}>
@@ -219,6 +225,8 @@ class Container extends React.Component {
 
           </div>
           <TrailList
+            trailEditable={trailEditable}
+            editableTrail={editableTrail}
             newTrailClicked={this.newTrailClicked}
             modifyTrail={modifyTrail}
             trails={trails}
@@ -241,6 +249,7 @@ class Container extends React.Component {
             modifyEnd={this.modifyEnd}
             trails={trails}
             hydrants={hydrants}
+            editableTrail={editableTrail}
             selectedTrail={selectedTrail}
             hydrantSelected={hydrantSelected}
           />
@@ -250,6 +259,14 @@ class Container extends React.Component {
             hydrantDeleted={hydrantDeleted}
             trails={trails}
           />
+
+          <TrailForm
+            trailEditable={trailEditable}
+            editableTrail={trails.get(editableTrail)}
+            modifyTrail= {modifyTrail}
+          />
+
+
       )
         </main>
       </div>
@@ -261,9 +278,10 @@ class Container extends React.Component {
 const mapStateToProps = state => ({
   trails: state.trails.trails,
   hydrants: state.hydrants.hydrants,
-  selectedTrail: state.selectedTrail,
+  selectedTrail: state.selectedTrail.selected,
   interaction: state.interaction,
   selectedHydrant: state.selectedHydrant,
+  editableTrail: state.selectedTrail.editable
 });
 
 const mapDispatchToProps = dispatch => ({
@@ -294,6 +312,9 @@ const mapDispatchToProps = dispatch => ({
   hydrantDeleted: id => dispatch({
     type: HYDRANT_DELETED, data: { selected: id }
   }),
+  trailEditable: id => dispatch({
+    type: EDIT_TRAIL, data: id
+  })
 });
 
 export default compose(
