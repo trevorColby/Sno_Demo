@@ -1,6 +1,7 @@
 import _ from 'lodash';
 import Immutable from 'immutable';
 import ActionTypes from '../ActionTypes';
+import { convertTrailFeaturesToDonuts } from '../../utils/mapUtils';
 
 const {
   DATA_IMPORTED,
@@ -55,10 +56,13 @@ export default (state = initialState, action) => {
     }
     case TRAIL_MODIFIED: {
       const { id, editedFields } = action.data;
-      const newTrail = state.trails.get(id)
+      let newTrail = state.trails.get(id)
         .withMutations((tr) => {
           _.each(editedFields, (val, key) => tr.set(key, val));
         });
+      if (_.has(editedFields, 'features')) {
+        newTrail = convertTrailFeaturesToDonuts(newTrail);
+      }
       _.each(newTrail.get('features'), (f) => {
         f.setProperties(editedFields);
         f.changed();

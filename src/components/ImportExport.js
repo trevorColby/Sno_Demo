@@ -14,12 +14,10 @@ import downloadjs from 'downloadjs';
 import ImportExportIcon from '@material-ui/icons/ImportExport';
 import Tooltip from 'material-ui/Tooltip';
 import IconButton from 'material-ui/IconButton';
-import { getMapStyle } from '../utils/mapUtils';
+import { getMapStyle, convertTrailFeaturesToDonuts } from '../utils/mapUtils';
 import { Trail, Hydrant } from '../utils/records';
 
-
 class ImportExport extends React.Component {
-
   constructor(props) {
     super(props);
     this.state = {
@@ -102,7 +100,7 @@ class ImportExport extends React.Component {
         });
 
         importKMLClicked({
-          trails: Immutable.Map(newTrails),
+          trails: Immutable.Map(newTrails).map(t => convertTrailFeaturesToDonuts(t)),
           hydrants:  Immutable.Map(newHydrants),
         });
       } catch (err) {

@@ -2,6 +2,7 @@ import Stroke from 'ol/style/stroke';
 import Fill from 'ol/style/fill';
 import Text from 'ol/style/text';
 import Style from 'ol/style/style';
+import LinearRing from 'ol/geom/linearring';
 import RegularShape from 'ol/style/regularshape';
 import axios from 'axios';
 import _ from 'lodash';
@@ -72,4 +73,29 @@ export function getElevation(coords) {
   const key = 'Rnodo0GTN0IK8fpaVlRuTh3H0vX7yX6T';
   return axios.get('http://open.mapquestapi.com/elevation/v1/profile?key='+ key + '&unit=f&shapeFormat=raw&latLngCollection=' + revcoords)
     .then(profile => profile.data.elevationProfile);
+}
+
+export function convertTrailFeaturesToDonuts(trail) {
+  const features = trail.get('features');
+  if (features.length > 1) {
+    const ringIndexes = [];
+    _.each(features, (f, index) => {
+      const coords = f.getGeometry().getCoordinates()[0];
+      _.each(features, (f2) => {
+        const isInside = _.reduce(coords, (soFarIsInside, coord) => {
+          return soFarIsInside && f2.getGeometry().intersectsCoordinate(coord);
+        }, true);
+        if (isInside) {
+          f2.getGeometry().appendLinearRing(new LinearRing(coords));
+          f.setId(`${f.getId()}-bad`);
+          f2.changed();
+          ringIndexes.push(index);
+        }
+      });
+    });
+    const newFeatures = _.clone(features);
+    _.each(ringIndexes.sort((a, b) => b - a), i => newFeatures.splice(i, 1));
+    return trail.set('features', newFeatures);
+  }
+  return trail;
 }

@@ -1,18 +1,16 @@
 import React from 'react';
 import { compose } from 'redux';
 import { connect } from 'react-redux';
-import _ from 'lodash';
-import Immutable from 'immutable';
-import { 
-  withStyles,
-  IconButton, Tooltip, Drawer, Button, Typography,
-  Toolbar, AppBar
-} from 'material-ui';
 import classNames from 'classnames';
+import _ from 'lodash';
+import {
+  withStyles,
+  IconButton, Drawer, Button, Typography,
+  Toolbar, AppBar,
+} from 'material-ui';
 import MenuIcon from '@material-ui/icons/Menu';
 import ChevronLeftIcon from '@material-ui/icons/ChevronLeft';
 import ChevronRightIcon from '@material-ui/icons/ChevronRight';
-import CallMerge from '@material-ui/icons/CallMerge';
 import Projection from 'ol/proj';
 import { Trail, Hydrant } from '../utils/records';
 import appStyles from '../styles/drawer';
