@@ -33,32 +33,24 @@ class OpenLayersMap extends React.Component {
   componentWillReceiveProps(nextProps) {
     const { trails, hydrants } = nextProps;
     // first sync to add externally-uploaded features or remove deleted ones
-    this.syncFeatures(trails, hydrants);
+    setTimeout(() => this.syncFeatures(trails, hydrants), 10);
+    // update interactions
+    this.updateInteractions(nextProps);
   }
 
   componentDidUpdate(prevProps) {
     const { selectedTrail, trails, interaction, hydrants } = this.props;
     const { map } = this.state;
 
-    // update interactions
-    if (
-      interaction !== prevProps.interaction ||
-      selectedTrail !== prevProps.selectedTrail ||
-      hydrants.size !== prevProps.hydrants.size ||
-      (selectedTrail === prevProps.selectedTrail &&
-        trails.getIn([selectedTrail, 'features'], []).length !== prevProps.trails.getIn([selectedTrail, 'features'], []).length)) {
-      this.updateInteractions();
-    }
-
     // pan to new selectedTrail
     if (selectedTrail !== prevProps.selectedTrail && selectedTrail) {
 
       try {
         const firstTrailGeom = trails.getIn([selectedTrail, 'features'])[0].getGeometry()
-        const geomExtent = firstTrailGeom.getExtent()
-        const view = map.getView()
-        const zoomResolution = view.getResolutionForExtent(geomExtent)
-        const zoomLevel = view.getZoomForResolution(zoomResolution)
+        const geomExtent = firstTrailGeom.getExtent();
+        const view = map.getView();
+        const zoomResolution = view.getResolutionForExtent(geomExtent);
+        const zoomLevel = view.getZoomForResolution(zoomResolution);
 
         const firstCoords = firstTrailGeom.getInteriorPoint().getCoordinates();
         map.getView().animate({
@@ -71,6 +63,18 @@ class OpenLayersMap extends React.Component {
         // map.getView().fit(firstTrailGeom, map.getSize());
       } catch (err) {
         console.log('No coordinates found for this trail');
+      }
+    }
+  }
+
+  onMapClick = (e) => {
+    const { interaction, hydrantSelected } = this.props;
+    const { map } = this.state;
+    const features = map.getFeaturesAtPixel(e.pixel);
+    if (features && interaction === 'DRAW_MODIFY_HYDRANTS') {
+      const match = _.find(features, f => f.getId() && f.getId()[0] === 'h');
+      if (match) {
+        hydrantSelected(match.getId().split('-')[1]);
       }
     }
   }
@@ -125,12 +129,12 @@ class OpenLayersMap extends React.Component {
     this.setState({ map });
   }
 
-  updateInteractions() {
+  updateInteractions(nextProps) {
     const {
       trails, hydrants,
       selectedTrail, interaction,
-      modifyEnd, drawEnd
-    } = this.props;
+      modifyEnd, drawEnd,
+    } = nextProps;
     const { source, map, mapInteractions } = this.state;
     _.each(mapInteractions, i => map.removeInteraction(i));
 
@@ -171,18 +175,6 @@ class OpenLayersMap extends React.Component {
 
     _.each(newInteractions, i => map.addInteraction(i));
     this.setState({ mapInteractions: newInteractions });
-  }
-
-  onMapClick = (e) => {
-    const { interaction, hydrantSelected } = this.props;
-    const { map } = this.state;
-    const features = map.getFeaturesAtPixel(e.pixel);
-    if (features && interaction === 'DRAW_MODIFY_HYDRANTS') {
-      const match = _.find(features, f => f.getId() && f.getId()[0] === 'h');
-      if (match) {
-        hydrantSelected(match.getId().split('-')[1]);
-      }
-    }
   }
 
   syncFeatures(trails, hydrants) {

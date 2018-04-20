@@ -1,18 +1,16 @@
 import React from 'react';
 import { compose } from 'redux';
 import { connect } from 'react-redux';
-import _ from 'lodash';
-import Immutable from 'immutable';
-import { 
-  withStyles,
-  IconButton, Tooltip, Drawer, Button, Typography,
-  Toolbar, AppBar
-} from 'material-ui';
 import classNames from 'classnames';
+import _ from 'lodash';
+import {
+  withStyles,
+  IconButton, Drawer, Button, Typography,
+  Toolbar, AppBar,
+} from 'material-ui';
 import MenuIcon from '@material-ui/icons/Menu';
 import ChevronLeftIcon from '@material-ui/icons/ChevronLeft';
 import ChevronRightIcon from '@material-ui/icons/ChevronRight';
-import CallMerge from '@material-ui/icons/CallMerge';
 import Projection from 'ol/proj';
 import { Trail, Hydrant } from '../utils/records';
 import appStyles from '../styles/drawer';
@@ -21,6 +19,7 @@ import TrailList from './TrailList';
 import OpenLayersMap from './OpenLayersMap';
 import ImportExport from './ImportExport';
 import HydrantForm from './HydrantForm';
+import AutoAssociate from './AutoAssociate';
 
 import ActionTypes from '../redux/ActionTypes';
 
@@ -179,12 +178,12 @@ class Container extends React.Component {
               <Typography variant="title" color="inherit" noWrap>
                 SnoTrack
               </Typography>
-              <div>
-                {/*<Tooltip title="Auto Associate Hydrants" placement="top-start">
-                  <IconButton>
-                    <CallMerge />
-                  </IconButton>
-                </Tooltip>*/}
+              <div style={{ marginLeft: '200px' }}>
+                <AutoAssociate
+                  trails={trails}
+                  hydrants={hydrants}
+                  modifyHydrant={modifyHydrant}
+                />
                 <ImportExport
                   importKMLClicked={dataImported}
                   trails={trails}
