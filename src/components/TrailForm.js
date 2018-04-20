@@ -49,7 +49,14 @@ class TrailForm extends React.Component {
     } = this.props;
 
     const deletePoly = (featureIndex) => {
-      console.log(featureIndex)
+      const newFeatures = _.clone(editableTrail.get('features'))
+      newFeatures.splice(1,featureIndex)
+      modifyTrail(editableTrail.get('id'), {features: newFeatures})
+    }
+
+    const highlightPoly = (feature) => {
+      feature.set('highlighted', true)
+      feature.changed()
     }
 
     if(!editableTrail){
@@ -58,7 +65,7 @@ class TrailForm extends React.Component {
 
     const polygons = editableTrail.get('features').map((feature, index) => {
       return (
-        <ListItem key={feature.get('id')}>
+        <ListItem key={feature.get('id')} onHover={}>
           {`Trail Section ${index + 1}`}
           <Delete onClick={ () => {deletePoly(index)}} />
         </ListItem>
@@ -72,11 +79,9 @@ class TrailForm extends React.Component {
             <Typography className={classes.title} color="textSecondary">
               Trail
             </Typography>
-
             <List>
             {polygons}
             </List>
-
             // <Button variant="raised" color="secondary" >
             //   Delete
             //   <Delete />
