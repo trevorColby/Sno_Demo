@@ -28,12 +28,30 @@ class TrailList extends React.Component {
     const rowClass = isSelected ? 'selected' : '';
     const iconClass = `fa fa-${isSelected ? 'minus' : 'plus'}`;
 
+    const toggleHighlight = () => {
+      _.each(trail.features, (f)=> {
+        if (f.get('highlighted')){
+          f.unset('highlighted')
+        } else {
+           f.set('highlighted', true)
+        }
+        f.changed()
+      })
+
+    }
+
+    const handleSelected = () => {
+        isSelected ? null : trailSelected(id)
+    };
+
     return (
       <TableRow
         key={id}
         className={rowClass}
         style={{ borderTop: '2px solid black', cursor: 'pointer' }}
-        onClick={() => trailSelected(isSelected ? null : id)}
+        onClick={handleSelected}
+        onMouseEnter={toggleHighlight}
+        onMouseLeave={toggleHighlight}
       >
       <TableCell>
         {trail.name}

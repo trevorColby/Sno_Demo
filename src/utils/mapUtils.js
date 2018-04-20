@@ -29,9 +29,6 @@ export function getMapStyle(feature, resolution) {
         }),
       });
     }
-    if(feature.get('highlighted')){
-      
-    })
     return new Style({
       image: new RegularShape({
         fill,
@@ -61,6 +58,9 @@ export function getMapStyle(feature, resolution) {
       // changes for selected trails
       fill.setColor('rgba(255,255,255,0.7)');
       stroke.setWidth(3);
+    }
+    if (feature.get('highlighted')){
+      fill.setColor('yellow');
     }
     return new Style({
       fill,

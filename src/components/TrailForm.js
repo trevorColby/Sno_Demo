@@ -39,7 +39,6 @@ const styles = {
 
 class TrailForm extends React.Component {
 
-
   render() {
     const {
       classes,
@@ -59,13 +58,18 @@ class TrailForm extends React.Component {
       feature.changed()
     }
 
+    const unHighlightPoly = (feature) => {
+      feature.unset('highlighted')
+      feature.changed()
+    }
+
     if(!editableTrail){
       return null
     }
 
     const polygons = editableTrail.get('features').map((feature, index) => {
       return (
-        <ListItem key={feature.get('id')} onHover={}>
+        <ListItem key={feature.get('id')} onMouseEnter={() => highlightPoly(feature)} onMouseLeave={()=> unHighlightPoly(feature)}>
           {`Trail Section ${index + 1}`}
           <Delete onClick={ () => {deletePoly(index)}} />
         </ListItem>
@@ -82,10 +86,6 @@ class TrailForm extends React.Component {
             <List>
             {polygons}
             </List>
-            // <Button variant="raised" color="secondary" >
-            //   Delete
-            //   <Delete />
-            </Button>
           </CardContent>
         </Card>
       </div>

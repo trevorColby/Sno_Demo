@@ -14,13 +14,17 @@ export default (state = initialState, action) => {
     case TRAIL_SELECTED: {
       return {
         ...state,
-        selected: action.data.selected
+        selected: action.data.selected,
+        editable: null
       };
     }
     case TRAIL_DELETED: {
       const trailId = action.data.selected;
       if (trailId === state.selectedTrail) {
-        return null;
+        return {
+          ...state,
+          selected: null,
+        };
       }
       return state;
     }
@@ -30,10 +34,10 @@ export default (state = initialState, action) => {
         selected: action.data.get('id'),
       };
     case EDIT_TRAIL:
-    console.log(action.data)
       return {
         ...state,
         editable: action.data,
+        selected: action.data
       };
     default:
       return state;
