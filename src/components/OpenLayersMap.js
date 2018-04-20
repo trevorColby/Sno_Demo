@@ -93,9 +93,10 @@ class OpenLayersMap extends React.Component {
       visible: true,
       preload: Infinity,
       source: new BingMaps({
-        hidpi: true,
+        hidpi: false,
         key: 'ApcR8_wnFxnsXwuY_W2mPQuMb-QB0Kg-My65RJYZL2g9fN6NCFA8-s0lsvxTTs2G',
         imagerySet: 'Aerial',
+        maxZoom: 19,
       }),
     });
     const geocoder = new Geocoder('nominatim', {
