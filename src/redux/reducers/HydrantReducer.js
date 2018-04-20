@@ -33,7 +33,7 @@ export default (state = initialState, action) => {
       const hydrantId = action.data.selected;
       return {
         ...state,
-        hydrants: state.hydrants.delete(hydrantId)
+        hydrants: state.hydrants.delete(hydrantId),
       };
     }
     case HYDRANT_MODIFIED: {
@@ -42,7 +42,6 @@ export default (state = initialState, action) => {
         .withMutations((h) => {
           _.each(editedFields, (val, key) => h.set(key, val));
         });
-      // console.log(newHydrant.toJS())
       newHydrant.get('feature').setProperties(editedFields);
       if (editedFields.coords) {
         newHydrant.get('feature').getGeometry().setCoordinates(Projection.fromLonLat(editedFields.coords));

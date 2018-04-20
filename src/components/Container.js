@@ -56,7 +56,8 @@ class Container extends React.Component {
     addTrail(trail);
   }
 
-  drawEnd(feature) {
+  drawEnd(e) {
+    const { feature } = e;
     const { interaction, selectedTrail, trails, addTrail, addHydrant, modifyTrail } = this.props;
     if (interaction === 'DRAW_MODIFY_TRAIL') {
       const trail = trails.get(selectedTrail);
@@ -81,8 +82,10 @@ class Container extends React.Component {
       let id = new Date().getTime();
       id = id.toString();
       const newHydrant = new Hydrant({
-        id, name,
-        coords, feature,
+        id,
+        name,
+        coords,
+        feature,
         trail: selectedTrail,
       });
       feature.setId(`h-${id}-0`);
@@ -95,13 +98,12 @@ class Container extends React.Component {
 
   modifyEnd(e) {
     const { interaction, modifyHydrant } = this.props;
-    const features = e.features;
-    if (interaction === 'DRAW_MODIFY_HYDRANTS') {
-      const feature = _.find(features.getArray(), f => f.getId() && f.getId()[0] === 'h');
+    const { features } = e;
+    if (interaction === 'DRAW_MODIFY_HYDRANTS' && features.item(0)) {
+      const feature = features.item(0);
       const hydrantId = feature.getId().split('-')[1];
       const mapCoords = feature.getGeometry().getCoordinates();
       const coords = Projection.toLonLat(mapCoords);
-      // do a projection and save them with modifyHyrant
       modifyHydrant(hydrantId, { coords });
     }
   }

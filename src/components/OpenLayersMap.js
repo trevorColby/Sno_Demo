@@ -11,7 +11,7 @@ import SourceVector from 'ol/source/vector';
 import Draw from 'ol/interaction/draw';
 import Modify from 'ol/interaction/modify';
 import Snap from 'ol/interaction/snap';
-//import Geocoder from 'ol-geocoder';
+import Geocoder from 'ol-geocoder';
 import { getMapStyle } from '../utils/mapUtils';
 
 class OpenLayersMap extends React.Component {
@@ -91,7 +91,7 @@ class OpenLayersMap extends React.Component {
         imagerySet: 'Aerial',
       }),
     });
-    /*const geocoder = new Geocoder('nominatim', {
+    const geocoder = new Geocoder('nominatim', {
       provider: 'osm',
       lang: 'en',
       placeholder: 'Search for ...',
@@ -100,7 +100,7 @@ class OpenLayersMap extends React.Component {
       autoComplete: true,
     });
 
-    geocoder.setTarget(document.getElementById('searchLocations'));*/
+    geocoder.setTarget(document.getElementById('searchLocations'));
 
     const resortLayer = new LayerVector({
       source,
@@ -124,7 +124,7 @@ class OpenLayersMap extends React.Component {
     });
 
     // Controls
-    // map.addControl(geocoder);
+    map.addControl(geocoder);
     map.on('click', this.onMapClick);
     this.setState({ map });
   }
@@ -133,7 +133,7 @@ class OpenLayersMap extends React.Component {
     const {
       trails, hydrants,
       selectedTrail, interaction,
-      modifyEnd,
+      modifyEnd, drawEnd,
     } = nextProps;
     const { source, map, mapInteractions } = this.state;
     _.each(mapInteractions, i => map.removeInteraction(i));
@@ -141,7 +141,7 @@ class OpenLayersMap extends React.Component {
     const newInteractions = [];
     // create new draw or modify interactions
     let type = null;
-    const modifiable = new Collection([]);
+    const modifiable = [];
     if (interaction === 'DRAW_MODIFY_TRAIL' && selectedTrail) {
       type = 'Polygon';
       _.each(trails.getIn([selectedTrail, 'features']), f => modifiable.push(f));
@@ -154,14 +154,15 @@ class OpenLayersMap extends React.Component {
       const draw = new Draw({
         source, type, geometryName: type,
       });
-      draw.on('drawend', this.drawEnd);
+      draw.on('drawend', drawEnd);
       newInteractions.push(draw);
     }
-    if (modifiable.getLength()) {
-      const modify = new Modify({ features: modifiable });
-      modify.on('modifyend', modifyEnd);
-      modify.on('modifystart', this.modifyStart);
-      newInteractions.push(modify);
+    if (modifiable.length) {
+      _.each(modifiable, (m) => {
+        const modify = new Modify({ features: new Collection([m]) });
+        modify.on('modifyend', modifyEnd);
+        newInteractions.push(modify);
+      });
     }
 
     if (interaction === 'DRAW_MODIFY_TRAIL') {
@@ -174,54 +175,6 @@ class OpenLayersMap extends React.Component {
 
     _.each(newInteractions, i => map.addInteraction(i));
     this.setState({ mapInteractions: newInteractions });
-  }
-
-  drawEnd = (e) => {
-    const { drawEnd, interaction, hydrantSelected } = this.props;
-    const { map } = this.state;
-    if (interaction === 'DRAW_MODIFY_HYDRANTS') {
-      const coords = e.feature.getGeometry().getCoordinates();
-      const pixel = map.getPixelFromCoordinate(coords);
-      const features = map.getFeaturesAtPixel(pixel);
-      if (features) {
-        const match = _.reduce(features, (curr, f) => {
-          if (curr) {
-            return curr;
-          } else {
-            const featureId = f.getId() || '';
-            const [type, hydrantId, number] = featureId.split('-');
-            return type === 'h' ? hydrantId : curr;
-          }
-        }, null);
-        if (match) {
-          return;
-        }
-      }
-    }
-    return drawEnd(e.feature);
-  }
-
-  modifyStart = (e) => {
-    const { interaction, hydrantSelected } = this.props;
-    const { map } = this.state;
-    if (interaction === 'DRAW_MODIFY_HYDRANTS') {
-      const pixel = e.target.lastPixel_;
-      const features = map.getFeaturesAtPixel(pixel);
-      if (features) {
-        const match = _.reduce(features, (curr, f) => {
-          if (curr) {
-            return curr;
-          } else {
-            const featureId = f.getId() || '';
-            const [type, hydrantId, number] = featureId.split('-');
-            return type === 'h' ? hydrantId : curr;
-          }
-        }, null);
-        if (match) {
-          hydrantSelected(match);
-        }
-      }
-    }
   }
 
   syncFeatures(trails, hydrants) {
@@ -254,7 +207,7 @@ class OpenLayersMap extends React.Component {
         const [type, id, number] = featureId.split('-');
         if (type === 't') {
           if (!trails.has(id) || !_.find(trails.get(id).features, f => f.getId() === featureId)) {
-          source.removeFeature(feature);
+            source.removeFeature(feature);
           }
         }
         else if (type === 'h' && !hydrants.has(id)) {

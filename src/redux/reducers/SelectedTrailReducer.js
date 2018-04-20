@@ -3,6 +3,7 @@ import ActionTypes from '../ActionTypes';
 const {
   TRAIL_SELECTED,
   TRAIL_DELETED,
+  TRAIL_ADDED,
 } = ActionTypes;
 
 const initialState = null;
@@ -19,6 +20,8 @@ export default (state = initialState, action) => {
       }
       return state;
     }
+    case TRAIL_ADDED:
+      return action.data.get('id');
     default:
       return state;
   }

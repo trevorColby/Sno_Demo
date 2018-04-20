@@ -5,6 +5,7 @@ const {
   HYDRANT_DELETED,
   HYDRANT_ADDED,
   TRAIL_SELECTED,
+  HYDRANT_MODIFIED,
 } = ActionTypes;
 
 const initialState = null;
@@ -23,6 +24,8 @@ export default (state = initialState, action) => {
       }
       return state;
     }
+    case HYDRANT_MODIFIED:
+      return action.data.id;
     default:
       return state;
   }
