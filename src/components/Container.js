@@ -222,6 +222,7 @@ class Container extends React.Component {
             selected={selectedTrail}
             interactionChanged={interactionChanged}
           />
+
         </Drawer>
         <main
           className={classNames(classes.content, classes[`content-left`], {
@@ -255,9 +256,6 @@ class Container extends React.Component {
             editableTrail={trails.get(editableTrail)}
             modifyTrail= {modifyTrail}
           />
-
-
-      )
         </main>
       </div>
     </div>

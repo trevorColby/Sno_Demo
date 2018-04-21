@@ -72,7 +72,7 @@ class TrailList extends React.Component {
     const {trails, trailSelected, selected, hydrants, newTrailClicked, interactionChanged} = this.props;
     const orphanCount = hydrants.filter((h) => h.get('trail') === null).size;
     return (
-      <Table >
+      <Table>
         <TableHead>
           <TableRow>
             <CustomTableCell>Trail Name</CustomTableCell>
