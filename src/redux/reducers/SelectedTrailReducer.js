@@ -32,6 +32,7 @@ export default (state = initialState, action) => {
       return {
         ...state,
         selected: action.data.get('id'),
+        editable: action.data.get('id'),
       };
     case EDIT_TRAIL:
       return {

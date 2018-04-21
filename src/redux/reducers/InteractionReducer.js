@@ -2,6 +2,8 @@ import ActionTypes from '../ActionTypes';
 
 const {
   INTERACTION_CHANGED,
+  EDIT_TRAIL,
+  TRAIL_ADDED
 } = ActionTypes;
 
 const initialState = 'DRAW_MODIFY_TRAIL';
@@ -15,6 +17,12 @@ export default (state = initialState, action) => {
         return action.data;
       }
       return state;
+    }
+    case EDIT_TRAIL: {
+      return initialState
+    }
+    case TRAIL_ADDED: {
+      return initialState
     }
     default:
       return state;

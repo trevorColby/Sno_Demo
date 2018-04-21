@@ -161,8 +161,6 @@ class Container extends React.Component {
       hydrantSelected,
     } = this.props;
     const { drawerOpen } = this.state;
-
-    console.log(editableTrail)
     return (
       <div className={classes.root}>
         <div className={classes.appFrame}>
@@ -208,17 +206,6 @@ class Container extends React.Component {
             }}
           >
           <div className={classes.drawerHeader}>
-            <Button
-              variant="raised"
-              color={interaction === 'DRAW_MODIFY_TRAIL' ? 'primary' : 'default'}
-              onClick={() => interactionChanged('DRAW_MODIFY_TRAIL')}
-            >Trails</Button>
-            <Button
-              variant="raised"
-              color={interaction === 'DRAW_MODIFY_HYDRANTS' ? 'primary' : 'default'}
-              onClick={() => interactionChanged('DRAW_MODIFY_HYDRANTS')}
-            >Hydrants</Button>
-
             <IconButton onClick={() => this.setState({ drawerOpen: false })}>
               {theme.direction === 'rtl' ? <ChevronRightIcon /> : <ChevronLeftIcon />}
             </IconButton>
@@ -233,6 +220,7 @@ class Container extends React.Component {
             trailSelected={(id) => trailSelected(selectedTrail, id)}
             hydrants={hydrants}
             selected={selectedTrail}
+            interactionChanged={interactionChanged}
           />
         </Drawer>
         <main
@@ -261,6 +249,8 @@ class Container extends React.Component {
           />
 
           <TrailForm
+            interactionChanged={interactionChanged}
+            interaction={interaction}
             trailEditable={trailEditable}
             editableTrail={trails.get(editableTrail)}
             modifyTrail= {modifyTrail}

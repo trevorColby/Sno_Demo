@@ -15,6 +15,12 @@ import List, { ListItem, ListItemIcon, ListItemText } from 'material-ui/List';
 
 
 const styles = {
+  root: {
+    float: 'right',
+  },
+  input: {
+    float: 'left',
+  },
   card: {
     minWidth: 275,
     position: 'absolute',
@@ -26,10 +32,6 @@ const styles = {
     marginRight: '1em',
     width: 200,
     display: 'block',
-  },
-  title: {
-    marginBottom: 16,
-    fontSize: 14,
   },
   pos: {
     marginBottom: 12,
@@ -44,12 +46,16 @@ class TrailForm extends React.Component {
       classes,
       modifyTrail,
       editableTrail,
-      trailEditable
+      trailEditable,
+      interaction,
+      interactionChanged
     } = this.props;
+
+    const isTrailMode = interaction === 'DRAW_MODIFY_TRAIL'
 
     const deletePoly = (featureIndex) => {
       const newFeatures = _.clone(editableTrail.get('features'))
-      newFeatures.splice(1,featureIndex)
+      newFeatures.splice(featureIndex,1)
       modifyTrail(editableTrail.get('id'), {features: newFeatures})
     }
 
@@ -80,13 +86,48 @@ class TrailForm extends React.Component {
       <div>
         <Card className={classes.card}>
           <CardContent>
-            <Typography className={classes.title} color="textSecondary">
-              Trail
+            <Typography className={classes.title} variant="title" color="textSecondary">
+              <Input
+              className={classes.input}
+              value={editableTrail.get('name')}
+              onChange={(e)=>{ modifyTrail(editableTrail.get('id'), { name: e.target.value }) }}
+              >
+              </Input>
             </Typography>
-            <List>
+            <List
+            className={classes.root}
+            >
             {polygons}
             </List>
           </CardContent>
+
+          {isTrailMode ?
+          (
+            <Button
+            onClick={()=> interactionChanged('DRAW_MODIFY_HYDRANTS')}
+            variant
+            >
+            Edit Hydrants
+            </Button>
+          ) :
+          <Button
+          onClick={()=> interactionChanged('DRAW_MODIFY_TRAIL')}
+          >
+            Edit Trail
+          </Button>
+
+        }
+
+
+
+
+
+          <Button
+          onClick={()=> {trailEditable(null)}}
+          >
+          Close
+          </Button>
+
         </Card>
       </div>
     );

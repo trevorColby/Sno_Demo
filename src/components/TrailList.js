@@ -69,21 +69,30 @@ class TrailList extends React.Component {
   }
 
   render() {
-    const {trails, trailSelected, selected, hydrants, newTrailClicked} = this.props;
+    const {trails, trailSelected, selected, hydrants, newTrailClicked, interactionChanged} = this.props;
     const orphanCount = hydrants.filter((h) => h.get('trail') === null).size;
     return (
-      <Table style={{height: '100%'}}>
+      <Table >
         <TableHead>
           <TableRow>
             <CustomTableCell>Trail Name</CustomTableCell>
             <CustomTableCell>Hydrants</CustomTableCell>
-            <CustomTableCell  />
+            <CustomTableCell />
           </TableRow>
         </TableHead>
         <TableBody style={{overflowY: 'auto', height: '100%', width: '95%'}}>
-          <TableRow><TableCell><Button onClick={newTrailClicked}>
-            CREATE NEW TRAIL
-          </Button></TableCell></TableRow>
+          <TableRow>
+            <TableCell>
+              <Button onClick={newTrailClicked}>
+                CREATE NEW TRAIL
+              </Button>
+            </TableCell>
+            <TableCell>
+              <Button onClick={() => { interactionChanged('DRAW_MODIFY_HYDRANTS'); }}>
+                ADD HYDRANTS
+              </Button>
+            </TableCell>
+          </TableRow>
           {orphanCount ? (
             <TableRow
               className={selected === null ? 'selected' : ''}
