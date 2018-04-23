@@ -182,7 +182,7 @@ class Container extends React.Component {
                 <AutoAssociate
                   trails={trails}
                   hydrants={hydrants}
-                  modifyHydrant={modifyHydrant}
+                  dataImported={dataImported}
                 />
                 <ImportExport
                   importKMLClicked={dataImported}

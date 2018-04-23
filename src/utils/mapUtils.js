@@ -69,10 +69,28 @@ export function getMapStyle(feature, resolution) {
 
 // Takes a series of ol coordinates and returns the elevation profile for those coordinates
 export function getElevation(coords) {
-  const revcoords = _.reverse(_.clone(coords));
   const key = 'Rnodo0GTN0IK8fpaVlRuTh3H0vX7yX6T';
-  return axios.get('http://open.mapquestapi.com/elevation/v1/profile?key='+ key + '&unit=f&shapeFormat=raw&latLngCollection=' + revcoords)
-    .then(profile => profile.data.elevationProfile);
+  return axios.get('http://open.mapquestapi.com/elevation/v1/profile', {
+    params: {
+      key,
+      unit: 'f',
+      shapeFormat: 'raw',
+      latLngCollection: coords,
+    },
+  })
+    .then(resp => {
+      // convert response into elevation profile with original coordinates
+      return _.map(resp.data.elevationProfile, (pt, i) => {
+        // when the mapquestapi can't calculate elevation it return -32768
+        // let's correct it to null
+        if (pt.height === -32768) {
+          pt.height = null;
+        }
+        pt.latitude = resp.data.shapePoints[i*2];
+        pt.longitude = resp.data.shapePoints[i*2 + 1];
+        return pt;
+      });
+    });
 }
 
 export function convertTrailFeaturesToDonuts(trail) {

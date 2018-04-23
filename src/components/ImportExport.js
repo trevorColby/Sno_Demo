@@ -61,7 +61,7 @@ class ImportExport extends React.Component {
       const geometry = feature.getGeometry().getType() === 'Point' ?
         feature.getGeometry() : feature.getGeometry().getGeometries()[0];
       feature.setGeometry(geometry);
-      const coords = geometry.getCoordinates();
+      const coords = geometry.getCoordinates().slice(0,2);
       feature.getGeometry().setCoordinates(Projection.fromLonLat(coords.slice(0,2)));
       feature.setId(`h-${id}-${index}`);
       feature.set('trailName', trailName);
