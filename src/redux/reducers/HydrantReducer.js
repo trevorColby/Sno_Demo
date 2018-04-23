@@ -3,7 +3,6 @@ import Immutable from 'immutable';
 import ActionTypes from '../ActionTypes';
 import Projection from 'ol/proj';
 
-
 const {
   DATA_IMPORTED,
   HYDRANT_ADDED,
@@ -17,6 +16,20 @@ const {
 const initialState = {
   hydrants: Immutable.Map(),
 };
+
+function updateHydrantFeatures(hydrant, editedFields) {
+  const feature = hydrant.get('feature');
+  if (editedFields.name) {
+    feature.set('name', editedFields.name);
+  }
+  if (editedFields.coords) {
+    feature.getGeometry().setCoordinates(Projection.fromLonLat(editedFields.coords));
+  }
+  if (_.has(editedFields, 'trail') && feature.get('selected')) {
+    feature.unset('selected');
+  }
+  feature.changed();
+}
 
 export default (state = initialState, action) => {
   switch (action.type) {
@@ -38,19 +51,10 @@ export default (state = initialState, action) => {
     }
     case HYDRANT_MODIFIED: {
       const { id, editedFields } = action.data;
-      const newHydrant = state.hydrants.get(id)
-        .withMutations((h) => {
-          _.each(editedFields, (val, key) => h.set(key, val));
-        });
-      newHydrant.get('feature').setProperties(editedFields);
-      if (editedFields.coords) {
-        newHydrant.get('feature').getGeometry().setCoordinates(Projection.fromLonLat(editedFields.coords));
-      }
-      if (_.has(editedFields, 'trail') && newHydrant.get('feature').get('selected')) {
-        newHydrant.get('feature').unset('selected');
-      }
-      newHydrant.get('feature').changed();
-
+      const newHydrant = state.hydrants.get(id).withMutations((h) => {
+        _.each(editedFields, (val, key) => h.set(key, val));
+      });
+      updateHydrantFeatures(newHydrant);
       return {
         ...state,
         hydrants: state.hydrants.set(id, newHydrant),
@@ -95,12 +99,21 @@ export default (state = initialState, action) => {
     }
     case DATA_IMPORTED: {
       const { hydrants } = action.data;
+      const mergedHydrants = state.hydrants.withMutations((map) => {
+        hydrants.forEach((h) => {
+          const id = h.get('id');
+          if (map.get(id)) {
+            updateHydrantFeatures(h, h.toJS());
+          }
+          map.set(id, h);
+        });
+      });
       return {
         ...state,
-        hydrants: state.hydrants.merge(hydrants),
-      }
+        hydrants: mergedHydrants,
+      };
     }
     default:
       return state;
   }
-}
+};

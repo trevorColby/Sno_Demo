@@ -108,7 +108,7 @@ class ImportExport extends React.Component {
       }
     };
 
-    if (selectedFiles) {
+    if (selectedFiles && selectedFiles.length) {
       reader.readAsText(selectedFiles[0]);
     }
   }
