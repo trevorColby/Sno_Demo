@@ -223,6 +223,7 @@ class Container extends React.Component {
                 trailEditable={trailEditable}
                 editableTrail={trails.get(editableTrail)}
                 modifyTrail={modifyTrail}
+                hydrants={hydrants}
               />
             ) : (
               <TrailList
