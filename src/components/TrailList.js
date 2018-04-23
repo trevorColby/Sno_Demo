@@ -72,42 +72,41 @@ class TrailList extends React.Component {
     const {trails, trailSelected, selected, hydrants, newTrailClicked, interactionChanged} = this.props;
     const orphanCount = hydrants.filter((h) => h.get('trail') === null).size;
     return (
-      <Table>
-        <TableHead>
-          <TableRow>
-            <CustomTableCell>Trail Name</CustomTableCell>
-            <CustomTableCell>Hydrants</CustomTableCell>
-            <CustomTableCell />
-          </TableRow>
-        </TableHead>
-        <TableBody style={{overflowY: 'auto', height: '100%', width: '95%'}}>
-          <TableRow>
-            <TableCell>
-              <Button onClick={newTrailClicked}>
-                CREATE NEW TRAIL
-              </Button>
-            </TableCell>
-            <TableCell>
-              <Button onClick={() => { interactionChanged('DRAW_MODIFY_HYDRANTS'); }}>
-                ADD HYDRANTS
-              </Button>
-            </TableCell>
-          </TableRow>
-          {orphanCount ? (
-            <TableRow
-              className={selected === null ? 'selected' : ''}
-              style={{borderTop: '2px solid black', cursor: 'pointer'}}
-              onClick={() => trailSelected(null)}
-            >
-              <TableCell>Orphans</TableCell>
-              <TableCell>{orphanCount}</TableCell>
-              <TableCell />
+
+
+        <Table>
+        <Button variant='raised' onClick={newTrailClicked}>
+          CREATE NEW TRAIL
+        </Button>
+
+        <Button variant='raised' onClick={() => { interactionChanged('DRAW_MODIFY_HYDRANTS'); }}>
+          ADD HYDRANTS
+        </Button>
+
+          <TableHead>
+            <TableRow>
+              <CustomTableCell>Trail Name</CustomTableCell>
+              <CustomTableCell>Hydrants</CustomTableCell>
+              <CustomTableCell />
             </TableRow>
-            ) : null
-          }
-          {_(trails.toJS()).values().orderBy('name').map((item) => this.renderTrail(item)).value()}
-        </TableBody>
-      </Table>
+          </TableHead>
+          <TableBody style={{overflowY: 'auto', height: '100%', width: '95%'}}>
+            {orphanCount ? (
+              <TableRow
+                className={selected === null ? 'selected' : ''}
+                style={{borderTop: '2px solid black', cursor: 'pointer'}}
+                onClick={() => trailSelected(null)}
+              >
+                <TableCell>Orphans</TableCell>
+                <TableCell>{orphanCount}</TableCell>
+                <TableCell />
+              </TableRow>
+              ) : null
+            }
+            {_(trails.toJS()).values().orderBy('name').map((item) => this.renderTrail(item)).value()}
+          </TableBody>
+        </Table>
+
     );
   }
 }

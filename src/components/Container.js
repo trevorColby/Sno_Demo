@@ -39,13 +39,14 @@ const {
 } = ActionTypes;
 
 
+
 class Container extends React.Component {
   constructor(props) {
     super(props);
     this.drawEnd = this.drawEnd.bind(this);
     this.modifyEnd = this.modifyEnd.bind(this);
     this.state = {
-      drawerOpen: true,
+      drawerOpen: false,
     };
   }
 
@@ -158,8 +159,12 @@ class Container extends React.Component {
       modifyTrail, modifyHydrant,
       dataImported, interaction, interactionChanged,
       classes, theme, selectedHydrant, hydrantDeleted,
-      hydrantSelected,
+      hydrantSelected
     } = this.props;
+
+
+
+
     const { drawerOpen } = this.state;
     return (
       <div className={classes.root}>
@@ -209,19 +214,30 @@ class Container extends React.Component {
             <IconButton onClick={() => this.setState({ drawerOpen: false })}>
               {theme.direction === 'rtl' ? <ChevronRightIcon /> : <ChevronLeftIcon />}
             </IconButton>
-
           </div>
-          <TrailList
-            trailEditable={trailEditable}
-            editableTrail={editableTrail}
-            newTrailClicked={this.newTrailClicked}
-            modifyTrail={modifyTrail}
-            trails={trails}
-            trailSelected={(id) => trailSelected(selectedTrail, id)}
-            hydrants={hydrants}
-            selected={selectedTrail}
-            interactionChanged={interactionChanged}
-          />
+
+            { editableTrail ? (
+              <TrailForm
+                interactionChanged={interactionChanged}
+                interaction={interaction}
+                trailEditable={trailEditable}
+                editableTrail={trails.get(editableTrail)}
+                modifyTrail={modifyTrail}
+              />
+            ) : (
+              <TrailList
+                trailEditable={trailEditable}
+                editableTrail={editableTrail}
+                newTrailClicked={this.newTrailClicked}
+                modifyTrail={modifyTrail}
+                trails={trails}
+                trailSelected={id => trailSelected(selectedTrail, id)}
+                hydrants={hydrants}
+                selected={selectedTrail}
+                interactionChanged={interactionChanged}
+              />
+            )
+            }
 
         </Drawer>
         <main
@@ -249,13 +265,6 @@ class Container extends React.Component {
             trails={trails}
           />
 
-          <TrailForm
-            interactionChanged={interactionChanged}
-            interaction={interaction}
-            trailEditable={trailEditable}
-            editableTrail={trails.get(editableTrail)}
-            modifyTrail= {modifyTrail}
-          />
         </main>
       </div>
     </div>

@@ -22,10 +22,6 @@ const styles = {
     float: 'left',
   },
   card: {
-    minWidth: 275,
-    position: 'absolute',
-    bottom: '10em',
-    right: '1em',
   },
   textField: {
     marginLeft: '1em',
@@ -74,6 +70,7 @@ class TrailForm extends React.Component {
     }
 
     const polygons = editableTrail.get('features').map((feature, index) => {
+      unHighlightPoly(feature)
       return (
         <ListItem key={feature.get('id')} onMouseEnter={() => highlightPoly(feature)} onMouseLeave={()=> unHighlightPoly(feature)}>
           {`Trail Section ${index + 1}`}
@@ -81,6 +78,8 @@ class TrailForm extends React.Component {
         </ListItem>
       )
     })
+
+
 
     return (
       <div>
@@ -117,10 +116,6 @@ class TrailForm extends React.Component {
           </Button>
 
         }
-
-
-
-
 
           <Button
           onClick={()=> {trailEditable(null)}}
