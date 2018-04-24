@@ -4,6 +4,7 @@ export const Trail = Record({
   id: null,
   name: null,
   features: [],
+  fillColor: '255,255,255',
 });
 
 export const Hydrant = Record({

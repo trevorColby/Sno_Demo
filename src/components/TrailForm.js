@@ -14,15 +14,17 @@ import Collapse from 'material-ui/transitions/Collapse';
 import List, { ListItem, ListItemIcon, ListItemText } from 'material-ui/List';
 import ExpandLess from '@material-ui/icons/ExpandLess';
 import ExpandMore from '@material-ui/icons/ExpandMore';
-
-
+import { SketchPicker } from 'react-color';
+import { getMapStyle } from './../utils/mapUtils';
+import HydrantList from './HydrantList';
+import ColorPicker from './ColorPicker';
 
 const styles = theme => ({
   root: {
-    width: '100%'
+    width: '100%',
   },
   input: {
-    float: 'left',
+    fontSize: '1.5rem',
   },
   textField: {
     marginLeft: '1em',
@@ -38,13 +40,20 @@ const styles = theme => ({
   },
   nested: {
     paddingLeft: theme.spacing.unit * 4,
+  },
+  mini: {
+    boxShadow: '0px -1px 6px 6px rgba(0, 0, 0, 0.29), 0px 6px 10px 0px rgba(0, 0, 0, 0.14), 0px 1px 18px 0px rgba(0, 0, 0, 0.12)'
   }
 });
 
 
 class TrailForm extends React.Component {
 
-  state = { hydrantsOpen: false, trailSectionsOpen: true }
+  state = {
+    trailSectionsOpen: true,
+    pickerOpen: false,
+    trailFill: 'white',
+    }
 
   render() {
     const {
@@ -54,31 +63,21 @@ class TrailForm extends React.Component {
       trailEditable,
       interaction,
       interactionChanged,
-      hydrants
+      hydrants,
+      hydrantDeleted,
+      modifyHydrant
     } = this.props;
 
     const isTrailMode = interaction === 'DRAW_MODIFY_TRAIL'
-
-    const deletePoly = (featureIndex) => {
-      const newFeatures = _.clone(editableTrail.get('features'))
-      newFeatures.splice(featureIndex,1)
-      modifyTrail(editableTrail.get('id'), {features: newFeatures})
-    }
-
-    const deleteHydrant = (hydrant) => {
-      console.log(hydrant)
-    }
 
     const highlightPoly = (feature) => {
       feature.set('highlighted', true)
       feature.changed()
     }
-
     const unHighlightPoly = (feature) => {
       feature.unset('highlighted')
       feature.changed()
     }
-
     const trailsSectionsList = editableTrail.get('features').map((feature, index) => {
       unHighlightPoly(feature)
       return (
@@ -88,39 +87,31 @@ class TrailForm extends React.Component {
         </ListItem>
       )
     })
-
-    const trailHydrants = hydrants.filter((h) => h.get('trail') === editableTrail.get('id'));
-    const hydrantsList = trailHydrants.map((h) => {
-      return (
-        <li key={h.get('name')}>
-          {h.get('name')}
-        </li>
-      );
-    })
-
-
-    console.log(hydrantsList)
-
-
-
-
+    const deletePoly = (featureIndex) => {
+      const newFeatures = _.clone(editableTrail.get('features'))
+      newFeatures.splice(featureIndex,1)
+      modifyTrail(editableTrail.get('id'), {features: newFeatures})
+    }
 
     return (
-      <div className={classes.root}>
+      <div>
         <Card className={classes.card}>
           <CardContent>
-            <Typography className={classes.title} variant="title" color="textSecondary">
-              <Input
+            <Input
               className={classes.input}
               value={editableTrail.get('name')}
               onChange={(e)=>{ modifyTrail(editableTrail.get('id'), { name: e.target.value }) }}
-              >
-              </Input>
-            </Typography>
+            />
+
             <List className={classes.root}>
+              <ColorPicker
+                editableTrail={editableTrail}
+                modifyTrail={modifyTrail}
+              />
+
 
               <ListItem disableGutters onClick={()=> { this.setState({ trailSectionsOpen: !this.state.trailSectionsOpen })} }>
-                <ListItemText classNames={classes.inset} primary="Trail Sections" />
+                <ListItemText className={classes.inset} primary="Trail Sections" />
                 {this.state.trailSectionsOpen ? <ExpandLess /> : <ExpandMore />}
               </ListItem>
               <Collapse in={this.state.trailSectionsOpen} timeout="auto" unmountOnExit>
@@ -129,21 +120,13 @@ class TrailForm extends React.Component {
                 </List>
               </Collapse>
 
-              <ListItem disableGutters  onClick={()=> { this.setState({ hydrantsOpen: !this.state.hydrantsOpen })} }>
-                <ListItemText classNames={classes.inset} primary="Hydrants" />
-                {this.state.hydrantsOpen ? <ExpandLess /> : <ExpandMore />}
-              </ListItem>
-              <Collapse in={this.state.hydrantsOpen} timeout="auto" unmountOnExit>
-                <ul>
-                  {trailHydrants.map((h) => {
-                    return (
-                      <li key={h.get('name')}>
-                        {h.get('name')}
-                      </li>
-                    );
-                  })}
-                </ul>
-              </Collapse>
+
+              <HydrantList
+                editableTrail={editableTrail}
+                hydrants={hydrants}
+                hydrantDeleted={hydrantDeleted}
+                modifyHydrant={modifyHydrant}
+              />
 
             </List>
 
@@ -153,13 +136,14 @@ class TrailForm extends React.Component {
           (
             <Button
             onClick={()=> interactionChanged('DRAW_MODIFY_HYDRANTS')}
-            variant
+            variant="raised"
             >
             Edit Hydrants
             </Button>
           ) :
           <Button
           onClick={()=> interactionChanged('DRAW_MODIFY_TRAIL')}
+          variant="raised"
           >
             Edit Trail
           </Button>
@@ -167,7 +151,7 @@ class TrailForm extends React.Component {
         }
 
           <Button
-          onClick={()=> {trailEditable(null)}}
+            onClick={()=> {trailEditable(null)}}
           >
           Close
           </Button>

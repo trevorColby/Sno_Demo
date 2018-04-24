@@ -45,12 +45,25 @@ class ImportExport extends React.Component {
       name = _.words(name).join(' ');
       const coords = feature.getGeometry().getCoordinates()[0];
       const lonLatCoords = _.map(coords, pt => Projection.fromLonLat(pt.slice(0, 2)));
+
+      const featureFill = feature.getStyle().call(feature)[0].getFill()
+
+      // this needs to be just rgb sepeated
+      const fillColor = featureFill ? featureFill.getColor() : null
+
+
       feature.getGeometry().setCoordinates([lonLatCoords]);
       feature.setId(`t-${name}-${index}`);
       feature.set('name', name);
+      feature.set('fillColor', fillColor)
+      feature.changed()
       feature.setStyle(getMapStyle);
-      return new Trail({ name, features: [feature] });
+
+      return new Trail({ name, features: [feature], fillColor });
     }
+
+
+
 
     function processHydrant(feature, index) {
       let [trailName, hydrantIndex, name]  = feature.get('description').split(',');

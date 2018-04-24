@@ -72,6 +72,8 @@ class Container extends React.Component {
         }
       });
       const id = `t-${trail.get('id')}-${trail.get('features').length}`;
+
+      feature.set('fillColor', trail.get('fillColor'));
       feature.set('name', trail.get('name'));
       feature.set('selected', true);
       feature.setId(id);
@@ -224,6 +226,8 @@ class Container extends React.Component {
                 editableTrail={trails.get(editableTrail)}
                 modifyTrail={modifyTrail}
                 hydrants={hydrants}
+                hydrantDeleted={hydrantDeleted}
+                modifyHydrant={modifyHydrant}
               />
             ) : (
               <TrailList
@@ -258,12 +262,6 @@ class Container extends React.Component {
             editableTrail={editableTrail}
             selectedTrail={selectedTrail}
             hydrantSelected={hydrantSelected}
-          />
-          <HydrantForm
-            hydrant={hydrants.get(selectedHydrant)}
-            modifyHydrant={modifyHydrant}
-            hydrantDeleted={hydrantDeleted}
-            trails={trails}
           />
 
         </main>
@@ -319,3 +317,11 @@ export default compose(
   withStyles(appStyles, { withTheme: true }),
   connect(mapStateToProps, mapDispatchToProps),
 )(Container);
+
+
+// <HydrantForm
+//   hydrant={hydrants.get(selectedHydrant)}
+//   modifyHydrant={modifyHydrant}
+//   hydrantDeleted={hydrantDeleted}
+//   trails={trails}
+// />

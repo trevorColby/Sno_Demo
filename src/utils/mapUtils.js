@@ -49,14 +49,18 @@ export function getMapStyle(feature, resolution) {
         width: 1.5,
       }),
     });
-    const fill = new Fill({ color: 'rgba(255,255,255,0.2)' });
+
+    const baseColor = `rgba(${feature.get('fillColor') || '255,255,255'}`;
+    const fill = new Fill({ color: `${baseColor},0.2)`});
+
+
     const stroke = new Stroke({
       color: '#3399CC',
       width: 0.75,
     });
     if (feature.get('selected')) {
       // changes for selected trails
-      fill.setColor('rgba(255,255,255,0.7)');
+      fill.setColor(`${baseColor},0.4)`);
       stroke.setWidth(3);
     }
     if (feature.get('highlighted')){
