@@ -61,7 +61,7 @@ class ManualAssociateHydrantsForm extends React.Component {
   renderHydrantItem = (hydrant, index, trailMenuItems) => {
     return (
       <div key={index} onMouseEnter={() => this.hydrantHovered(hydrant.get('id'))}>
-        <span style={{ width: '100px' }}>{index}</span>
+        <span style={{ width: '100px' }}>{index + 1}</span>
         <Select
           onChange={e => this.updateManualTrailAssociation(hydrant.get('id'), e.target.value)}
           value={hydrant.get('trail')}
@@ -93,13 +93,20 @@ class ManualAssociateHydrantsForm extends React.Component {
         return <MenuItem key={id} value={id}>{trail.get('name')}</MenuItem>;
       });
 
+    const limit_to = 20;
+
     return (
       <div>
         <h4>Confirm hydrant trails</h4>
         <Button onClick={this.endManualAssignment}>Back to Menu</Button>
         {hydrants
           .valueSeq()
+          .take(limit_to)
           .map((h, i) => this.renderHydrantItem(h, i, trailMenuItems))
+        }
+        {hydrants.size > limit_to ? (
+          <p>...and {hydrants.size - limit_to} others</p>
+          ) : null
         }
         <Button onClick={() => {dataImported({ hydrants }); this.endManualAssignment();}}>
           Confirm all hydrant assignments
