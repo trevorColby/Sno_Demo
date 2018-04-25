@@ -38,10 +38,10 @@ const styles = {
 
 class HydrantForm extends React.Component {
   render() {
-    const { 
-      classes, hydrant, 
-      modifyHydrant, hydrantDeleted, 
-      trails 
+    const {
+      classes, hydrant,
+      modifyHydrant, hydrantDeleted,
+      trails
     } = this.props;
 
     const updateCoords = (e, coordIndex) => {
@@ -55,9 +55,9 @@ class HydrantForm extends React.Component {
         <MenuItem key={trail.id} value={trail.id}> {trail.name} </MenuItem>
       );
     };
-    if (!hydrant) {
-      return null;
-    }
+    // if (!hydrant) {
+    //   return null;
+    // }
 
     return (
       <div>
