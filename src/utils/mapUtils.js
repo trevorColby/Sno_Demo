@@ -29,6 +29,10 @@ export function getMapStyle(feature, resolution) {
         }),
       });
     }
+
+    if (feature.get('highlighted')) {
+      fill.setColor('yellow')
+    }
     return new Style({
       image: new RegularShape({
         fill,

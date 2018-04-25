@@ -6,6 +6,7 @@ import ExpandMore from '@material-ui/icons/ExpandMore';
 import Collapse from 'material-ui/transitions/Collapse';
 import Input from 'material-ui/Input';
 import { withStyles } from 'material-ui/styles';
+import ModeEdit from '@material-ui/icons/ModeEdit';
 
 
 const styles = theme => ({
@@ -19,7 +20,8 @@ const styles = theme => ({
 class HydrantList extends React.Component {
 
   state = {
-    open: true
+    open: true,
+    showDetails: null
   }
 
 render() {
@@ -34,17 +36,26 @@ render() {
 
   const trailHydrants = hydrants.filter((h) => h.get('trail') === editableTrail.get('id')).valueSeq();
 
-  // const toggleHighLight()
+  const toggleHighLight = (feature, state) => {
+    feature.set('highlighted', state)
+    feature.changed();
+  }
 
   const hydrantsList = trailHydrants.map((h, index)=> {
     return (
-      <ListItem key={h.get('id')} >
+      <ListItem
+        key={h.get('id')}
+        onMouseLeave={() => toggleHighLight(h.get('feature'), false)}
+        onMouseEnter={() => toggleHighLight(h.get('feature'), true)}
+      >
         <Input
           onChange={(e) => { modifyHydrant(h.get('id'), { name: e.target.value }); }}
           value={h.get('name')}
           placeholder="Enter Hydrant Name"
         />
         <Delete onClick={()=> { hydrantDeleted((h.get('id'))); }} />
+        <ModeEdit />
+
       </ListItem>
     )
   })
