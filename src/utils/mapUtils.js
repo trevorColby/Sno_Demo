@@ -55,7 +55,7 @@ export function getMapStyle(feature, resolution) {
 
 
     const stroke = new Stroke({
-      color: '#3399CC',
+      color: `${baseColor},1)`,
       width: 0.75,
     });
     if (feature.get('selected')) {
