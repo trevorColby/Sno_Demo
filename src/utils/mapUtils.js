@@ -67,14 +67,6 @@ export function getMapStyle(feature, resolution) {
   }
 }
 
-// Takes a series of ol coordinates and returns the elevation profile for those coordinates
-export function getElevation(coords) {
-  const revcoords = _.reverse(_.clone(coords));
-  const key = 'Rnodo0GTN0IK8fpaVlRuTh3H0vX7yX6T';
-  return axios.get('http://open.mapquestapi.com/elevation/v1/profile?key='+ key + '&unit=f&shapeFormat=raw&latLngCollection=' + revcoords)
-    .then(profile => profile.data.elevationProfile);
-}
-
 export function convertTrailFeaturesToDonuts(trail) {
   const features = trail.get('features');
   if (features.length > 1) {

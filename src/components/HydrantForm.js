@@ -71,7 +71,7 @@ class HydrantForm extends React.Component {
               <InputLabel htmlFor="trail-simple'"> Trail Name </InputLabel>
               <Select
                 onChange={(e) => { modifyHydrant(hydrant.get('id'), { trail: e.target.value }); }}
-                value={hydrant.get('trail') || null}
+                value={hydrant.get('trail') || 'None'}
                 inputProps={{
                   name: 'trail',
                   id: 'trail-simple',
