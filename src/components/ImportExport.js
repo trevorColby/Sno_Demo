@@ -56,7 +56,7 @@ class ImportExport extends React.Component {
       let [trailName, hydrantIndex, name]  = feature.get('description').split(',');
       trailName = _.words(trailName).join(' ');
       const trailObj = trails.find(t => t.get('name') === trailName);
-      const trailId = null;//trailObj ? trailObj.get('id') : null;
+      const trailId = trailObj ? trailObj.get('id') : null;
       const id = index + name;
       const geometry = feature.getGeometry().getType() === 'Point' ?
         feature.getGeometry() : feature.getGeometry().getGeometries()[0];
