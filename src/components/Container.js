@@ -21,6 +21,7 @@ import ImportExport from './ImportExport';
 import HydrantForm from './HydrantForm';
 import TrailForm from './TrailForm';
 import AutoAssociate from './AutoAssociate';
+import ManualAssociateHydrantsForm from './ManualAssociateHydrantsForm';
 
 import ActionTypes from '../redux/ActionTypes';
 
@@ -34,8 +35,13 @@ const {
   HYDRANT_MODIFIED,
   INTERACTION_CHANGED,
   HYDRANT_SELECTED,
+  EDIT_TRAIL,
   HYDRANT_DELETED,
-  EDIT_TRAIL
+  MANUAL_ASSIGNMENT_ITEMS_ADDED,
+  MANUAL_ASSIGNMENT_OPENED,
+  MANUAL_ASSIGNMENT_CLOSED,
+  MANUAL_ASSIGNMENT_HYDRANT_FOCUSED,
+  UPDATE_MANUAL_TRAIL_ASSOCIATION
 } = ActionTypes;
 
 
@@ -112,45 +118,61 @@ class Container extends React.Component {
       modifyHydrant(hydrantId, { coords });
     }
   }
-  /*
-    dont do this for now to avoid all the api calls
-    lets put it in when we associate hydrants maybe?
 
-    getElevation(coords).then((data) => {
-      const elevation = data[0].height;
-      this.modifyHydrant(id, {elevation});
-      this.renameHydrantsByElevation(selectedTrail);
-    });
-  }
+  renderDrawerContents = () => {
+    const {
+      hydrants, trails,editableTrail,trailEditable,
+      selectedTrail, trailSelected,
+      modifyTrail, modifyHydrant,
+      dataImported, interaction, interactionChanged,
+      classes, theme, selectedHydrant, hydrantDeleted,
+      hydrantSelected, closeManualAssignment,
+      manualAssignmentItems, focusedHydrant,
+      focusHydrant, manualAssignmentOpen,
+    } = this.props;
 
-  renameHydrantsByElevation = (trailId) => {
-    if (!trailId) {
-      return;
+    if (manualAssignmentOpen) {
+      return (
+        <ManualAssociateHydrantsForm
+          trails={trails}
+          dataImported={dataImported}
+          manualAssignmentItems={manualAssignmentItems}
+          focusHydrant={focusHydrant}
+          focusedHydrant={focusedHydrant}
+          closeManualAssignment={closeManualAssignment}
+        />
+      );
     }
-    const { hydrants } = this.state;
 
-    const sortedTrailHydrants = _(hydrants.toJS())
-      .filter((h) => h.trail === trailId)
-      .orderBy('elevation', 'desc')
-      .map((h, i) => {
-        h.name = i + 1;
-        return h;
-      })
-      .value();
-
-    const newHydrants = hydrants.map((h) => {
-      if (h.get('trail') === trailId) {
-        const elevationIndex = _.findIndex(sortedTrailHydrants, (sortedHydrant) => sortedHydrant.id === h.get('id'));
-        const name = String(elevationIndex + 1);
-        return h.set('name', name);
-      }
-      return h;
-    });
-
-    this.setState({
-      hydrants: newHydrants,
-    });
-  }*/
+    if (editableTrail) {
+      return (
+        <TrailForm
+          interactionChanged={interactionChanged}
+          interaction={interaction}
+          trailEditable={trailEditable}
+          editableTrail={trails.get(editableTrail)}
+          modifyTrail={modifyTrail}
+          hydrants={hydrants}
+          hydrantDeleted={hydrantDeleted}
+          modifyHydrant={modifyHydrant}
+        />
+      )
+    }
+    return (
+      <div>
+        <TrailList
+          trailEditable={trailEditable}
+          newTrailClicked={this.newTrailClicked}
+          modifyTrail={modifyTrail}
+          trails={trails}
+          trailSelected={(id) => trailSelected(selectedTrail, id)}
+          hydrants={hydrants}
+          selected={selectedTrail}
+          interactionChanged={interactionChanged}
+        />
+      </div>
+    );
+  }
 
   render() {
     const {
@@ -161,7 +183,8 @@ class Container extends React.Component {
       modifyTrail, modifyHydrant,
       dataImported, interaction, interactionChanged,
       classes, theme, selectedHydrant, hydrantDeleted,
-      hydrantSelected
+      hydrantSelected, openManualAssignment,
+      manualAssignmentItems, manualAssignmentItemsAdded, focusedHydrant
     } = this.props;
 
 
@@ -178,6 +201,7 @@ class Container extends React.Component {
             })}
           >
             <Toolbar disableGutters={!drawerOpen}>
+            
               <IconButton
                 color="inherit"
                 aria-label="open drawer"
@@ -186,6 +210,7 @@ class Container extends React.Component {
               >
                 <MenuIcon />
               </IconButton>
+
               <Typography variant="title" color="inherit" noWrap>
                 SnoTrack
               </Typography>
@@ -193,7 +218,10 @@ class Container extends React.Component {
                 <AutoAssociate
                   trails={trails}
                   hydrants={hydrants}
-                  modifyHydrant={modifyHydrant}
+                  dataImported={dataImported}
+                  manualAssignmentItemsAdded={manualAssignmentItemsAdded}
+                  openManualAssignment={openManualAssignment}
+                  manualAssignmentItems={manualAssignmentItems}
                 />
                 <ImportExport
                   importKMLClicked={dataImported}
@@ -212,45 +240,14 @@ class Container extends React.Component {
               paper: classes.drawerPaper,
             }}
           >
-          <div className={classes.drawerHeader}>
-            <IconButton onClick={() => this.setState({ drawerOpen: false })}>
-              {theme.direction === 'rtl' ? <ChevronRightIcon /> : <ChevronLeftIcon />}
-            </IconButton>
-          </div>
-
-            { editableTrail ? (
-              <TrailForm
-                interactionChanged={interactionChanged}
-                interaction={interaction}
-                trailEditable={trailEditable}
-                editableTrail={trails.get(editableTrail)}
-                modifyTrail={modifyTrail}
-                hydrants={hydrants}
-                hydrantDeleted={hydrantDeleted}
-                modifyHydrant={modifyHydrant}
-              />
-            ) : (
-              <TrailList
-                trailEditable={trailEditable}
-                editableTrail={editableTrail}
-                newTrailClicked={this.newTrailClicked}
-                modifyTrail={modifyTrail}
-                trails={trails}
-                trailSelected={id => trailSelected(selectedTrail, id)}
-                hydrants={hydrants}
-                selected={selectedTrail}
-                interactionChanged={interactionChanged}
-              />
-            )
-            }
-
-        </Drawer>
-        <main
-          className={classNames(classes.content, classes[`content-left`], {
-            [classes.contentShift]: drawerOpen,
-            [classes[`contentShift-left`]]: drawerOpen,
-          })}
-        >
+          {this.renderDrawerContents()}
+          </Drawer>
+          <main
+            className={classNames(classes.content, classes[`content-left`], {
+              [classes.contentShift]: drawerOpen,
+              [classes[`contentShift-left`]]: drawerOpen,
+            })}
+          >
           <div className={classes.drawerHeader} />
 
           <OpenLayersMap
@@ -262,8 +259,8 @@ class Container extends React.Component {
             editableTrail={editableTrail}
             selectedTrail={selectedTrail}
             hydrantSelected={hydrantSelected}
+            focusedHydrant={focusedHydrant}
           />
-
         </main>
       </div>
     </div>
@@ -277,7 +274,10 @@ const mapStateToProps = state => ({
   selectedTrail: state.selectedTrail.selected,
   interaction: state.interaction,
   selectedHydrant: state.selectedHydrant,
-  editableTrail: state.selectedTrail.editable
+  editableTrail: state.selectedTrail.editable,
+  manualAssignmentItems: state.autoAssignment.manualAssignmentItems,
+  manualAssignmentOpen: state.autoAssignment.manualAssignmentOpen,
+  focusedHydrant: state.autoAssignment.focusedHydrant,
 });
 
 const mapDispatchToProps = dispatch => ({
@@ -306,7 +306,19 @@ const mapDispatchToProps = dispatch => ({
     type: INTERACTION_CHANGED, data,
   }),
   hydrantDeleted: id => dispatch({
-    type: HYDRANT_DELETED, data: { selected: id }
+    type: HYDRANT_DELETED, data: { selected: id },
+  }),
+  manualAssignmentItemsAdded: data => dispatch({
+    type: MANUAL_ASSIGNMENT_ITEMS_ADDED, data,
+  }),
+  openManualAssignment: () => dispatch({
+    type: MANUAL_ASSIGNMENT_OPENED,
+  }),
+  closeManualAssignment: () => dispatch({
+    type: MANUAL_ASSIGNMENT_CLOSED,
+  }),
+  focusHydrant: id => dispatch({
+    type: MANUAL_ASSIGNMENT_HYDRANT_FOCUSED, data: id,
   }),
   trailEditable: id => dispatch({
     type: EDIT_TRAIL, data: id
@@ -317,11 +329,3 @@ export default compose(
   withStyles(appStyles, { withTheme: true }),
   connect(mapStateToProps, mapDispatchToProps),
 )(Container);
-
-
-// <HydrantForm
-//   hydrant={hydrants.get(selectedHydrant)}
-//   modifyHydrant={modifyHydrant}
-//   hydrantDeleted={hydrantDeleted}
-//   trails={trails}
-// />

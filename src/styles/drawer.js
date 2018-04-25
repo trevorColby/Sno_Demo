@@ -8,7 +8,7 @@ export default theme => ({
     background: 'black',
   },
   drawerPaper: {
-    background: '#ffffffde',
+    background: 'white',
     width: 325
   },
   appBar: {

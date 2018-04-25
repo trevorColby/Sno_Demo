@@ -39,7 +39,7 @@ class OpenLayersMap extends React.Component {
   }
 
   componentDidUpdate(prevProps) {
-    const { selectedTrail, trails, interaction, hydrants } = this.props;
+    const { selectedTrail, trails, interaction, hydrants, focusedHydrant } = this.props;
     const { map } = this.state;
 
     // pan to new selectedTrail
@@ -64,6 +64,13 @@ class OpenLayersMap extends React.Component {
       } catch (err) {
         console.log('No coordinates found for this trail');
       }
+    } else if (focusedHydrant && focusedHydrant !== prevProps.focusedHydrant) {
+      const coords = hydrants.getIn([focusedHydrant, 'feature']).getGeometry().getCoordinates();
+      map.getView().animate({
+        center: coords,
+        duration: 0,
+        zoom: 17,
+      });
     }
   }
 

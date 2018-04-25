@@ -20,7 +20,7 @@ class ColorPicker extends React.Component {
     open: false
   }
 
-  render(){
+  render() {
 
     const {
       classes,
@@ -41,14 +41,17 @@ class ColorPicker extends React.Component {
       b: selectedColor[2]
     }
 
-    return(
+    return (
       <div>
         <ListItem disableGutters>
           <ListItemText className={classes.inset} primary="Trail Shading:" />
           <Button
-          onClick={()=> { this.setState({ open: !this.state.open})}}
-          style={{backgroundColor: `rgba(${editableTrail.get('fillColor')})`}}
-          className={classes.mini} variant='fab' mini />
+            onClick={()=> { this.setState({ open: !this.state.open})}}
+            style={{backgroundColor: `rgba(${editableTrail.get('fillColor')})`}}
+            className={classes.mini}
+            variant='fab'
+            mini
+          />
         </ListItem>
 
         <Collapse style={{ paddingBottom: 10 }} in={this.state.open} timeout="auto" unmountOnExit>

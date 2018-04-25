@@ -5,6 +5,7 @@ import HydrantReducer from './HydrantReducer';
 import SelectedTrailReducer from './SelectedTrailReducer';
 import InteractionReducer from './InteractionReducer';
 import SelectedHydrantReducer from './SelectedHydrantReducer';
+import AutoAssignmentReducer from './AutoAssignmentReducer';
 
 export default combineReducers({
   trails: TrailReducer,
@@ -12,4 +13,5 @@ export default combineReducers({
   selectedTrail: SelectedTrailReducer,
   interaction: InteractionReducer,
   selectedHydrant: SelectedHydrantReducer,
+  autoAssignment: AutoAssignmentReducer,
 });
