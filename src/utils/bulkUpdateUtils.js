@@ -6,10 +6,10 @@ import { mapquestApi } from './api';
 export function getElevations(hydrants, handleNewHydrants) {
   // make it an array to ensure consistent order
   const needsElevation = hydrants.filter(h => !h.get('elevation')).toArray();
-  const coords = _.map(needsElevation.slice(0, 24), (h) => _.clone(h.get('coords')).reverse());
+  const coords = _.map(needsElevation, (h) => _.clone(h.get('coords')).reverse());
   mapquestApi.fetchElevationForCoords(coords)
     .then(resp => {
-      const updatedHydrants = _.map(needsElevation.slice(0, 24), (h, index) => {
+      const updatedHydrants = _.map(needsElevation, (h, index) => {
         return h.set('elevation', resp[index].elevation);
       });
       // return to immutable dictionary object and pass to the handler
@@ -37,33 +37,28 @@ export function autonameHydrants(hydrants, override = false) {
 export function assignHydrantsToTrails(hydrants, trails) {
   const trailFeatures = trails.reduce((curr, t) => curr.concat(t.get('features')), []);
   const sourceVector = new SourceVector({ features: trailFeatures });
-  let multiple = 0,
-    single = 0,
-    closest = 0;
+  const matchedIds = [];
   const newHydrants = hydrants.filter(h => h.get('trail') === null).map((h) => {
     /*
       Just use the feature xy coordinates since the
       trail features are already in that format too.
       No point converting both since it's not user-facing.
     */
+    const id = h.get('id');
     const point = h.get('feature').getGeometry().getCoordinates();
     const matches = sourceVector.getFeaturesAtCoordinate(point);
     let feature;
     if (matches.length) {
-      if (matches.length > 1) {
-        // This shouldn't happen, it means we have overlapping trail polygons
-        multiple += 1;
-      } else {
-        single += 1;
+      if (matches.length === 1) {
+        matchedIds.push(id);
       }
       [feature] = matches;
     } else {
-      closest += 1;
       feature = sourceVector.getClosestFeatureToCoordinate(point);
     }
     const trailId = feature.getId().split('-')[1];
     return h.set('trail', trailId);
   });
 
-  return newHydrants;
+  return [newHydrants, matchedIds];
 }
