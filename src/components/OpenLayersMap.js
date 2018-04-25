@@ -69,7 +69,6 @@ class OpenLayersMap extends React.Component {
       map.getView().animate({
         center: coords,
         duration: 0,
-        zoom: 17,
       });
     }
   }
