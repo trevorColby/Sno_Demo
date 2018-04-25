@@ -51,7 +51,7 @@ class ColorPicker extends React.Component {
           className={classes.mini} variant='fab' mini />
         </ListItem>
 
-        <Collapse in={this.state.open} timeout="auto" unmountOnExit>
+        <Collapse style={{ paddingBottom: 10 }} in={this.state.open} timeout="auto" unmountOnExit>
           <CompactPicker
           color={colorObj}
           onChangeComplete={changeColor}

@@ -18,6 +18,7 @@ import { SketchPicker } from 'react-color';
 import { getMapStyle } from './../utils/mapUtils';
 import HydrantList from './HydrantList';
 import ColorPicker from './ColorPicker';
+import Close from '@material-ui/icons/Close';
 
 const styles = theme => ({
   root: {
@@ -97,11 +98,39 @@ class TrailForm extends React.Component {
       <div>
         <Card className={classes.card}>
           <CardContent>
+            <Close
+              style={{ float: 'right'}}
+              onClick={()=> {trailEditable(null)}}
+            />
             <Input
               className={classes.input}
               value={editableTrail.get('name')}
               onChange={(e)=>{ modifyTrail(editableTrail.get('id'), { name: e.target.value }) }}
             />
+
+            {isTrailMode ?
+            (
+              <Button
+              className={classes.root}
+              style={{marginTop: 10}}
+              color="secondary"
+              onClick={()=> interactionChanged('DRAW_MODIFY_HYDRANTS')}
+              variant="raised"
+              >
+              Edit Hydrants
+              </Button>
+            ) :
+            <Button
+            className={classes.root}
+            color="secondary"
+            style={{marginTop: 10}}
+            onClick={()=> interactionChanged('DRAW_MODIFY_TRAIL')}
+            variant="raised"
+            >
+              Edit Trail
+            </Button>
+
+          }
 
             <List className={classes.root}>
               <ColorPicker
@@ -131,31 +160,6 @@ class TrailForm extends React.Component {
             </List>
 
           </CardContent>
-
-          {isTrailMode ?
-          (
-            <Button
-            onClick={()=> interactionChanged('DRAW_MODIFY_HYDRANTS')}
-            variant="raised"
-            >
-            Edit Hydrants
-            </Button>
-          ) :
-          <Button
-          onClick={()=> interactionChanged('DRAW_MODIFY_TRAIL')}
-          variant="raised"
-          >
-            Edit Trail
-          </Button>
-
-        }
-
-          <Button
-            onClick={()=> {trailEditable(null)}}
-          >
-          Close
-          </Button>
-
         </Card>
       </div>
     );
