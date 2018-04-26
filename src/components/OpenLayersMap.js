@@ -92,9 +92,10 @@ class OpenLayersMap extends React.Component {
       visible: true,
       preload: Infinity,
       source: new BingMaps({
-        hidpi: true,
+        hidpi: false,
         key: 'ApcR8_wnFxnsXwuY_W2mPQuMb-QB0Kg-My65RJYZL2g9fN6NCFA8-s0lsvxTTs2G',
         imagerySet: 'Aerial',
+        maxZoom: 19,
       }),
     });
     const geocoder = new Geocoder('nominatim', {
@@ -138,8 +139,8 @@ class OpenLayersMap extends React.Component {
   updateInteractions(nextProps) {
     const {
       trails, hydrants,
-      selectedTrail, interaction,
-      modifyEnd, drawEnd,
+      interaction,modifyEnd,
+      drawEnd, editableTrail
     } = nextProps;
     const { source, map, mapInteractions } = this.state;
     _.each(mapInteractions, i => map.removeInteraction(i));
@@ -148,12 +149,12 @@ class OpenLayersMap extends React.Component {
     // create new draw or modify interactions
     let type = null;
     const modifiable = [];
-    if (interaction === 'DRAW_MODIFY_TRAIL' && selectedTrail) {
+    if (interaction === 'DRAW_MODIFY_TRAIL' && editableTrail) {
       type = 'Polygon';
-      _.each(trails.getIn([selectedTrail, 'features']), f => modifiable.push(f));
+      _.each(trails.getIn([editableTrail, 'features']), f => modifiable.push(f));
     } else if (interaction === 'DRAW_MODIFY_HYDRANTS') {
       type = 'Point';
-      hydrants.filter(h => h.get('trail') === selectedTrail)
+      hydrants.filter(h => h.get('trail') === editableTrail)
         .forEach(h => modifiable.push(h.get('feature')));
     }
     if (type) {

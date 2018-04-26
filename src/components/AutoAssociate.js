@@ -59,16 +59,16 @@ class AutoAssociate extends React.Component {
     if (!assigned && !orphans.size ) {
       return <p>All hydrants are aready assigned to trails</p>;
     }
-    
+
     return (
       <div>
         { assigned ? (
-          <p>Auto-assigned {assigned} hydrants that were located inside trails. </p>
+          <p>Auto-assigned {assigned} hydrants located inside of trails. </p>
           ) : null
         }
         { manualAssignmentItems.size ? (
           <div>
-            <p>There are {manualAssignmentItems.size} hydrants needing review</p>
+            <p>{manualAssignmentItems.size} hydrants require review</p>
             <Button onClick={() => {openManualAssignment(); this.setState({ dialogOpen: false });}}>
               Assign now
             </Button>
@@ -82,7 +82,7 @@ class AutoAssociate extends React.Component {
   render() {
     const { dialogOpen } = this.state;
     const { hydrants, trails, dataImported, manualAssignmentItems } = this.props;
-    
+
     const orphans = hydrants.filter(h => h.get('trail') === null);
     const noElevation = hydrants.filter(h => !h.get('elevation'));
     return (

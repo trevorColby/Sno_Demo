@@ -56,7 +56,7 @@ export default (state = initialState, action) => {
       const newHydrant = state.hydrants.get(id).withMutations((h) => {
         _.each(editedFields, (val, key) => h.set(key, val));
       });
-      updateHydrantFeatures(newHydrant);
+      updateHydrantFeatures(newHydrant, editedFields);
       return {
         ...state,
         hydrants: state.hydrants.set(id, newHydrant),

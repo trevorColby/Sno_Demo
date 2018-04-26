@@ -1,4 +1,4 @@
-const drawerWidth = 300;
+const drawerWidth = 325;
 
 export default theme => ({
   root: {
@@ -8,7 +8,8 @@ export default theme => ({
     background: 'black',
   },
   drawerPaper: {
-    background: '#ffffffde',
+    background: 'white',
+    width: 325
   },
   appBar: {
     background: '#040404',

@@ -1,6 +1,3 @@
-.App {
-  text-align: center;
-}
 
 .App-title {
   font-size: 1.5em;
@@ -17,9 +14,6 @@
 
 .selected {
 	background: #d5eefb;
-}
-table, thead, tbody {
-	display: block !important;
 }
 
 .ol-control{
