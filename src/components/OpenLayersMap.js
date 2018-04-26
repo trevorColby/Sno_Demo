@@ -51,8 +51,11 @@ class OpenLayersMap extends React.Component {
 
       try {
 
-        const GeomCollection = new GeometryCollection()
         const trailFeatures = trails.getIn([selectedTrail, 'features'])
+
+        if (trailFeatures.length > 0) {
+
+        const GeomCollection = new GeometryCollection()
         const geometries = _.flatMap(trailFeatures, f => f.getGeometry())
         GeomCollection.setGeometries(geometries)
         const newExtent = GeomCollection.getExtent()
@@ -66,6 +69,14 @@ class OpenLayersMap extends React.Component {
           duration: 500,
           zoom: zoomLevel,
         });
+
+        map.getView().animate({
+          center: extent.getCenter(newExtent),
+          duration: 500,
+          zoom: zoomLevel,
+        });
+      }
+
         // Instead of Panning the below code will jerk to the trail
         // and will fit the trail but is not as smooth.
         // map.getView().fit(firstTrailGeom, map.getSize());
