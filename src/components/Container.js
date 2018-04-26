@@ -202,6 +202,11 @@ class Container extends React.Component {
           >
             <Toolbar disableGutters={!drawerOpen}>
 
+            {drawerOpen? (
+              <IconButton style={{color:'white'}} onClick={()=> { this.setState({drawerOpen:false})} }>
+                {<ChevronLeftIcon />}
+              </IconButton>
+            ) : (
               <IconButton
                 color="inherit"
                 aria-label="open drawer"
@@ -210,6 +215,10 @@ class Container extends React.Component {
               >
                 <MenuIcon />
               </IconButton>
+            )
+
+            }
+
 
               <Typography variant="title" color="inherit" noWrap>
                 SnoTrack
@@ -240,10 +249,6 @@ class Container extends React.Component {
               paper: classes.drawerPaper,
             }}
           >
-
-          <IconButton onClick={()=> { this.setState({drawerOpen:false})} }>
-            {<ChevronLeftIcon />}
-          </IconButton>
 
           {this.renderDrawerContents()}
           </Drawer>
