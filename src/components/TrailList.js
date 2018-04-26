@@ -27,6 +27,7 @@ class TrailList extends React.Component {
     const isEditable = editableTrail === id;
     const rowClass = isSelected ? 'selected' : '';
     const iconClass = `fa fa-${isSelected ? 'minus' : 'plus'}`;
+    const fillColor = `rgba(${trail.fillColor},.3)`
 
     const toggleHighlight = () => {
       _.each(trail.features, (f)=> {
@@ -44,6 +45,7 @@ class TrailList extends React.Component {
         isSelected ? null : trailSelected(id)
     };
 
+
     return (
       <TableRow
         key={id}
@@ -52,6 +54,7 @@ class TrailList extends React.Component {
         onClick={handleSelected}
         onMouseEnter={toggleHighlight}
         onMouseLeave={toggleHighlight}
+        style={{backgroundColor:fillColor}}
       >
       <TableCell>
         {trail.name}
