@@ -11,7 +11,7 @@ import SourceVector from 'ol/source/vector';
 import Draw from 'ol/interaction/draw';
 import Modify from 'ol/interaction/modify';
 import Snap from 'ol/interaction/snap';
-import Geocoder from 'ol-geocoder';
+// import Geocoder from 'ol-geocoder';
 import { getMapStyle } from '../utils/mapUtils';
 
 class OpenLayersMap extends React.Component {
@@ -98,16 +98,16 @@ class OpenLayersMap extends React.Component {
         maxZoom: 19,
       }),
     });
-    const geocoder = new Geocoder('nominatim', {
-      provider: 'osm',
-      lang: 'en',
-      placeholder: 'Search for ...',
-      limit: 5,
-      keepOpen: true,
-      autoComplete: true,
-    });
-
-    geocoder.setTarget(document.getElementById('searchLocations'));
+    // const geocoder = new Geocoder('nominatim', {
+    //   provider: 'osm',
+    //   lang: 'en',
+    //   placeholder: 'Search for ...',
+    //   limit: 5,
+    //   keepOpen: true,
+    //   autoComplete: true,
+    // });
+    // 
+    // geocoder.setTarget(document.getElementById('searchLocations'));
 
     const resortLayer = new LayerVector({
       source,
@@ -131,7 +131,7 @@ class OpenLayersMap extends React.Component {
     });
 
     // Controls
-    map.addControl(geocoder);
+    // map.addControl(geocoder);
     map.on('click', this.onMapClick);
     this.setState({ map });
   }
