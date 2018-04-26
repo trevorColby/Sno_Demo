@@ -13,6 +13,7 @@ import Modify from 'ol/interaction/modify';
 import Snap from 'ol/interaction/snap';
 // import Geocoder from 'ol-geocoder';
 import { getMapStyle } from '../utils/mapUtils';
+import RotationSlider from './RotationSlider';
 
 class OpenLayersMap extends React.Component {
   constructor(props) {
@@ -23,6 +24,7 @@ class OpenLayersMap extends React.Component {
       source: new SourceVector({ wrapX: false }),
       map: null,
       mapInteractions: [],
+      rotation: 0,
     };
   }
 
@@ -73,6 +75,13 @@ class OpenLayersMap extends React.Component {
     }
   }
 
+  onRotationChange = (value) => {
+    this.setState({
+      rotation: value
+    })
+    this.state.map.getView().setRotation(value)
+  }
+
   onMapClick = (e) => {
     const { interaction, hydrantSelected } = this.props;
     const { map } = this.state;
@@ -106,7 +115,7 @@ class OpenLayersMap extends React.Component {
     //   keepOpen: true,
     //   autoComplete: true,
     // });
-    // 
+    //
     // geocoder.setTarget(document.getElementById('searchLocations'));
 
     const resortLayer = new LayerVector({
@@ -127,6 +136,7 @@ class OpenLayersMap extends React.Component {
         projection,
         center: Projection.fromLonLat(centerCoords),
         zoom: 14.2,
+        rotation: this.state.rotation
       }),
     });
 
@@ -225,7 +235,16 @@ class OpenLayersMap extends React.Component {
   }
 
   render() {
-    return <div id="map-container" />;
+    const { rotation } = this.state
+    return (
+      <div>
+        <div id="map-container" />
+        <RotationSlider
+          rotation={rotation}
+          onRotationChange={this.onRotationChange}
+        />
+      </div>
+    )
   }
 }
 
