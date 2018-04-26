@@ -2,6 +2,7 @@ import React from 'react';
 import _ from 'lodash';
 import Map from 'ol/map';
 import View from 'ol/view';
+import GeometryCollection from 'ol/geom/geometrycollection';
 import Collection from 'ol/collection';
 import TileLayer from 'ol/layer/tile';
 import LayerVector from 'ol/layer/vector';
@@ -14,6 +15,7 @@ import Snap from 'ol/interaction/snap';
 // import Geocoder from 'ol-geocoder';
 import { getMapStyle } from '../utils/mapUtils';
 import RotationSlider from './RotationSlider';
+import extent from 'ol/extent';
 
 class OpenLayersMap extends React.Component {
   constructor(props) {
@@ -48,15 +50,19 @@ class OpenLayersMap extends React.Component {
     if (selectedTrail !== prevProps.selectedTrail && selectedTrail) {
 
       try {
-        const firstTrailGeom = trails.getIn([selectedTrail, 'features'])[0].getGeometry()
-        const geomExtent = firstTrailGeom.getExtent();
+
+        const GeomCollection = new GeometryCollection()
+        const trailFeatures = trails.getIn([selectedTrail, 'features'])
+        const geometries = _.flatMap(trailFeatures, f => f.getGeometry())
+        GeomCollection.setGeometries(geometries)
+        const newExtent = GeomCollection.getExtent()
+
         const view = map.getView();
-        const zoomResolution = view.getResolutionForExtent(geomExtent);
+        const zoomResolution = view.getResolutionForExtent(newExtent);
         const zoomLevel = view.getZoomForResolution(zoomResolution);
 
-        const firstCoords = firstTrailGeom.getInteriorPoint().getCoordinates();
         map.getView().animate({
-          center: firstCoords,
+          center: extent.getCenter(newExtent),
           duration: 500,
           zoom: zoomLevel,
         });
