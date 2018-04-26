@@ -12,7 +12,7 @@ const initialState = null;
 
 export default (state = initialState, action) => {
   switch (action.type) {
-    case HYDRANT_ADDED: 
+    case HYDRANT_ADDED:
     case TRAIL_SELECTED:
       return null;
     case HYDRANT_SELECTED: {

@@ -38,7 +38,6 @@ export default (state = initialState, action) => {
       return {
         ...state,
         editable: action.data,
-        selected: action.data
       };
     default:
       return state;
