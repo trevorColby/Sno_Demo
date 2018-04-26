@@ -87,8 +87,6 @@ class ImportExport extends React.Component {
 
     function processHydrant(feature, index) {
       let [trailName, hydrantIndex, name]  = feature.get('description').split(',');
-
-      console.log(trailName, hydrantIndex, name)
       trailName = _.words(trailName).join(' ');
       const trailObj = trails.find(t => t.get('name') === trailName);
       const trailId = trailObj ? trailObj.get('id') : null;
