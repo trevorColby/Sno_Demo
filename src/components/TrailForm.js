@@ -66,7 +66,8 @@ class TrailForm extends React.Component {
       interactionChanged,
       hydrants,
       hydrantDeleted,
-      modifyHydrant
+      modifyHydrant,
+      selectedTrail
     } = this.props;
 
     const isTrailMode = interaction === 'DRAW_MODIFY_TRAIL'

@@ -56,6 +56,8 @@ class Container extends React.Component {
     };
   }
 
+
+
   newTrailClicked = () => {
     const { addTrail } = this.props;
     let id = new Date().getTime();
@@ -120,6 +122,7 @@ class Container extends React.Component {
   }
 
   renderDrawerContents = () => {
+
     const {
       hydrants, trails,editableTrail,trailEditable,
       selectedTrail, trailSelected,
@@ -186,7 +189,6 @@ class Container extends React.Component {
       hydrantSelected, openManualAssignment,
       manualAssignmentItems, manualAssignmentItemsAdded, focusedHydrant
     } = this.props;
-
 
 
 
