@@ -23,6 +23,7 @@ import TrailForm from './TrailForm';
 import AutoAssociate from './AutoAssociate';
 import ManualAssociateHydrantsForm from './ManualAssociateHydrantsForm';
 
+
 import ActionTypes from '../redux/ActionTypes';
 
 const {
@@ -273,6 +274,7 @@ class Container extends React.Component {
             hydrantSelected={hydrantSelected}
             focusedHydrant={focusedHydrant}
           />
+
         </main>
       </div>
     </div>
