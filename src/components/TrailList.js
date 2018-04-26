@@ -85,8 +85,8 @@ class TrailList extends React.Component {
           <Table>
             <TableHead>
               <TableRow>
-                <CustomTableCell>Trail Name</CustomTableCell>
-                <CustomTableCell>Hydrants</CustomTableCell>
+                <CustomTableCell padding="dense">Trail Name</CustomTableCell>
+                <CustomTableCell padding="dense">Hydrants</CustomTableCell>
                 <CustomTableCell />
               </TableRow>
             </TableHead>
@@ -97,9 +97,9 @@ class TrailList extends React.Component {
                   style={{borderTop: '2px solid black', cursor: 'pointer'}}
                   onClick={() => trailSelected(null)}
                 >
-                  <TableCell>Orphans</TableCell>
-                  <TableCell>{orphanCount}</TableCell>
-                  <TableCell />
+                  <TableCell padding="dense">Orphans</TableCell>
+                  <TableCell padding="dense">{orphanCount}</TableCell>
+                  <TableCell padding="dense" />
                 </TableRow>
                 ) : null
               }
