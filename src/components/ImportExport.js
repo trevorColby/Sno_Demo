@@ -191,7 +191,7 @@ class ImportExport extends React.Component {
       'Hyd_Target_Gallons', 'Hyd_Total_Gallons', 'Hyd_Cfm', 'Hyd_Pressure_Zone']
     ]
     trails.keySeq().forEach((trailId) => {
-      const trailName = trails.get(trailId).get('name')
+      const trailName = trails.getIn([trailId, 'features'])[0].get('description').split(',')[0]
       const trailHydrants = _
         .chain(hydrants.toJS())
         .values()
