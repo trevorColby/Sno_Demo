@@ -29,10 +29,6 @@
   top: 4.875em;
 }
 
-.ol-geocoder{
-  position: unset !important;
-}
-
 .gcd-gl-btn{
   height:2em !important;
   width: 2em !important;
@@ -55,4 +51,5 @@
   position: absolute;
   right: 4em;
   top: 1em;
+  width: 250px;
 }
