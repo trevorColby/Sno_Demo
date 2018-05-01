@@ -22,7 +22,6 @@ import Select from 'material-ui/Select';
 import { MenuItem } from 'material-ui/Menu';
 import Typography from 'material-ui/Typography';
 
-
 const styles = theme => ({
   root: {
     display: 'flex',
@@ -56,7 +55,6 @@ class ImportExport extends React.Component {
     });
   }
 
-
   importFile = () => {
     const { selectedFiles } = this.state;
     const { importKMLClicked, trails, hydrants } = this.props;
@@ -85,7 +83,7 @@ class ImportExport extends React.Component {
 
 
 
-    function processHydrant(feature, index) {
+   function processHydrant(feature, index) {
       let [trailName, hydrantIndex, name]  = feature.get('description').split(',');
       trailName = _.words(trailName).join(' ');
       const trailObj = trails.find(t => t.get('name') === trailName);
@@ -156,6 +154,10 @@ class ImportExport extends React.Component {
     const ext = exportType === 'GJ' ? 'json' : 'kml';
 
     hydrantFeatures.forEach((f,i) => {
+      // let trailName= trails.getIn([.get('trail', 'features', 0)]).get('description').split(',')[0];
+      // if !trailName {
+      //   trailName = trail.get('name')
+      // }
       const desc = `${f.get('trailName')},${i},${f.get('name')}`
       f.set('description', desc)
     })
@@ -181,6 +183,47 @@ class ImportExport extends React.Component {
     }
   }
 
+  generateCSV = () => {
+    const { hydrants, trails } = this.props;
+    const hydrantsRows = [
+      ['Trail_Name', 'Hyd_Index', 'Hyd_ID', 'Hyd_State', 'Hyd_Hours',
+      'Hyd_Gun', 'Hyd_Gpm', 'Hyd_Notes', 'Hyd_Elevation',
+      'Hyd_Target_Gallons', 'Hyd_Total_Gallons', 'Hyd_Cfm', 'Hyd_Pressure_Zone']
+    ]
+    trails.keySeq().forEach((trailId) => {
+      const trailName = trails.get(trailId).get('name')
+      const trailHydrants = _
+        .chain(hydrants.toJS())
+        .values()
+        .filter({ trail: trailId })
+        .orderBy('name', 'asc')
+        .value();
+
+      for (let i = 0; i < 100; i += 1) {
+        let hydId = i
+        let elevation = 0
+        if (trailHydrants[i]) {
+          hydId = trailHydrants[i].name
+          elevation = trailHydrants[i].elevation
+        }
+        hydrantsRows.push([
+          trailName, i, hydId, 0, 0,
+          'None', 0, 'None', elevation, 0,
+          0, 0, 'None',
+        ]);
+      }
+    });
+    const lineArray = []
+    hydrantsRows.forEach((r, i) => {
+      const line = r.join(",")
+      lineArray.push(i === 0 ? "data:text/csv;charset=utf-8," + line : line)
+    });
+    const csvContent = lineArray.join("\n")
+    const encodedUri = encodeURI(csvContent);
+    // window.location.assign(encodedUri);
+    downloadjs(encodedUri, `Hydrants_Table.csv`);
+  }
+
   handleClose = () => {
     this.setState({
       dialogOpen: false,
@@ -198,6 +241,9 @@ class ImportExport extends React.Component {
       selectedExport: event.target.value
     })
   }
+
+
+
 
   render() {
     const { classes } = this.props;
@@ -251,10 +297,15 @@ class ImportExport extends React.Component {
 
             </ListItem>
 
+            <Button
+              onClick={this.generateCSV}
+            >
+
+            Download Hydrants_Table.CSV
+            </Button>
           </List>
 
           <Divider />
-
 
         </Dialog>
       </div>
