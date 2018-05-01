@@ -12,7 +12,7 @@ import SourceVector from 'ol/source/vector';
 import Draw from 'ol/interaction/draw';
 import Modify from 'ol/interaction/modify';
 import Snap from 'ol/interaction/snap';
-// import Geocoder from 'ol-geocoder';
+import createGeocoder from './Geocoder';
 import { getMapStyle } from '../utils/mapUtils';
 import RotationSlider from './RotationSlider';
 import extent from 'ol/extent';
@@ -124,16 +124,6 @@ class OpenLayersMap extends React.Component {
         maxZoom: 19,
       }),
     });
-    // const geocoder = new Geocoder('nominatim', {
-    //   provider: 'osm',
-    //   lang: 'en',
-    //   placeholder: 'Search for ...',
-    //   limit: 5,
-    //   keepOpen: true,
-    //   autoComplete: true,
-    // });
-    //
-    // geocoder.setTarget(document.getElementById('searchLocations'));
 
     const resortLayer = new LayerVector({
       source,
@@ -153,12 +143,20 @@ class OpenLayersMap extends React.Component {
         projection,
         center: Projection.fromLonLat(centerCoords),
         zoom: 14.2,
-        rotation: this.state.rotation
+        rotation: this.state.rotation,
       }),
     });
 
     // Controls
-    // map.addControl(geocoder);
+    const onGeocoderChange = (coords) => {
+      const mapCoords = Projection.fromLonLat(coords);
+      map.getView().animate({
+        center: mapCoords,
+        duration: 100,
+      });
+    };
+    createGeocoder('searchLocations', onGeocoderChange);
+
     map.on('click', this.onMapClick);
     this.setState({ map });
   }
@@ -166,8 +164,8 @@ class OpenLayersMap extends React.Component {
   updateInteractions(nextProps) {
     const {
       trails, hydrants,
-      interaction,modifyEnd,
-      drawEnd, editableTrail
+      interaction, modifyEnd,
+      drawEnd, editableTrail,
     } = nextProps;
     const { source, map, mapInteractions } = this.state;
     _.each(mapInteractions, i => map.removeInteraction(i));
