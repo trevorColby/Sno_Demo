@@ -23,7 +23,6 @@ import TrailForm from './TrailForm';
 import AutoAssociate from './AutoAssociate';
 import ManualAssociateHydrantsForm from './ManualAssociateHydrantsForm';
 
-
 import ActionTypes from '../redux/ActionTypes';
 
 const {
@@ -53,7 +52,7 @@ class Container extends React.Component {
     this.drawEnd = this.drawEnd.bind(this);
     this.modifyEnd = this.modifyEnd.bind(this);
     this.state = {
-      drawerOpen: false,
+      drawerOpen: false
     };
   }
 
@@ -132,7 +131,7 @@ class Container extends React.Component {
       classes, theme, selectedHydrant, hydrantDeleted,
       hydrantSelected, closeManualAssignment,
       manualAssignmentItems, focusedHydrant,
-      focusHydrant, manualAssignmentOpen,
+      focusHydrant, manualAssignmentOpen, trailDeleted
     } = this.props;
 
     if (manualAssignmentOpen) {
@@ -151,6 +150,7 @@ class Container extends React.Component {
     if (editableTrail) {
       return (
         <TrailForm
+          trailDeleted={trailDeleted}
           interactionChanged={interactionChanged}
           interaction={interaction}
           trailEditable={trailEditable}
@@ -188,7 +188,7 @@ class Container extends React.Component {
       dataImported, interaction, interactionChanged,
       classes, theme, selectedHydrant, hydrantDeleted,
       hydrantSelected, openManualAssignment,
-      manualAssignmentItems, manualAssignmentItemsAdded, focusedHydrant
+      manualAssignmentItems, manualAssignmentItemsAdded, focusedHydrant,
     } = this.props;
 
 
@@ -336,7 +336,10 @@ const mapDispatchToProps = dispatch => ({
   }),
   trailEditable: id => dispatch({
     type: EDIT_TRAIL, data: id
-  })
+  }),
+  trailDeleted: id => dispatch({
+    type: TRAIL_DELETED, data: id
+  }),
 });
 
 export default compose(

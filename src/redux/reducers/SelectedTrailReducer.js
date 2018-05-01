@@ -24,6 +24,7 @@ export default (state = initialState, action) => {
         return {
           ...state,
           selected: null,
+          editable: null
         };
       }
       return state;

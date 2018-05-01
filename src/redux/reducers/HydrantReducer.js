@@ -89,7 +89,7 @@ export default (state = initialState, action) => {
     case TRAIL_DELETED: {
       const trailId = action.data;
       const newHydrants = state.hydrants.map(hydrant => {
-        if (hydrant.get('id') === trailId) {
+        if (hydrant.get('trail') === trailId) {
           return hydrant.set('trail', null);
         }
         return hydrant;

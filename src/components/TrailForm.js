@@ -19,6 +19,10 @@ import { getMapStyle } from './../utils/mapUtils';
 import HydrantList from './HydrantList';
 import ColorPicker from './ColorPicker';
 import Close from '@material-ui/icons/Close';
+import Dialog, { DialogTitle,
+  DialogActions,
+  DialogContent,
+  DialogContentText } from 'material-ui/Dialog';
 
 const styles = theme => ({
   root: {
@@ -54,7 +58,15 @@ class TrailForm extends React.Component {
     trailSectionsOpen: true,
     pickerOpen: false,
     trailFill: 'white',
+    dialogOpen: false
     }
+
+
+  toggleConfirmation(onOff) {
+    this.setState({
+      dialogOpen: onOff
+    })
+  }
 
   render() {
     const {
@@ -67,8 +79,11 @@ class TrailForm extends React.Component {
       hydrants,
       hydrantDeleted,
       modifyHydrant,
-      selectedTrail
+      selectedTrail,
+      trailDeleted
     } = this.props;
+
+    const {  dialogOpen } = this.state
 
     const isTrailMode = interaction === 'DRAW_MODIFY_TRAIL'
 
@@ -103,18 +118,21 @@ class TrailForm extends React.Component {
               style={{ float: 'right'}}
               onClick={()=> {trailEditable(null)}}
             />
+
+
             <Input
               className={classes.input}
               value={editableTrail.get('name')}
               onChange={(e)=>{ modifyTrail(editableTrail.get('id'), { name: e.target.value }) }}
             />
 
+
             {isTrailMode ?
             (
               <Button
               className={classes.root}
               style={{marginTop: 10}}
-              color="secondary"
+              color="primary"
               onClick={()=> interactionChanged('DRAW_MODIFY_HYDRANTS')}
               variant="raised"
               >
@@ -160,8 +178,45 @@ class TrailForm extends React.Component {
 
             </List>
 
+            <Button
+              fullWidth
+              style={{ marginTop: 10 }}
+              color="secondary"
+              variant="raised"
+              onClick={() => { this.toggleConfirmation(true)}}
+            > Delete Trail
+            </Button>
+
           </CardContent>
         </Card>
+
+        <Dialog open={dialogOpen} >
+
+          <DialogTitle>Confirm Trail Delete</DialogTitle>
+
+          <DialogContent>
+            <DialogContentText id="alert-dialog-description">
+               You are about to delete a trail. Deleting a trail will remove
+               the trail polygon features and dissascociate the hydrants currently assigned.
+            </DialogContentText>
+          </DialogContent>
+
+          <DialogActions>
+            <Button
+              color="primary"
+              onClick={() => { trailDeleted(editableTrail.get('id'))}}
+            > Confirm Delete
+            </Button>
+
+            <Button
+              color="primary"
+              onClick={() => { this.toggleConfirmation(false); }}
+            > Cancel
+            </Button>
+          </DialogActions>
+
+        </Dialog>
+
       </div>
     );
   }
