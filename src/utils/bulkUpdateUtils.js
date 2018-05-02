@@ -15,12 +15,14 @@ export function getElevations() {
     const coords = _.map(needsElevation, h => _.clone(h.get('coords')).reverse());
     mapquestApi.fetchElevationForCoords(coords)
       .then((resp) => {
-        const updatedHydrants = _.map(needsElevation, (h, index) => {
+        const updatedHydrants = _.filter(_.map(needsElevation, (h, index) => {
           return h.set('elevation', resp[index].elevation);
-        });
+        }), h => h.get('elevation'));
         // return to immutable dictionary object and pass to the handler
-        const updatedHydrantsMap = Immutable.Map(_.keyBy(updatedHydrants, h => h.get('id')));
-        store.dispatch({ type: DATA_IMPORTED, data: { hydrants: updatedHydrantsMap } });
+        if (updatedHydrants.length) {
+          const updatedHydrantsMap = Immutable.Map(_.keyBy(updatedHydrants, h => h.get('id')));
+          store.dispatch({ type: DATA_IMPORTED, data: { hydrants: updatedHydrantsMap } });
+        }
       });
   }
 }
