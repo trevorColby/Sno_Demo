@@ -17,14 +17,6 @@ class AutoAssociate extends React.Component {
     };
   }
 
-  getElevations = () => {
-    const { dataImported, hydrants } = this.props;
-    const onFetchSuccess = (newHydrants) => {
-      dataImported({ hydrants: newHydrants });
-    };
-    getElevations(hydrants, onFetchSuccess);
-  }
-
   assignHydrants = () => {
     const { dataImported, hydrants, trails, manualAssignmentItemsAdded } = this.props;
     const orphans = hydrants.filter(h => h.get('trail') === null);
@@ -42,7 +34,7 @@ class AutoAssociate extends React.Component {
 
   openDialog = () => {
     this.assignHydrants();
-    setTimeout(this.getElevations, 20);
+    setTimeout(getElevations, 20);
     this.setState({ dialogOpen: true });
   }
 

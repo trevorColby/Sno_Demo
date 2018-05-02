@@ -2,20 +2,27 @@ import Immutable from 'immutable';
 import _ from 'lodash';
 import SourceVector from 'ol/source/vector';
 import { mapquestApi } from './api';
+import ActionTypes from '../redux/ActionTypes';
+import store from '../redux/store';
 
-export function getElevations(hydrants, handleNewHydrants) {
+const { DATA_IMPORTED } = ActionTypes;
+
+export function getElevations() {
+  const { hydrants } = store.getState().hydrants;
   // make it an array to ensure consistent order
   const needsElevation = hydrants.filter(h => !h.get('elevation')).toArray();
-  const coords = _.map(needsElevation, (h) => _.clone(h.get('coords')).reverse());
-  mapquestApi.fetchElevationForCoords(coords)
-    .then(resp => {
-      const updatedHydrants = _.map(needsElevation, (h, index) => {
-        return h.set('elevation', resp[index].elevation);
+  if (needsElevation.length) {
+    const coords = _.map(needsElevation, h => _.clone(h.get('coords')).reverse());
+    mapquestApi.fetchElevationForCoords(coords)
+      .then((resp) => {
+        const updatedHydrants = _.map(needsElevation, (h, index) => {
+          return h.set('elevation', resp[index].elevation);
+        });
+        // return to immutable dictionary object and pass to the handler
+        const updatedHydrantsMap = Immutable.Map(_.keyBy(updatedHydrants, h => h.get('id')));
+        store.dispatch({ type: DATA_IMPORTED, data: { hydrants: updatedHydrantsMap } });
       });
-      // return to immutable dictionary object and pass to the handler
-      const updatedHydrantsMap = Immutable.Map(_.keyBy(updatedHydrants, h => h.get('id')));
-      handleNewHydrants(updatedHydrantsMap);
-    });
+  }
 }
 
 export function autonameHydrants(hydrants, override = false) {
