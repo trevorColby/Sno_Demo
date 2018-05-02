@@ -53,7 +53,6 @@ class TrailForm extends React.Component {
   state = {
     trailSectionsOpen: true,
     pickerOpen: false,
-    trailFill: 'white',
     }
 
 
@@ -72,19 +71,19 @@ class TrailForm extends React.Component {
 
     const isTrailMode = interaction === 'DRAW_MODIFY_TRAIL'
 
-    const highlightPoly = (feature) => {
+    const highlightFeature = (feature) => {
       feature.set('highlighted', true)
       feature.changed()
     }
-    const unHighlightPoly = (feature) => {
+    const unhighlightFeature = (feature) => {
       feature.unset('highlighted')
       feature.changed()
     }
 
     const trailsSectionsList = trail.get('features').map((feature, index) => {
-      unHighlightPoly(feature)
+      unhighlightFeature(feature)
       return (
-        <ListItem className={classes.nested} key={feature.getId()} onMouseEnter={() => highlightPoly(feature)} onMouseLeave={()=> unHighlightPoly(feature)}>
+        <ListItem className={classes.nested} key={feature.getId()} onMouseEnter={() => highlightFeature(feature)} onMouseLeave={()=> unhighlightFeature(feature)}>
           {`Trail Section ${index + 1}`}
           <Delete onClick={ () => {deletePoly(index)}} />
         </ListItem>

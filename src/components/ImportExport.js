@@ -170,16 +170,16 @@ class ImportExport extends React.Component {
     })
 
 
-    function GetFileFromFeatures(features) {
+    function getFileFromFeatures(features) {
       const format = exportType === 'GJ' ? new GeoJSON() : new KML();
       const exportFile = format.writeFeatures(features, { featureProjection: 'EPSG:3857' });
       return exportFile;
     }
 
     if (selectedExport === 'trails') {
-      downloadjs(GetFileFromFeatures(trailFeatures), `Trails.${ext}`);
+      downloadjs(getFileFromFeatures(trailFeatures), `Trails.${ext}`);
     } else {
-      downloadjs(GetFileFromFeatures(hydrantFeatures), `Hydrants.${ext}`);
+      downloadjs(getFileFromFeatures(hydrantFeatures), `Hydrants.${ext}`);
     }
   }
 
@@ -250,14 +250,9 @@ class ImportExport extends React.Component {
                   </FormControl>
                 </div>
                 <Button variant="raised"  onClick={this.exportFile} > Export </Button>
-
             </ListItem>
-
           </List>
-
           <Divider />
-
-
         </Dialog>
       </div>
     );

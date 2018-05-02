@@ -8,6 +8,12 @@ import axios from 'axios';
 import _ from 'lodash';
 
 export function getMapStyle(feature, resolution) {
+
+  const HIGHLIGHT_COLOR = 'yellow';
+  const DEFAULT_OPACITY = 0.2;
+  const SELECTED_OPACITY = 0.4;
+
+
   if (feature.getGeometry().getType() === 'Point') {
     // hydrant styling defaults
     const fill = new Fill({ color: 'rgba(222, 49, 33, 0.4)' });
@@ -31,7 +37,7 @@ export function getMapStyle(feature, resolution) {
     }
 
     if (feature.get('highlighted')) {
-      fill.setColor('yellow')
+      fill.setColor(HIGHLIGHT_COLOR)
     }
     return new Style({
       image: new RegularShape({
@@ -55,7 +61,7 @@ export function getMapStyle(feature, resolution) {
     });
 
     const baseColor = `rgba(${feature.get('fillColor') || '255,255,255'}`;
-    const fill = new Fill({ color: `${baseColor},0.2)`});
+    const fill = new Fill({ color: `${baseColor},${DEFAULT_OPACITY})`});
 
 
     const stroke = new Stroke({
@@ -64,11 +70,11 @@ export function getMapStyle(feature, resolution) {
     });
     if (feature.get('selected')) {
       // changes for selected trails
-      fill.setColor(`${baseColor},0.4)`);
+      fill.setColor(`${baseColor},${SELECTED_OPACITY})`);
       stroke.setWidth(3);
     }
     if (feature.get('highlighted')){
-      fill.setColor('yellow');
+      fill.setColor(HIGHLIGHT_COLOR);
     }
     return new Style({
       fill,
