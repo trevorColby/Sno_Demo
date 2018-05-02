@@ -33,13 +33,9 @@ class ColorPicker extends React.Component {
       modifyTrail(editableTrail.get('id'), {fillColor: updateColor})
     }
 
-    const selectedColor = editableTrail.get('fillColor').split(',')
+    const [r,g,b] = editableTrail.get('fillColor').split(',')
 
-    const colorObj = {
-      r: selectedColor[0],
-      g: selectedColor[1],
-      b: selectedColor[2]
-    }
+    const colorObj = {r,g,b}
 
     return (
       <div>
