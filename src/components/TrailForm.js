@@ -61,19 +61,14 @@ class TrailForm extends React.Component {
     const {
       classes,
       modifyTrail,
-      editableTrail,
       trailEditable,
       interaction,
       interactionChanged,
       hydrants,
       hydrantDeleted,
       modifyHydrant,
-      selectedTrail
+      trail,
     } = this.props;
-
-    if (!editableTrail) {
-      return null
-    }
 
     const isTrailMode = interaction === 'DRAW_MODIFY_TRAIL'
 
@@ -86,7 +81,7 @@ class TrailForm extends React.Component {
       feature.changed()
     }
 
-    const trailsSectionsList = selectedTrail.get('features').map((feature, index) => {
+    const trailsSectionsList = trail.get('features').map((feature, index) => {
       unHighlightPoly(feature)
       return (
         <ListItem className={classes.nested} key={feature.getId()} onMouseEnter={() => highlightPoly(feature)} onMouseLeave={()=> unHighlightPoly(feature)}>
@@ -96,9 +91,9 @@ class TrailForm extends React.Component {
       )
     })
     const deletePoly = (featureIndex) => {
-      const newFeatures = _.clone(editableTrail.get('features'))
+      const newFeatures = _.clone(trail.get('features'))
       newFeatures.splice(featureIndex,1)
-      modifyTrail(editableTrail.get('id'), {features: newFeatures})
+      modifyTrail(trail.get('id'), {features: newFeatures})
     }
 
     return (
@@ -107,12 +102,12 @@ class TrailForm extends React.Component {
           <CardContent>
             <Close
               style={{ float: 'right'}}
-              onClick={()=> {trailEditable(null)}}
+              onClick={()=> {trailEditable(false)}}
             />
             <Input
               className={classes.input}
-              value={editableTrail.get('name')}
-              onChange={(e)=>{ modifyTrail(editableTrail.get('id'), { name: e.target.value }) }}
+              value={trail.get('name')}
+              onChange={(e)=>{ modifyTrail(trail.get('id'), { name: e.target.value }) }}
             />
 
             {isTrailMode ?
@@ -141,7 +136,7 @@ class TrailForm extends React.Component {
 
             <List className={classes.root}>
               <ColorPicker
-                editableTrail={editableTrail}
+                trail={trail}
                 modifyTrail={modifyTrail}
               />
 
@@ -158,7 +153,7 @@ class TrailForm extends React.Component {
 
 
               <HydrantList
-                editableTrail={editableTrail}
+                trail={trail}
                 hydrants={hydrants}
                 hydrantDeleted={hydrantDeleted}
                 modifyHydrant={modifyHydrant}

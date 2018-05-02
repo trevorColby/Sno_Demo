@@ -62,7 +62,7 @@ class TrailList extends React.Component {
         <TableCell>{hydrants.filter((h) => h.get('trail') === id).size}</TableCell>
         <TableCell>
           {isSelected ? (
-            <Icon className="fa-xs fa fa-pencil-alt" style={{ fontSize: 20 }} onClick={(e) => { trailEditable(id); }} />
+            <Icon className="fa-xs fa fa-pencil-alt" style={{ fontSize: 20 }} onClick={trailEditable} />
           ) : null
           }
         </TableCell>

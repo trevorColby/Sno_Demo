@@ -24,16 +24,16 @@ class ColorPicker extends React.Component {
 
     const {
       classes,
-      editableTrail,
+      trail,
       modifyTrail,
     } = this.props;
 
     const changeColor = (color) => {
       const updateColor = `${color.rgb.r},${color.rgb.g},${color.rgb.b}`
-      modifyTrail(editableTrail.get('id'), {fillColor: updateColor})
+      modifyTrail(trail.get('id'), {fillColor: updateColor})
     }
 
-    const [r,g,b] = editableTrail.get('fillColor').split(',')
+    const [r,g,b] = trail.get('fillColor').split(',')
 
     const colorObj = {r,g,b}
 
@@ -43,7 +43,7 @@ class ColorPicker extends React.Component {
           <ListItemText className={classes.inset} primary="Trail Shading:" />
           <Button
             onClick={()=> { this.setState({ open: !this.state.open})}}
-            style={{backgroundColor: `rgba(${editableTrail.get('fillColor')})`}}
+            style={{backgroundColor: `rgba(${trail.get('fillColor')})`}}
             className={classes.mini}
             variant='fab'
             mini

@@ -34,14 +34,14 @@ render() {
 
   const {
     classes,
-    editableTrail,
+    trail,
     hydrants,
     hydrantDeleted,
     modifyHydrant
   } = this.props;
 
   const trailHydrants = hydrants
-      .filter((h) => h.get('trail') === editableTrail.get('id'))
+      .filter((h) => h.get('trail') === trail.get('id'))
       .sort((a,b) => a.get('name').localeCompare(b.get('name'), undefined, {numeric: true}))
       .valueSeq()
 

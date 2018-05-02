@@ -7,7 +7,7 @@ const {
   EDIT_TRAIL
 } = ActionTypes;
 
-const initialState = { selected: null, editable: null };
+const initialState = { selected: null, editable: false };
 
 export default (state = initialState, action) => {
   switch (action.type) {
@@ -37,7 +37,7 @@ export default (state = initialState, action) => {
     case EDIT_TRAIL:
       return {
         ...state,
-        editable: true,
+        editable: action.data,
       };
     default:
       return state;

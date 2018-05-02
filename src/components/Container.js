@@ -149,13 +149,12 @@ class Container extends React.Component {
     }
 
     if (editableTrail) {
-          console.log(editableTrail)
       return (
         <TrailForm
           interactionChanged={interactionChanged}
           interaction={interaction}
           trailEditable={trailEditable}
-          editableTrail={trails.get(editableTrail)}
+          trail={trails.get(selectedTrail)}
           modifyTrail={modifyTrail}
           hydrants={hydrants}
           hydrantDeleted={hydrantDeleted}
@@ -222,7 +221,6 @@ class Container extends React.Component {
             )
 
             }
-
 
               <Typography variant="title" color="inherit" noWrap>
                 SnoTrack
@@ -335,8 +333,8 @@ const mapDispatchToProps = dispatch => ({
   focusHydrant: id => dispatch({
     type: MANUAL_ASSIGNMENT_HYDRANT_FOCUSED, data: id,
   }),
-  trailEditable: dispatch({
-    type: EDIT_TRAIL,
+  trailEditable: state => dispatch({
+    type: EDIT_TRAIL, data: state
   })
 });
 

@@ -156,8 +156,6 @@ class OpenLayersMap extends React.Component {
 
     map.on('click', this.onMapClick);
     this.setState({ map });
-
-    console.log(this.state)
   }
 
   updateInteractions(nextProps) {
