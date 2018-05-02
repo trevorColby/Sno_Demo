@@ -26,7 +26,6 @@ class OpenLayersMap extends React.Component {
       source: new SourceVector({ wrapX: false }),
       map: null,
       mapInteractions: [],
-      rotation: 0,
     };
   }
 
@@ -93,10 +92,8 @@ class OpenLayersMap extends React.Component {
   }
 
   onRotationChange = (value) => {
-    this.setState({
-      rotation: value
-    })
-    this.state.map.getView().setRotation(value)
+    const {map} = this.state
+    map.getView().setRotation(value)
   }
 
   onMapClick = (e) => {
@@ -143,7 +140,7 @@ class OpenLayersMap extends React.Component {
         projection,
         center: Projection.fromLonLat(centerCoords),
         zoom: 14.2,
-        rotation: this.state.rotation,
+        rotation: 0,
       }),
     });
 
