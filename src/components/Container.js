@@ -18,7 +18,6 @@ import appStyles from '../styles/drawer';
 import TrailList from './TrailList';
 import OpenLayersMap from './OpenLayersMap';
 import ImportExport from './ImportExport';
-import HydrantForm from './HydrantForm';
 import TrailForm from './TrailForm';
 import AutoAssociate from './AutoAssociate';
 import ManualAssociateHydrantsForm from './ManualAssociateHydrantsForm';
@@ -203,8 +202,8 @@ class Container extends React.Component {
               [classes[`appBarShift-left`]]: drawerOpen,
             })}
           >
-            <Toolbar disableGutters={!drawerOpen}>
 
+            <Toolbar disableGutters={!drawerOpen}>
             {drawerOpen? (
               <IconButton style={{color:'white'}} onClick={()=> { this.setState({drawerOpen:false})} }>
                 {<ChevronLeftIcon />}
@@ -219,7 +218,6 @@ class Container extends React.Component {
                 <MenuIcon />
               </IconButton>
             )
-
             }
 
               <Typography variant="title" color="inherit" noWrap>

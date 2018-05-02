@@ -70,7 +70,7 @@ class ImportExport extends React.Component {
       const featureFill = feature.getStyle().call(feature)[0].getFill()
 
       let fillColor = '255,255,255';
-      if (featureFill.getColor()) {
+      if (featureFill) {
         fillColor = hexToRgb(featureFill.getColor()) || featureFill.getColor().slice(0, 3).join(',')
       }
 

@@ -27,49 +27,44 @@ class HydrantList extends React.Component {
 
   state = {
     open: true,
-    showDetails:{}
+    showDetails: {}
   }
 
-render() {
-
-  const {
-    classes,
-    trail,
-    hydrants,
-    hydrantDeleted,
-    modifyHydrant
-  } = this.props;
-
-  const trailHydrants = hydrants
-      .filter((h) => h.get('trail') === trail.get('id'))
-      .sort((a,b) => a.get('name').localeCompare(b.get('name'), undefined, {numeric: true}))
-      .valueSeq()
-
-  const toggleHighLight = (feature, state) => {
+  toggleHighLight = (feature, state) => {
     feature.set('highlighted', state)
     feature.changed();
   }
 
-  const updateCoords = (e, h, coordIndex) => {
-    const newCoords = _.clone(h.get('coords'));
-    newCoords.splice(coordIndex, 1, Number(e.target.value))
-    modifyHydrant(h.get('id'), { coords: newCoords })
-  };
-
-  const toggleEdit = (id) => {
+  toggleEdit = (id) => {
     const newDetails = {}
-    if (!this.state.showDetails[id]){
+    if (!this.state.showDetails[id]) {
       newDetails[id] = true
     }
     this.setState({ showDetails: newDetails })
   }
 
-  const hydrantsList =  trailHydrants.map((h, index)=> {
+  updateCoords = (e, h, coordIndex) => {
+    const { modifyHydrant } = this.props
+    const newCoords = _.clone(h.get('coords'));
+    newCoords.splice(coordIndex, 1, Number(e.target.value))
+    modifyHydrant(h.get('id'), { coords: newCoords })
+  };
+
+
+
+  renderHydrant(h) {
+    const {
+      modifyHydrant,
+      classes,
+      hydrantDeleted,
+    } = this.props;
+
+
     return (
       <ListItem
         key={h.get('id')}
-        onMouseLeave={() => toggleHighLight(h.get('feature'), false)}
-        onMouseEnter={() => toggleHighLight(h.get('feature'), true)}
+        onMouseLeave={() => this.toggleHighLight(h.get('feature'), false)}
+        onMouseEnter={() => this.toggleHighLight(h.get('feature'), true)}
         className={classes.root}
       >
         <Input
@@ -79,7 +74,7 @@ render() {
         />
 
         <Delete onClick={()=> { hydrantDeleted((h.get('id'))); }} />
-        <ModeEdit onClick={() => toggleEdit(h.get('id'))} />
+        <ModeEdit onClick={() => this.toggleEdit(h.get('id'))} />
 
         <Collapse
           style={{ padding: 20 }}
@@ -91,13 +86,13 @@ render() {
             <Input
               type="number"
               value={h.get('coords')[1]}
-              onChange={(e) => { updateCoords(e, h, 1); }}
+              onChange={(e) => { this.updateCoords(e, h, 1); }}
             />
             <FormHelperText>Lat.</FormHelperText>
             <Input
               type="number"
               value={h.get('coords')[0]}
-              onChange={(e)=> { updateCoords(e, h, 0); }}
+              onChange={(e)=> { this.updateCoords(e, h, 0); }}
             />
             <FormHelperText>Lng.</FormHelperText>
 
@@ -112,22 +107,34 @@ render() {
         </Collapse>
       </ListItem>
     )
-  })
+  }
 
+  render() {
 
-  return (
-    <div>
-      <ListItem disableGutters onClick={()=> { this.setState({ open: !this.state.open }); }}>
-        <ListItemText className={classes.inset} primary="Hydrants" />
-        {this.state.open ? <ExpandLess /> : <ExpandMore />}
-      </ListItem>
-      <Collapse in={this.state.open} timeout="auto" unmountOnExit>
-        <List>
-          {hydrantsList}
-        </List>
-      </Collapse>
-    </div>
-  )
+    const {
+      classes,
+      trail,
+      hydrants,
+    } = this.props;
+
+    const trailHydrants = hydrants
+      .filter(h => h.get('trail') === trail.get('id'))
+      .sort((a, b) => a.get('name').localeCompare(b.get('name'), undefined, { numeric: true }))
+      .valueSeq()
+
+    return (
+      <div>
+        <ListItem disableGutters onClick={() => { this.setState({ open: !this.state.open }); }}>
+          <ListItemText className={classes.inset} primary="Hydrants" />
+          {this.state.open ? <ExpandLess /> : <ExpandMore />}
+        </ListItem>
+        <Collapse in={this.state.open} timeout="auto" unmountOnExit>
+          <List>
+            {trailHydrants.map(h => this.renderHydrant(h))}
+          </List>
+        </Collapse>
+      </div>
+    )
 }
 }
 
