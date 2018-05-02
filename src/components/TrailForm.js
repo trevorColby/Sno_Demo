@@ -195,7 +195,7 @@ class TrailForm extends React.Component {
           <DialogTitle>Confirm Trail Delete</DialogTitle>
 
           <DialogContent>
-            <DialogContentText id="alert-dialog-description">
+            <DialogContentText>
                You are about to delete a trail. Deleting a trail will remove
                the trail polygon features and dissascociate the hydrants currently assigned.
             </DialogContentText>
