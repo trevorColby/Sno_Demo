@@ -156,15 +156,19 @@ class OpenLayersMap extends React.Component {
 
     map.on('click', this.onMapClick);
     this.setState({ map });
+
+    console.log(this.state)
   }
 
   updateInteractions(nextProps) {
     const {
       trails, hydrants,
       interaction, modifyEnd,
-      drawEnd, editableTrail,
+      drawEnd, editableTrail, selectedTrail
     } = nextProps;
+
     const { source, map, mapInteractions } = this.state;
+
     _.each(mapInteractions, i => map.removeInteraction(i));
 
     const newInteractions = [];
@@ -173,10 +177,10 @@ class OpenLayersMap extends React.Component {
     const modifiable = [];
     if (interaction === 'DRAW_MODIFY_TRAIL' && editableTrail) {
       type = 'Polygon';
-      _.each(trails.getIn([editableTrail, 'features']), f => modifiable.push(f));
+      _.each(trails.getIn([selectedTrail, 'features']), f => modifiable.push(f));
     } else if (interaction === 'DRAW_MODIFY_HYDRANTS') {
       type = 'Point';
-      hydrants.filter(h => h.get('trail') === editableTrail)
+      hydrants.filter(h => h.get('trail') === selectedTrail)
         .forEach(h => modifiable.push(h.get('feature')));
     }
     if (type) {

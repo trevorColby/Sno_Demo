@@ -56,6 +56,7 @@ class TrailForm extends React.Component {
     trailFill: 'white',
     }
 
+
   render() {
     const {
       classes,
@@ -70,6 +71,10 @@ class TrailForm extends React.Component {
       selectedTrail
     } = this.props;
 
+    if (!editableTrail) {
+      return null
+    }
+
     const isTrailMode = interaction === 'DRAW_MODIFY_TRAIL'
 
     const highlightPoly = (feature) => {
@@ -80,7 +85,8 @@ class TrailForm extends React.Component {
       feature.unset('highlighted')
       feature.changed()
     }
-    const trailsSectionsList = editableTrail.get('features').map((feature, index) => {
+
+    const trailsSectionsList = selectedTrail.get('features').map((feature, index) => {
       unHighlightPoly(feature)
       return (
         <ListItem className={classes.nested} key={feature.getId()} onMouseEnter={() => highlightPoly(feature)} onMouseLeave={()=> unHighlightPoly(feature)}>

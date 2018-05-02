@@ -72,7 +72,7 @@ class Container extends React.Component {
     const { feature } = e;
     const { interaction, selectedTrail, editableTrail, trails, addTrail, addHydrant, modifyTrail } = this.props;
     if (interaction === 'DRAW_MODIFY_TRAIL') {
-      const trail = trails.get(editableTrail);
+      const trail = trails.get(selectedTrail);
       // set attributes on the feature, create a unique feature id
       _.each(trail.get('features'), (f, index) => {
         const id = `t-${trail.get('id')}-${index}`;
@@ -149,6 +149,7 @@ class Container extends React.Component {
     }
 
     if (editableTrail) {
+          console.log(editableTrail)
       return (
         <TrailForm
           interactionChanged={interactionChanged}
@@ -334,8 +335,8 @@ const mapDispatchToProps = dispatch => ({
   focusHydrant: id => dispatch({
     type: MANUAL_ASSIGNMENT_HYDRANT_FOCUSED, data: id,
   }),
-  trailEditable: id => dispatch({
-    type: EDIT_TRAIL, data: id
+  trailEditable: dispatch({
+    type: EDIT_TRAIL,
   })
 });
 

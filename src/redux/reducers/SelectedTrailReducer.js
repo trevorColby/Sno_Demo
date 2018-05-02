@@ -15,7 +15,7 @@ export default (state = initialState, action) => {
       return {
         ...state,
         selected: action.data.selected,
-        editable: null
+        editable: false
       };
     }
     case TRAIL_DELETED: {
@@ -32,12 +32,12 @@ export default (state = initialState, action) => {
       return {
         ...state,
         selected: action.data.get('id'),
-        editable: action.data.get('id'),
+        editable: true,
       };
     case EDIT_TRAIL:
       return {
         ...state,
-        editable: action.data,
+        editable: true,
       };
     default:
       return state;
