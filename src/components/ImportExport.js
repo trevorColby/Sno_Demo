@@ -60,7 +60,9 @@ class ImportExport extends React.Component {
     const { importKMLClicked, trails, hydrants } = this.props;
 
     function processTrail(feature, index) {
+
       let [name, ...otherThings] = feature.get('description').split(',') ;
+      const originalTrailName = name
       name = _.words(name).join(' ');
       const coords = feature.getGeometry().getCoordinates()[0];
       const lonLatCoords = _.map(coords, pt => Projection.fromLonLat(pt.slice(0, 2)));
@@ -72,6 +74,7 @@ class ImportExport extends React.Component {
 
       feature.getGeometry().setCoordinates([lonLatCoords]);
       feature.setId(`t-${name}-${index}`);
+      feature.set('originalTrailName', originalTrailName)
       feature.set('name', name);
       feature.set('fillColor', fillColor)
       feature.changed()
@@ -85,6 +88,7 @@ class ImportExport extends React.Component {
 
    function processHydrant(feature, index) {
       let [trailName, hydrantIndex, name]  = feature.get('description').split(',');
+      const originalTrailName = name
       trailName = _.words(trailName).join(' ');
       const trailObj = trails.find(t => t.get('name') === trailName);
       const trailId = trailObj ? trailObj.get('id') : null;
@@ -95,11 +99,11 @@ class ImportExport extends React.Component {
       const coords = geometry.getCoordinates().slice(0,2);
       feature.getGeometry().setCoordinates(Projection.fromLonLat(coords.slice(0,2)));
       feature.setId(`h-${id}-${index}`);
+      feature.set('originalTrailName', originalTrailName)
       feature.set('trailName', trailName);
       feature.setStyle(getMapStyle);
       return new Hydrant({ id, name, coords, feature, trail: trailId });
     }
-
     const reader = new FileReader();
     reader.onload = (event) => {
       try {
@@ -138,7 +142,6 @@ class ImportExport extends React.Component {
         console.log(err);
       }
     };
-
     if (selectedFiles && selectedFiles.length) {
       reader.readAsText(selectedFiles[0]);
     }
@@ -149,26 +152,36 @@ class ImportExport extends React.Component {
     const { selectedExport, exportType } = this.state;
 
 
-    const trailFeatures = _.flatMap(_.values(trails.toJS()), item => item.features);
-    const hydrantFeatures = _.flatMap(_.values(hydrants.toJS()), item => item.feature);
+    const trailFeatures = []
+    const hydrantFeatures = []
+
+    trails.valueSeq().forEach((v) => {
+      let trailName = v.get('name').split(' ').join('_')
+      // Iterate through Trail's Features
+      v.get('features').forEach((f) => {
+        if (f.get('originalTrailName')) {
+          trailName = f.get('originalTrailName')
+        }
+        const description = trailName
+        f.unset('features')
+        f.set('description', description)
+        f.setStyle()
+        trailFeatures.push(f)
+      })
+      // Iterate through Trail's Hydrants
+      _.chain(hydrants.toJS())
+        .values()
+        .filter({ trail: v.get('id') })
+        .orderBy('name', 'asc')
+        .value()
+        .forEach((h, index) => {
+           const feature = h.feature
+           feature.set('description', `${trailName},${index},${feature.get('name')}`)
+           hydrantFeatures.push(feature)
+         })
+    })
+    
     const ext = exportType === 'GJ' ? 'json' : 'kml';
-
-    hydrantFeatures.forEach((f,i) => {
-      // let trailName= trails.getIn([.get('trail', 'features', 0)]).get('description').split(',')[0];
-      // if !trailName {
-      //   trailName = trail.get('name')
-      // }
-      const desc = `${f.get('trailName')},${i},${f.get('name')}`
-      f.set('description', desc)
-    })
-
-    trailFeatures.forEach((feature) => {
-      //Features in a feature creates GeoJson Circular stringify error
-      feature.unset('features')
-      feature.set('description', feature.get('name'))
-      feature.setStyle(getMapStyle);
-    })
-
 
     function GetFileFromFeatures(features) {
       const format = exportType === 'GJ' ? new GeoJSON() : new KML();
@@ -191,7 +204,7 @@ class ImportExport extends React.Component {
       'Hyd_Target_Gallons', 'Hyd_Total_Gallons', 'Hyd_Cfm', 'Hyd_Pressure_Zone']
     ]
     trails.keySeq().forEach((trailId) => {
-      const trailName = trails.getIn([trailId, 'features'])[0].get('description').split(',')[0]
+      const trailName = trails.getIn([trailId, 'features'])[0].get('originalTrailName')
       const trailHydrants = _
         .chain(hydrants.toJS())
         .values()
