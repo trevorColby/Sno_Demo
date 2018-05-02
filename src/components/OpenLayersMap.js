@@ -55,10 +55,10 @@ class OpenLayersMap extends React.Component {
 
         if (trailFeatures.length > 0) {
 
-        const GeomCollection = new GeometryCollection()
+        const geomCollection = new GeometryCollection()
         const geometries = _.flatMap(trailFeatures, f => f.getGeometry())
-        GeomCollection.setGeometries(geometries)
-        const newExtent = GeomCollection.getExtent()
+        geomCollection.setGeometries(geometries)
+        const newExtent = geomCollection.getExtent()
 
         const view = map.getView();
         const zoomResolution = view.getResolutionForExtent(newExtent);
