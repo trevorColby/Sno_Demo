@@ -125,7 +125,7 @@ class Container extends React.Component {
   renderDrawerContents = () => {
 
     const {
-      hydrants, trails,editableTrail,trailEditable,
+      hydrants, trails,editableTrail,toggledEditing,
       selectedTrail, trailSelected,
       modifyTrail, modifyHydrant,
       dataImported, interaction, interactionChanged,
@@ -153,7 +153,7 @@ class Container extends React.Component {
         <TrailForm
           interactionChanged={interactionChanged}
           interaction={interaction}
-          trailEditable={trailEditable}
+          toggledEditing={toggledEditing}
           trail={trails.get(selectedTrail)}
           modifyTrail={modifyTrail}
           hydrants={hydrants}
@@ -165,7 +165,7 @@ class Container extends React.Component {
     return (
       <div>
         <TrailList
-          trailEditable={trailEditable}
+          toggledEditing={toggledEditing}
           newTrailClicked={this.newTrailClicked}
           modifyTrail={modifyTrail}
           trails={trails}
@@ -180,7 +180,7 @@ class Container extends React.Component {
 
   render() {
     const {
-      trailEditable,
+      toggledEditing,
       editableTrail,
       hydrants, trails,
       selectedTrail, trailSelected,
@@ -333,7 +333,7 @@ const mapDispatchToProps = dispatch => ({
   focusHydrant: id => dispatch({
     type: MANUAL_ASSIGNMENT_HYDRANT_FOCUSED, data: id,
   }),
-  trailEditable: state => dispatch({
+  toggledEditing: state => dispatch({
     type: EDIT_TRAIL, data: state
   })
 });

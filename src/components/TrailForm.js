@@ -61,7 +61,7 @@ class TrailForm extends React.Component {
     const {
       classes,
       modifyTrail,
-      trailEditable,
+      toggledEditing,
       interaction,
       interactionChanged,
       hydrants,
@@ -102,7 +102,7 @@ class TrailForm extends React.Component {
           <CardContent>
             <Close
               style={{ float: 'right'}}
-              onClick={()=> {trailEditable(false)}}
+              onClick={()=> {toggledEditing(false)}}
             />
             <Input
               className={classes.input}

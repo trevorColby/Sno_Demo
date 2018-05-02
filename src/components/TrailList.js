@@ -20,7 +20,7 @@ const CustomTableCell = withStyles(theme => ({
 class TrailList extends React.Component {
 
   renderTrail = (trail) => {
-    const { selected, trailSelected, modifyTrail, hydrants, trailEditable, editableTrail } = this.props;
+    const { selected, trailSelected, modifyTrail, hydrants, toggledEditing, editableTrail } = this.props;
 
     const id = trail.id;
     const isSelected = selected === id;
@@ -62,7 +62,7 @@ class TrailList extends React.Component {
         <TableCell>{hydrants.filter((h) => h.get('trail') === id).size}</TableCell>
         <TableCell>
           {isSelected ? (
-            <Icon className="fa-xs fa fa-pencil-alt" style={{ fontSize: 20 }} onClick={trailEditable} />
+            <Icon className="fa-xs fa fa-pencil-alt" style={{ fontSize: 20 }} onClick={toggledEditing} />
           ) : null
           }
         </TableCell>
