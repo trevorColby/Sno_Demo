@@ -180,7 +180,7 @@ class ImportExport extends React.Component {
            hydrantFeatures.push(feature)
          })
     })
-    
+
     const ext = exportType === 'GJ' ? 'json' : 'kml';
 
     function GetFileFromFeatures(features) {
@@ -204,7 +204,9 @@ class ImportExport extends React.Component {
       'Hyd_Target_Gallons', 'Hyd_Total_Gallons', 'Hyd_Cfm', 'Hyd_Pressure_Zone']
     ]
     trails.keySeq().forEach((trailId) => {
-      const trailName = trails.getIn([trailId, 'features'])[0].get('originalTrailName')
+      const trail = trails.get(trailId)
+      const trailName = trail.get('features')[0].get('originalTrailName') || trail.get('name').split(' ').join('_')
+
       const trailHydrants = _
         .chain(hydrants.toJS())
         .values()
