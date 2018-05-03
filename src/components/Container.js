@@ -69,7 +69,7 @@ class Container extends React.Component {
 
   drawEnd(e) {
     const { feature } = e;
-    const { interaction, selectedTrail, editableTrail, trails, addTrail, addHydrant, modifyTrail } = this.props;
+    const { interaction, selectedTrail, editableTrail, trails, addTrail, addHydrant, modifyTrail, hydrants } = this.props;
     if (interaction === 'DRAW_MODIFY_TRAIL') {
       const trail = trails.get(selectedTrail);
       // set attributes on the feature, create a unique feature id
@@ -91,7 +91,9 @@ class Container extends React.Component {
     } else if (interaction === 'DRAW_MODIFY_HYDRANTS') {
       const mapCoords = feature.getGeometry().getCoordinates();
       const coords = Projection.toLonLat(mapCoords);
-      const name = '';
+
+      const name = `${hydrants.filter(h => h.get('trail') === selectedTrail).size + 1}`;
+
       let id = new Date().getTime();
       id = id.toString();
       const newHydrant = new Hydrant({

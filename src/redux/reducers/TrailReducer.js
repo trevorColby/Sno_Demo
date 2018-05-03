@@ -15,6 +15,20 @@ const initialState = {
   trails: Immutable.Map(),
 };
 
+function updateTrailFeatures(trail, editedFields) {
+  _.each(trail.get('features'), (f) => {
+    if (editedFields.name) {
+      f.set('name', editedFields.name)
+    }
+    if (editedFields.fillColor) {
+      f.set('fillColor', editedFields.fillColor)
+    }
+    f.changed()
+  });
+}
+
+
+
 export default (state = initialState, action) => {
   switch (action.type) {
     case TRAIL_ADDED: {
@@ -38,6 +52,7 @@ export default (state = initialState, action) => {
         });
       }
       if (selected && state.trails.get(selected)) {
+
         const features = state.trails.getIn([selected, 'features']);
         _.each(features, (f) => {
           f.set('selected', true);
@@ -63,10 +78,7 @@ export default (state = initialState, action) => {
       if (_.has(editedFields, 'features')) {
         newTrail = convertTrailFeaturesToDonuts(newTrail);
       }
-      _.each(newTrail.get('features'), (f) => {
-        f.setProperties(editedFields);
-        f.changed();
-      });
+      updateTrailFeatures(newTrail, editedFields)
       return {
         ...state,
         trails: state.trails.set(id, newTrail),

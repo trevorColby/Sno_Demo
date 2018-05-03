@@ -164,7 +164,6 @@ class ImportExport extends React.Component {
 
     trailFeatures.forEach((feature) => {
       //Features in a feature creates GeoJson Circular stringify error
-      feature.unset('features')
       feature.set('description', feature.get('name'))
       feature.setStyle(getMapStyle);
     })
