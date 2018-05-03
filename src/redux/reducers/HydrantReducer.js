@@ -55,6 +55,9 @@ export default (state = initialState, action) => {
       const { id, editedFields } = action.data;
       const newHydrant = state.hydrants.get(id).withMutations((h) => {
         _.each(editedFields, (val, key) => h.set(key, val));
+        if (editedFields.coords && !editedFields.elevation) {
+          h.set('elevation', null);
+        }
       });
       updateHydrantFeatures(newHydrant, editedFields);
       return {
