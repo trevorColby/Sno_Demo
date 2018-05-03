@@ -42,7 +42,7 @@ class TrailList extends React.Component {
     }
 
     const handleSelected = () => {
-        isSelected ? null : trailSelected(id)
+        isSelected ? trailSelected(null) : trailSelected(id)
     };
 
 
@@ -62,7 +62,7 @@ class TrailList extends React.Component {
         <TableCell>{hydrants.filter((h) => h.get('trail') === id).size}</TableCell>
         <TableCell>
           {isSelected ? (
-            <Icon className="fa-xs fa fa-pencil-alt" style={{ fontSize: 20 }} onClick={toggledEditing} />
+            <Icon className="fa-xs fa fa-pencil-alt" style={{ fontSize: 20 }} onClick={(e) => {e.stopPropagation(); toggledEditing(true)}} />
           ) : null
           }
         </TableCell>
