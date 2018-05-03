@@ -40,7 +40,10 @@ render() {
     modifyHydrant
   } = this.props;
 
-  const trailHydrants = hydrants.filter((h) => h.get('trail') === editableTrail.get('id')).valueSeq();
+  const trailHydrants = hydrants
+      .filter((h) => h.get('trail') === editableTrail.get('id'))
+      .sort((a,b) => a.get('name').localeCompare(b.get('name'), undefined, {numeric: true}))
+      .valueSeq()
 
   const toggleHighLight = (feature, state) => {
     feature.set('highlighted', state)
@@ -61,7 +64,7 @@ render() {
     this.setState({ showDetails: newDetails })
   }
 
-  const hydrantsList = trailHydrants.map((h, index)=> {
+  const hydrantsList =  trailHydrants.map((h, index)=> {
     return (
       <ListItem
         key={h.get('id')}
@@ -105,15 +108,8 @@ render() {
             />
 
             <FormHelperText>Elevation</FormHelperText>
-
-
-
           </FormControl>
-
-
-
         </Collapse>
-
       </ListItem>
     )
   })
