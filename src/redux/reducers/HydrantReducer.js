@@ -39,7 +39,6 @@ export default (state = initialState, action) => {
       const { hydrants } = state;
       const hydrant = action.data;
       const newHydrants = hydrants.set(hydrant.id, hydrant);
-      console.log(hydrant.toJS())
       return {
         ...state,
         hydrants: newHydrants,
