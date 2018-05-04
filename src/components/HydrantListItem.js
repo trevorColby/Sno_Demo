@@ -54,14 +54,12 @@ class HydrantListItem extends React.Component {
       classes,
       hydrantDeleted,
       hydrant,
-      key
     } = this.props;
 
     const { name, showDetails } = this.state
 
     return (
       <ListItem
-        key={key}
         onMouseLeave={() => this.toggleHighLight(hydrant.get('feature'), false)}
         onMouseEnter={() => this.toggleHighLight(hydrant.get('feature'), true)}
         className={classes.root}
