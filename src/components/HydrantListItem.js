@@ -40,6 +40,15 @@ class HydrantListItem extends React.Component {
     modifyHydrant(hydrant.get('id'), { coords: newCoords })
   };
 
+
+  componentWillReceiveProps(nextProps){
+    if (this.props.hydrant !== nextProps.hydrant) {
+      this.setState({
+        name: nextProps.hydrant.get('name')
+      })
+    }
+  }
+
   render() {
     const {
       modifyHydrant,
@@ -56,6 +65,7 @@ class HydrantListItem extends React.Component {
         onMouseEnter={() => this.toggleHighLight(hydrant.get('feature'), true)}
         className={classes.root}
       >
+
         <Input
           onBlur={(e) => { modifyHydrant(hydrant.get('id'), { name: e.target.value })}}
           onChange={(e) => { this.setState({ name: e.target.value }); }}

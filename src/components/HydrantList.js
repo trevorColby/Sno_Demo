@@ -11,6 +11,9 @@ import { FormControl, FormHelperText } from 'material-ui/Form';
 import TextField from 'material-ui/TextField';
 import _ from 'lodash';
 import HydrantListItem from './HydrantListItem';
+import Button from 'material-ui/Button';
+import Check from '@material-ui/icons/Check';
+import Tooltip from 'material-ui/Tooltip';
 
 
 const styles = theme => ({
@@ -23,9 +26,52 @@ const styles = theme => ({
 
 class HydrantList extends React.Component {
 
-  state = {
-    open: true,
+
+  constructor(props){
+    super(props)
+    this.state = {
+      open: true,
+      prefix: this.getPrefix(props.trailHydrants),
+    }
   }
+
+  componentWillReceiveProps(nextProps) {
+    const prefix = this.getPrefix(nextProps.trailHydrants)
+    this.setState({
+        prefix
+    })
+
+  }
+
+  getPrefix = (hydrants) => {
+    if (hydrants.size > 1) {
+      return hydrants.reduce((accum, val) => {
+        let name = val.get('name')
+        for (let i = 0; i < accum.length; i++) {
+          if (accum[i] !== name[i]) {
+            return accum.slice(0, i)
+          }
+        };
+        return accum
+      }, hydrants.getIn([0,'name']) )
+    }
+    return ''
+  }
+
+  applyPrefix = () => {
+    const { modifyHydrant, trailHydrants } = this.props
+    const { prefix } = this.state
+    const oldPrefix = this.getPrefix(trailHydrants)
+
+
+    trailHydrants.forEach((h) => {
+      const newName = h.get('name').replace(oldPrefix, prefix)
+      modifyHydrant(h.get('id'), { name: newName })
+    })
+
+  }
+
+
 
   render() {
 
@@ -35,12 +81,12 @@ class HydrantList extends React.Component {
       hydrants,
       modifyHydrant,
       hydrantDeleted,
+      trailHydrants
     } = this.props;
 
-    const trailHydrants = hydrants
-      .filter(h => h.get('trail') === trail.get('id'))
-      .sort((a, b) => a.get('name').localeCompare(b.get('name'), undefined, { numeric: true }))
-      .valueSeq()
+
+    const { prefix } = this.state
+
 
     return (
       <div>
@@ -49,6 +95,27 @@ class HydrantList extends React.Component {
           {this.state.open ? <ExpandLess /> : <ExpandMore />}
         </ListItem>
         <Collapse in={this.state.open} timeout="auto" unmountOnExit>
+          <ListItem>
+            <FormControl>
+              <Input
+                placeholder="None"
+                value={prefix}
+                onChange={(e) => { this.setState({ prefix: e.target.value })}}
+              />
+              <FormHelperText>Hydrant prefix</FormHelperText>
+            </FormControl>
+            <Tooltip title='Apply Prefix'>
+              <Button
+               variant='flat'
+               mini
+               onClick={this.applyPrefix}
+              >
+                <Check style={{ color: 'green' }} />
+              </Button>
+            </Tooltip>
+          </ListItem>
+
+
           <List>
             {trailHydrants.map((h) => {
               const key = h.get('id')
