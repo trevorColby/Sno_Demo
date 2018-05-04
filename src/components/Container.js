@@ -25,6 +25,7 @@ import OperationMessage from './OperationMessage';
 import TimeLine from '@material-ui/icons/Timeline';
 import Tooltip from 'material-ui/Tooltip';
 import AddLocation from '@material-ui/icons/AddLocation';
+import Card, { CardContent, CardHeader } from 'material-ui/Card';
 
 
 import ActionTypes from '../redux/ActionTypes';
@@ -67,10 +68,8 @@ class Container extends React.Component {
         message: null
     })
   }
-
-
     newTrailClicked = () => {
-      const { addTrail } = this.props;
+      const { addTrail, trailSelected, selectedTrail } = this.props;
       let id = new Date().getTime();
       id = id.toString();
       const name = 'New Trail';
@@ -81,6 +80,7 @@ class Container extends React.Component {
         drawerOpen: true
       });
     }
+
 
   drawEnd(e) {
     const { feature } = e;
@@ -140,7 +140,6 @@ class Container extends React.Component {
   }
 
   renderDrawerContents = () => {
-
     const {
       hydrants, trails,editableTrail,toggledEditing,
       selectedTrail, trailSelected,
@@ -149,7 +148,8 @@ class Container extends React.Component {
       classes, theme, selectedHydrant, hydrantDeleted,
       hydrantSelected, closeManualAssignment,
       manualAssignmentItems, focusedHydrant,
-      focusHydrant, manualAssignmentOpen, trailDeleted
+      focusHydrant, manualAssignmentOpen, trailDeleted, manualAssignmentItemsAdded,
+      openManualAssignment
     } = this.props;
 
     if (manualAssignmentOpen) {
@@ -180,9 +180,45 @@ class Container extends React.Component {
         />
       )
     }
+
+    if (trails.size === 0) {
+      return (
+
+        <Card raised={true} >
+          <CardHeader
+          title="Getting Started"
+
+          />
+          <CardContent>
+            <Typography variant="body2" >
+              Get Started By Importing exisiting KML Trail Features
+              or Adding Features Manually.
+            </Typography>
+
+            <Button color='primary' variant='raised' onClick={this.newTrailClicked} fullWidth>
+            Create A Trail
+            </Button>
+
+            <Button color='primary' variant='raised' onClick={() => { interactionChanged('DRAW_MODIFY_HYDRANTS')}} fullWidth>
+            Drop Hydrants
+            </Button>
+
+
+          </CardContent>
+        </Card>
+
+
+      )
+
+    }
+
     return (
       <div>
         <TrailList
+          dataImported={dataImported}
+          manualAssignmentItemsAdded={manualAssignmentItemsAdded}
+          openManualAssignment={openManualAssignment}
+          manualAssignmentItems={manualAssignmentItems}
           toggledEditing={toggledEditing}
           newTrailClicked={this.newTrailClicked}
           modifyTrail={modifyTrail}
@@ -216,6 +252,7 @@ class Container extends React.Component {
       <div className={classes.root}>
         <div className={classes.appFrame}>
           <AppBar
+            color='primary'
             className={classNames(classes.appBar, {
               [classes.appBarShift]: drawerOpen,
               [classes[`appBarShift-left`]]: drawerOpen,
@@ -278,17 +315,6 @@ class Container extends React.Component {
                   trails={trails}
                   hydrants={hydrants}
                 />
-
-
-                <AutoAssociate
-                  trails={trails}
-                  hydrants={hydrants}
-                  dataImported={dataImported}
-                  manualAssignmentItemsAdded={manualAssignmentItemsAdded}
-                  openManualAssignment={openManualAssignment}
-                  manualAssignmentItems={manualAssignmentItems}
-                />
-
 
               </div>
 

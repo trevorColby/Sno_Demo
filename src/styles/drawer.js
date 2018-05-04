@@ -12,7 +12,6 @@ export default theme => ({
     width: 325
   },
   appBar: {
-    background: '#040404',
     position: 'absolute',
     transition: theme.transitions.create(['margin', 'width'], {
       easing: theme.transitions.easing.sharp,

@@ -68,6 +68,7 @@ export default (state = initialState, action) => {
     case TRAIL_SELECTED: {
       // this is actually bad because state shouldnt cause side effects
       // but this map stuff is a little wack
+      console.log('selected')
       const { prevSelected, selected } = action.data;
       if (prevSelected) {
         state.hydrants

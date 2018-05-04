@@ -124,14 +124,11 @@ class TrailForm extends React.Component {
               style={{ float: 'right'}}
               onClick={()=> {toggledEditing(false)}}
             />
-
-
             <Input
               className={classes.input}
               value={trail.get('name')}
               onChange={(e)=>{ modifyTrail(trail.get('id'), { name: e.target.value }) }}
             />
-
 
             {isTrailMode ?
             (
@@ -147,7 +144,7 @@ class TrailForm extends React.Component {
             ) :
             <Button
             className={classes.root}
-            color="secondary"
+            color="primary"
             style={{marginTop: 10}}
             onClick={()=> interactionChanged('DRAW_MODIFY_TRAIL')}
             variant="raised"
