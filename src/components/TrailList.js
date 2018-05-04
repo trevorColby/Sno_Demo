@@ -74,8 +74,9 @@ class TrailList extends React.Component {
   render() {
     const {trails, trailSelected, selected, hydrants, newTrailClicked, interactionChanged} = this.props;
     const orphanCount = hydrants.filter((h) => h.get('trail') === null).size;
-    return (
 
+    console.log(hydrants.toJS())
+    return (
       <div>
         <Button variant='raised' color='secondary' onClick={newTrailClicked}>
           ADD TRAIL

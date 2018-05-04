@@ -5,11 +5,17 @@ import { withStyles } from 'material-ui/styles';
 import Button from 'material-ui/Button';
 import { ListItem, ListItemText } from 'material-ui/List';
 import Collapse from 'material-ui/transitions/Collapse';
+import FiberManualRecord from '@material-ui/icons/FiberManualRecord';
+import { Icon } from 'material-ui';
 
 
 const styles = theme => ({
   inset: {
     paddingLeft: 0
+  },
+  icon: {
+    fontSize: 60,
+    boxShadow: "0px 3px 5px -1px rgba(0, 0, 0, 0.2), 0px 6px 10px 0px rgba(0, 0, 0, 0.14), 0px 1px 18px 0px rgba(0, 0, 0, 0.12)"
   }
 })
 
@@ -41,13 +47,17 @@ class ColorPicker extends React.Component {
       <div>
         <ListItem disableGutters>
           <ListItemText className={classes.inset} primary="Trail Shading:" />
-          <Button
+
+          <button
+            style={{background: `rgba(${editableTrail.get('fillColor')})`,
+                    fontSize: 60,
+                    boxShadow: "0px 3px 5px -1px rgba(0, 0, 0, 0.2), 0px 6px 10px 0px rgba(0, 0, 0, 0.14), 0px 1px 18px 0px rgba(0, 0, 0, 0.12)",
+                    height: 40,
+                    width: 40
+                    }}
             onClick={()=> { this.setState({ open: !this.state.open})}}
-            style={{backgroundColor: `rgba(${trail.get('fillColor')})`}}
-            className={classes.mini}
-            variant='fab'
-            mini
           />
+
         </ListItem>
 
         <Collapse style={{ paddingBottom: 10 }} in={this.state.open} timeout="auto" unmountOnExit>

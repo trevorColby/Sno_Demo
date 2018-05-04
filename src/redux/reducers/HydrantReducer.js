@@ -55,6 +55,9 @@ export default (state = initialState, action) => {
       const { id, editedFields } = action.data;
       const newHydrant = state.hydrants.get(id).withMutations((h) => {
         _.each(editedFields, (val, key) => h.set(key, val));
+        if (editedFields.coords && !editedFields.elevation) {
+          h.set('elevation', null);
+        }
       });
       updateHydrantFeatures(newHydrant, editedFields);
       return {
@@ -88,11 +91,14 @@ export default (state = initialState, action) => {
     }
     case TRAIL_DELETED: {
       const trailId = action.data;
+
       const newHydrants = state.hydrants.map(hydrant => {
-        if (hydrant.get('id') === trailId) {
-          return hydrant.set('trail', null);
+        let newHydrant = hydrant
+        if (hydrant.get('trail') === trailId) {
+          newHydrant = hydrant.set('trail', null);
+          updateHydrantFeatures(newHydrant, newHydrant.toJS());
         }
-        return hydrant;
+        return newHydrant;
       });
       return {
         ...state,

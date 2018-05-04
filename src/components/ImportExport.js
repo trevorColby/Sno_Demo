@@ -23,7 +23,6 @@ import Select from 'material-ui/Select';
 import { MenuItem } from 'material-ui/Menu';
 import Typography from 'material-ui/Typography';
 
-
 const styles = theme => ({
   root: {
     display: 'flex',
@@ -57,13 +56,13 @@ class ImportExport extends React.Component {
     });
   }
 
-
   importFile = () => {
     const { selectedFiles } = this.state;
     const { importKMLClicked, trails, hydrants } = this.props;
 
     function processTrail(feature, index) {
-      let [name, ...otherThings] = feature.get('description').split(',');
+      let [name, ...otherThings] = feature.get('description').split(',') ;
+      const originalTrailName = name
       name = _.words(name).join(' ');
       const coords = feature.getGeometry().getCoordinates()[0];
       const lonLatCoords = _.map(coords, pt => Projection.fromLonLat(pt.slice(0, 2)));
@@ -77,6 +76,7 @@ class ImportExport extends React.Component {
 
       feature.getGeometry().setCoordinates([lonLatCoords]);
       feature.setId(`t-${name}-${index}`);
+      feature.set('originalTrailName', originalTrailName)
       feature.set('name', name);
       feature.set('fillColor', fillColor)
       feature.changed()
@@ -88,8 +88,9 @@ class ImportExport extends React.Component {
 
 
 
-    function processHydrant(feature, index) {
+   function processHydrant(feature, index) {
       let [trailName, hydrantIndex, name]  = feature.get('description').split(',');
+      const originalTrailName = name
       trailName = _.words(trailName).join(' ');
       const trailObj = trails.find(t => t.get('name') === trailName);
       const trailId = trailObj ? trailObj.get('id') : null;
@@ -100,11 +101,11 @@ class ImportExport extends React.Component {
       const coords = geometry.getCoordinates().slice(0,2);
       feature.getGeometry().setCoordinates(Projection.fromLonLat(coords.slice(0,2)));
       feature.setId(`h-${id}-${index}`);
+      feature.set('originalTrailName', originalTrailName)
       feature.set('trailName', trailName);
       feature.setStyle(getMapStyle);
       return new Hydrant({ id, name, coords, feature, trail: trailId });
     }
-
     const reader = new FileReader();
     reader.onload = (event) => {
       try {
@@ -143,7 +144,6 @@ class ImportExport extends React.Component {
         console.log(err);
       }
     };
-
     if (selectedFiles && selectedFiles.length) {
       reader.readAsText(selectedFiles[0]);
     }
@@ -153,22 +153,36 @@ class ImportExport extends React.Component {
     const { trails, hydrants } = this.props;
     const { selectedExport, exportType } = this.state;
 
+    const trailFeatures = []
+    const hydrantFeatures = []
 
-    const trailFeatures = _.flatMap(_.values(trails.toJS()), item => item.features);
-    const hydrantFeatures = _.flatMap(_.values(hydrants.toJS()), item => item.feature);
+    trails.valueSeq().forEach((v) => {
+      let trailName = v.get('name').split(' ').join('_')
+      // Iterate through Trail's Features
+      v.get('features').forEach((f) => {
+        if (f.get('originalTrailName')) {
+          trailName = f.get('originalTrailName')
+        }
+        const description = trailName
+        f.unset('features')
+        f.set('description', description)
+        f.setStyle()
+        trailFeatures.push(f)
+      })
+      // Iterate through Trail's Hydrants
+      _.chain(hydrants.toJS())
+        .values()
+        .filter({ trail: v.get('id') })
+        .orderBy('name', 'asc')
+        .value()
+        .forEach((h, index) => {
+           const feature = h.feature
+           feature.set('description', `${trailName},${index},${feature.get('name')}`)
+           hydrantFeatures.push(feature)
+         })
+    })
+
     const ext = exportType === 'GJ' ? 'json' : 'kml';
-
-    hydrantFeatures.forEach((f,i) => {
-      const desc = `${f.get('trailName')},${i},${f.get('name')}`
-      f.set('description', desc)
-    })
-
-    trailFeatures.forEach((feature) => {
-      //Features in a feature creates GeoJson Circular stringify error
-      feature.set('description', feature.get('name'))
-      feature.setStyle(getMapStyle);
-    })
-
 
     function getFileFromFeatures(features) {
       const format = exportType === 'GJ' ? new GeoJSON() : new KML();
@@ -181,6 +195,49 @@ class ImportExport extends React.Component {
     } else {
       downloadjs(getFileFromFeatures(hydrantFeatures), `Hydrants.${ext}`);
     }
+  }
+
+  generateCSV = () => {
+    const { hydrants, trails } = this.props;
+    const hydrantsRows = [
+      ['Trail_Name', 'Hyd_Index', 'Hyd_ID', 'Hyd_State', 'Hyd_Hours',
+      'Hyd_Gun', 'Hyd_Gpm', 'Hyd_Notes', 'Hyd_Elevation',
+      'Hyd_Target_Gallons', 'Hyd_Total_Gallons', 'Hyd_Cfm', 'Hyd_Pressure_Zone']
+    ]
+    trails.keySeq().forEach((trailId) => {
+      const trail = trails.get(trailId)
+      const trailName = trail.get('features')[0].get('originalTrailName') || trail.get('name').split(' ').join('_')
+
+      const trailHydrants = _
+        .chain(hydrants.toJS())
+        .values()
+        .filter({ trail: trailId })
+        .orderBy('name', 'asc')
+        .value();
+
+      for (let i = 0; i < 100; i += 1) {
+        let hydId = i
+        let elevation = 0
+        if (trailHydrants[i]) {
+          hydId = trailHydrants[i].name
+          elevation = trailHydrants[i].elevation
+        }
+        hydrantsRows.push([
+          trailName, i, hydId, 0, 0,
+          'None', 0, 'None', elevation, 0,
+          0, 0, 'None',
+        ]);
+      }
+    });
+    const lineArray = []
+    hydrantsRows.forEach((r, i) => {
+      const line = r.join(",")
+      lineArray.push(i === 0 ? "data:text/csv;charset=utf-8," + line : line)
+    });
+    const csvContent = lineArray.join("\n")
+    const encodedUri = encodeURI(csvContent);
+    // window.location.assign(encodedUri);
+    downloadjs(encodedUri, `Hydrants_Table.csv`);
   }
 
   handleClose = () => {
@@ -200,6 +257,9 @@ class ImportExport extends React.Component {
       selectedExport: event.target.value
     })
   }
+
+
+
 
   render() {
     const { classes } = this.props;
@@ -251,6 +311,13 @@ class ImportExport extends React.Component {
                 </div>
                 <Button variant="raised"  onClick={this.exportFile} > Export </Button>
             </ListItem>
+
+            <Button
+              onClick={this.generateCSV}
+            >
+
+            Download Hydrants_Table.CSV
+            </Button>
           </List>
           <Divider />
         </Dialog>

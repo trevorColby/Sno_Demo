@@ -71,6 +71,7 @@ export default (state = initialState, action) => {
     }
     case TRAIL_MODIFIED: {
       const { id, editedFields } = action.data;
+
       let newTrail = state.trails.get(id)
         .withMutations((tr) => {
           _.each(editedFields, (val, key) => tr.set(key, val));
