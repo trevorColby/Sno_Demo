@@ -16,7 +16,8 @@ import downloadjs from 'downloadjs';
 import ImportExportIcon from '@material-ui/icons/ImportExport';
 import Tooltip from 'material-ui/Tooltip';
 import IconButton from 'material-ui/IconButton';
-import { getMapStyle, convertTrailFeaturesToDonuts, hexToRgb } from '../utils/mapUtils';
+import { getMapStyle, convertTrailFeaturesToDonuts } from '../utils/mapUtils';
+import { hexToRgb } from '../utils/convertToRGB'
 import { Trail, Hydrant } from '../utils/records';
 import Select from 'material-ui/Select';
 import { MenuItem } from 'material-ui/Menu';
