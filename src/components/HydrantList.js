@@ -14,9 +14,6 @@ import HydrantListItem from './HydrantListItem';
 
 
 const styles = theme => ({
-  root: {
-    flexWrap: 'wrap'
-  },
   inset: {
     paddingLeft: 0
   }
@@ -28,29 +25,7 @@ class HydrantList extends React.Component {
 
   state = {
     open: true,
-    showDetails: {}
   }
-
-  toggleHighLight = (feature, state) => {
-    feature.set('highlighted', state)
-    feature.changed();
-  }
-
-  toggleEdit = (id) => {
-    const newDetails = {}
-    if (!this.state.showDetails[id]) {
-      newDetails[id] = true
-    }
-    this.setState({ showDetails: newDetails })
-  }
-
-  updateCoords = (e, h, coordIndex) => {
-    const { modifyHydrant } = this.props
-    const newCoords = _.clone(h.get('coords'));
-    newCoords.splice(coordIndex, 1, Number(e.target.value))
-    modifyHydrant(h.get('id'), { coords: newCoords })
-  };
-
 
   render() {
 

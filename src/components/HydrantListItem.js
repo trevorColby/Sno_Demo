@@ -23,7 +23,7 @@ class HydrantListItem extends React.Component {
   constructor(props) {
     super(props);
     this.state = {
-      showDetails: {},
+      showDetails: false,
       name: props.hydrant.get('name')
     }
   }
@@ -31,14 +31,6 @@ class HydrantListItem extends React.Component {
   toggleHighLight = (feature, state) => {
     feature.set('highlighted', state)
     feature.changed();
-  }
-
-  toggleEdit = (id) => {
-    const newDetails = {}
-    if (!this.state.showDetails[id]) {
-      newDetails[id] = true
-    }
-    this.setState({ showDetails: newDetails })
   }
 
   updateCoords = (e, h, coordIndex) => {
@@ -72,11 +64,11 @@ class HydrantListItem extends React.Component {
         />
 
         <Delete onClick={()=> { hydrantDeleted((hydrant.get('id'))); }} />
-        <ModeEdit onClick={() => this.toggleEdit(hydrant.get('id'))} />
+        <ModeEdit onClick={() => this.setState({ showDetails: !showDetails })} />
 
         <Collapse
           style={{ padding: 20 }}
-          in={showDetails[hydrant.get('id')]}
+          in={showDetails}
           timeout="auto"
           unmountOnExit>
 
