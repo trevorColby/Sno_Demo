@@ -15,13 +15,15 @@ import { FormGroup, FormControl, FormControlLabel, FormHelperText } from 'materi
 import downloadjs from 'downloadjs';
 import ImportExportIcon from '@material-ui/icons/ImportExport';
 import Tooltip from 'material-ui/Tooltip';
-import IconButton from 'material-ui/IconButton';
 import { getMapStyle, convertTrailFeaturesToDonuts } from '../utils/mapUtils';
 import { hexToRgb } from '../utils/convertToRGB'
 import { Trail, Hydrant } from '../utils/records';
 import Select from 'material-ui/Select';
 import { MenuItem } from 'material-ui/Menu';
 import Typography from 'material-ui/Typography';
+import {IconButton, InputLabel} from 'material-ui';
+
+
 
 const styles = theme => ({
   root: {
@@ -267,11 +269,18 @@ class ImportExport extends React.Component {
     const { dialogOpen, selectedExport } = this.state;
 
     return (
-      <div style={{display: 'inline', margin: '20px'}}>
-        <Tooltip title="Import/Export" placement="top-start">
-        <Button onClick={this.handleOpen}
-          style={{color: 'rgba(0,0,0,0.87)', backgroundColor: '#e0e0e0'}}
-        >Import/Export</Button>
+      <div style={{display: 'inline'}}>
+        <Tooltip style={{marginLeft: 50}} title="Import/Export" placement="top-start">
+          <IconButton
+            onClick={this.handleOpen}
+            variant='raised'
+            color='secondary'
+          >
+          <ImportExportIcon />
+          <Typography color='secondary' variant="caption">
+          Import Export
+          </Typography>
+          </IconButton>
         </Tooltip>
         <Dialog onBackdropClick={this.handleClose} open={dialogOpen} >
           <DialogTitle >Import/Export</DialogTitle>

@@ -6,7 +6,7 @@ import _ from 'lodash';
 import {
   withStyles,
   IconButton, Drawer, Button, Typography,
-  Toolbar, AppBar,
+  Toolbar, AppBar, InputLabel
 } from 'material-ui';
 import MenuIcon from '@material-ui/icons/Menu';
 import ChevronLeftIcon from '@material-ui/icons/ChevronLeft';
@@ -22,6 +22,10 @@ import TrailForm from './TrailForm';
 import AutoAssociate from './AutoAssociate';
 import ManualAssociateHydrantsForm from './ManualAssociateHydrantsForm';
 import OperationMessage from './OperationMessage';
+import TimeLine from '@material-ui/icons/Timeline';
+import Tooltip from 'material-ui/Tooltip';
+import AddLocation from '@material-ui/icons/AddLocation';
+
 
 import ActionTypes from '../redux/ActionTypes';
 
@@ -58,25 +62,25 @@ class Container extends React.Component {
   }
 
 
-
-  newTrailClicked = () => {
-    const { addTrail } = this.props;
-    let id = new Date().getTime();
-    id = id.toString();
-    const name = 'New Trail';
-    const trail = new Trail({ id, name, features: [] });
-    addTrail(trail);
-    this.setState({
-      message: 'New Trail Added',
-      drawerOpen: true
-    });
-  }
-
   setMessageToNull = () => {
     this.setState({
         message: null
     })
   }
+
+
+    newTrailClicked = () => {
+      const { addTrail } = this.props;
+      let id = new Date().getTime();
+      id = id.toString();
+      const name = 'New Trail';
+      const trail = new Trail({ id, name, features: [] });
+      addTrail(trail);
+      this.setState({
+        message: 'New Trail Added',
+        drawerOpen: true
+      });
+    }
 
   drawEnd(e) {
     const { feature } = e;
@@ -239,7 +243,43 @@ class Container extends React.Component {
                 SnoTrack
               </Typography>
 
-              <div style={{ marginLeft: '200px' }}>
+              <div>
+
+              <Tooltip title="New Trail"
+              style={{marginLeft: 50}}
+              >
+                <IconButton
+                  color='secondary'
+                  onClick={this.newTrailClicked}
+                >
+                  <TimeLine />
+                  <Typography color='secondary' variant="caption">
+                  New Trail
+                  </Typography>
+                </IconButton>
+              </Tooltip>
+
+              <Tooltip title="Add Hydrants"
+              style={{marginLeft: 50}}
+              >
+                <IconButton
+                  color='secondary'
+                  onClick={() => { interactionChanged('DRAW_MODIFY_HYDRANTS')}}
+                >
+                  <AddLocation />
+                  <Typography color='secondary' variant="caption">
+                  New Hydrant
+                  </Typography>
+                </IconButton>
+              </Tooltip>
+
+                <ImportExport
+                  importKMLClicked={dataImported}
+                  trails={trails}
+                  hydrants={hydrants}
+                />
+
+
                 <AutoAssociate
                   trails={trails}
                   hydrants={hydrants}
@@ -248,19 +288,8 @@ class Container extends React.Component {
                   openManualAssignment={openManualAssignment}
                   manualAssignmentItems={manualAssignmentItems}
                 />
-                <ImportExport
-                  importKMLClicked={dataImported}
-                  trails={trails}
-                  hydrants={hydrants}
-                />
 
-                <Button variant='raised' color='secondary' onClick={this.newTrailClicked}>
-                  ADD TRAIL
-                </Button>
 
-                <Button variant='raised' color='secondary' onClick={() => { interactionChanged('DRAW_MODIFY_HYDRANTS'); }}>
-                  ADD HYDRANTS
-                </Button>
               </div>
 
             </Toolbar>
