@@ -57,7 +57,6 @@ class TrailForm extends React.Component {
   state = {
     trailSectionsOpen: true,
     pickerOpen: false,
-    trailFill: 'white',
     dialogOpen: false
     }
 
@@ -67,18 +66,17 @@ class TrailForm extends React.Component {
       dialogOpen: onOff
     })
   }
-
   render() {
     const {
       classes,
       modifyTrail,
-      editableTrail,
-      trailEditable,
+      toggledEditing,
       interaction,
       interactionChanged,
       hydrants,
       hydrantDeleted,
       modifyHydrant,
+      trail,
       selectedTrail,
       trailDeleted
     } = this.props;
@@ -87,27 +85,28 @@ class TrailForm extends React.Component {
 
     const isTrailMode = interaction === 'DRAW_MODIFY_TRAIL'
 
-    const highlightPoly = (feature) => {
+    const highlightFeature = (feature) => {
       feature.set('highlighted', true)
       feature.changed()
     }
-    const unHighlightPoly = (feature) => {
+    const unhighlightFeature = (feature) => {
       feature.unset('highlighted')
       feature.changed()
     }
-    const trailsSectionsList = editableTrail.get('features').map((feature, index) => {
-      unHighlightPoly(feature)
+
+    const trailsSectionsList = trail.get('features').map((feature, index) => {
+      unhighlightFeature(feature)
       return (
-        <ListItem className={classes.nested} key={feature.getId()} onMouseEnter={() => highlightPoly(feature)} onMouseLeave={()=> unHighlightPoly(feature)}>
+        <ListItem className={classes.nested} key={feature.getId()} onMouseEnter={() => highlightFeature(feature)} onMouseLeave={()=> unhighlightFeature(feature)}>
           {`Trail Section ${index + 1}`}
           <Delete onClick={ () => {deletePoly(index)}} />
         </ListItem>
       )
     })
     const deletePoly = (featureIndex) => {
-      const newFeatures = _.clone(editableTrail.get('features'))
+      const newFeatures = _.clone(trail.get('features'))
       newFeatures.splice(featureIndex,1)
-      modifyTrail(editableTrail.get('id'), {features: newFeatures})
+      modifyTrail(trail.get('id'), {features: newFeatures})
     }
 
     return (
@@ -116,14 +115,14 @@ class TrailForm extends React.Component {
           <CardContent>
             <Close
               style={{ float: 'right'}}
-              onClick={()=> {trailEditable(null)}}
+              onClick={()=> {toggledEditing(false)}}
             />
 
 
             <Input
               className={classes.input}
-              value={editableTrail.get('name')}
-              onChange={(e)=>{ modifyTrail(editableTrail.get('id'), { name: e.target.value }) }}
+              value={trail.get('name')}
+              onChange={(e)=>{ modifyTrail(trail.get('id'), { name: e.target.value }) }}
             />
 
 
@@ -153,7 +152,7 @@ class TrailForm extends React.Component {
 
             <List className={classes.root}>
               <ColorPicker
-                editableTrail={editableTrail}
+                trail={trail}
                 modifyTrail={modifyTrail}
               />
 
@@ -170,7 +169,7 @@ class TrailForm extends React.Component {
 
 
               <HydrantList
-                editableTrail={editableTrail}
+                trail={trail}
                 hydrants={hydrants}
                 hydrantDeleted={hydrantDeleted}
                 modifyHydrant={modifyHydrant}
@@ -204,7 +203,7 @@ class TrailForm extends React.Component {
           <DialogActions>
             <Button
               color="primary"
-              onClick={() => { trailDeleted(editableTrail.get('id'))}}
+              onClick={() => { trailDeleted(trail.get('id'))}}
             > Confirm Delete
             </Button>
 

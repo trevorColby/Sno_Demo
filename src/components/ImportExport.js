@@ -17,6 +17,7 @@ import ImportExportIcon from '@material-ui/icons/ImportExport';
 import Tooltip from 'material-ui/Tooltip';
 import IconButton from 'material-ui/IconButton';
 import { getMapStyle, convertTrailFeaturesToDonuts } from '../utils/mapUtils';
+import { hexToRgb } from '../utils/convertToRGB'
 import { Trail, Hydrant } from '../utils/records';
 import Select from 'material-ui/Select';
 import { MenuItem } from 'material-ui/Menu';
@@ -60,7 +61,6 @@ class ImportExport extends React.Component {
     const { importKMLClicked, trails, hydrants } = this.props;
 
     function processTrail(feature, index) {
-
       let [name, ...otherThings] = feature.get('description').split(',') ;
       const originalTrailName = name
       name = _.words(name).join(' ');
@@ -69,8 +69,10 @@ class ImportExport extends React.Component {
 
       const featureFill = feature.getStyle().call(feature)[0].getFill()
 
-      // this needs to be just rgb sepeated
-      const fillColor = featureFill ? featureFill.getColor().slice(0, 3).join(',') : '255,255,255'
+      let fillColor = '255,255,255';
+      if (featureFill) {
+        fillColor = hexToRgb(featureFill.getColor()) || featureFill.getColor().slice(0, 3).join(',')
+      }
 
       feature.getGeometry().setCoordinates([lonLatCoords]);
       feature.setId(`t-${name}-${index}`);
@@ -151,7 +153,6 @@ class ImportExport extends React.Component {
     const { trails, hydrants } = this.props;
     const { selectedExport, exportType } = this.state;
 
-
     const trailFeatures = []
     const hydrantFeatures = []
 
@@ -183,16 +184,16 @@ class ImportExport extends React.Component {
 
     const ext = exportType === 'GJ' ? 'json' : 'kml';
 
-    function GetFileFromFeatures(features) {
+    function getFileFromFeatures(features) {
       const format = exportType === 'GJ' ? new GeoJSON() : new KML();
       const exportFile = format.writeFeatures(features, { featureProjection: 'EPSG:3857' });
       return exportFile;
     }
 
     if (selectedExport === 'trails') {
-      downloadjs(GetFileFromFeatures(trailFeatures), `Trails.${ext}`);
+      downloadjs(getFileFromFeatures(trailFeatures), `Trails.${ext}`);
     } else {
-      downloadjs(GetFileFromFeatures(hydrantFeatures), `Hydrants.${ext}`);
+      downloadjs(getFileFromFeatures(hydrantFeatures), `Hydrants.${ext}`);
     }
   }
 
@@ -309,7 +310,6 @@ class ImportExport extends React.Component {
                   </FormControl>
                 </div>
                 <Button variant="raised"  onClick={this.exportFile} > Export </Button>
-
             </ListItem>
 
             <Button
@@ -319,9 +319,7 @@ class ImportExport extends React.Component {
             Download Hydrants_Table.CSV
             </Button>
           </List>
-
           <Divider />
-
         </Dialog>
       </div>
     );

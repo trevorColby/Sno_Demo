@@ -26,7 +26,6 @@ class OpenLayersMap extends React.Component {
       source: new SourceVector({ wrapX: false }),
       map: null,
       mapInteractions: [],
-      rotation: 0,
     };
   }
 
@@ -55,10 +54,10 @@ class OpenLayersMap extends React.Component {
 
         if (trailFeatures.length > 0) {
 
-        const GeomCollection = new GeometryCollection()
+        const geomCollection = new GeometryCollection()
         const geometries = _.flatMap(trailFeatures, f => f.getGeometry())
-        GeomCollection.setGeometries(geometries)
-        const newExtent = GeomCollection.getExtent()
+        geomCollection.setGeometries(geometries)
+        const newExtent = geomCollection.getExtent()
 
         const view = map.getView();
         const zoomResolution = view.getResolutionForExtent(newExtent);
@@ -93,10 +92,8 @@ class OpenLayersMap extends React.Component {
   }
 
   onRotationChange = (value) => {
-    this.setState({
-      rotation: value
-    })
-    this.state.map.getView().setRotation(value)
+    const {map} = this.state
+    map.getView().setRotation(value)
   }
 
   onMapClick = (e) => {
@@ -143,7 +140,7 @@ class OpenLayersMap extends React.Component {
         projection,
         center: Projection.fromLonLat(centerCoords),
         zoom: 14.2,
-        rotation: this.state.rotation,
+        rotation: 0,
       }),
     });
 
@@ -165,9 +162,11 @@ class OpenLayersMap extends React.Component {
     const {
       trails, hydrants,
       interaction, modifyEnd,
-      drawEnd, editableTrail,
+      drawEnd, editableTrail, selectedTrail
     } = nextProps;
+
     const { source, map, mapInteractions } = this.state;
+
     _.each(mapInteractions, i => map.removeInteraction(i));
 
     const newInteractions = [];
@@ -176,10 +175,10 @@ class OpenLayersMap extends React.Component {
     const modifiable = [];
     if (interaction === 'DRAW_MODIFY_TRAIL' && editableTrail) {
       type = 'Polygon';
-      _.each(trails.getIn([editableTrail, 'features']), f => modifiable.push(f));
+      _.each(trails.getIn([selectedTrail, 'features']), f => modifiable.push(f));
     } else if (interaction === 'DRAW_MODIFY_HYDRANTS') {
       type = 'Point';
-      hydrants.filter(h => h.get('trail') === editableTrail)
+      hydrants.filter(h => h.get('trail') === selectedTrail)
         .forEach(h => modifiable.push(h.get('feature')));
     }
     if (type) {

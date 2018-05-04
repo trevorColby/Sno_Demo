@@ -30,22 +30,18 @@ class ColorPicker extends React.Component {
 
     const {
       classes,
-      editableTrail,
+      trail,
       modifyTrail,
     } = this.props;
 
     const changeColor = (color) => {
       const updateColor = `${color.rgb.r},${color.rgb.g},${color.rgb.b}`
-      modifyTrail(editableTrail.get('id'), {fillColor: updateColor})
+      modifyTrail(trail.get('id'), {fillColor: updateColor})
     }
 
-    const selectedColor = editableTrail.get('fillColor').split(',')
+    const [r,g,b] = trail.get('fillColor').split(',')
 
-    const colorObj = {
-      r: selectedColor[0],
-      g: selectedColor[1],
-      b: selectedColor[2]
-    }
+    const colorObj = {r,g,b}
 
     return (
       <div>
@@ -53,7 +49,7 @@ class ColorPicker extends React.Component {
           <ListItemText className={classes.inset} primary="Trail Shading:" />
 
           <button
-            style={{background: `rgba(${editableTrail.get('fillColor')})`,
+            style={{background: `rgba(${trail.get('fillColor')})`,
                     fontSize: 60,
                     boxShadow: "0px 3px 5px -1px rgba(0, 0, 0, 0.2), 0px 6px 10px 0px rgba(0, 0, 0, 0.14), 0px 1px 18px 0px rgba(0, 0, 0, 0.12)",
                     height: 40,
@@ -61,7 +57,7 @@ class ColorPicker extends React.Component {
                     }}
             onClick={()=> { this.setState({ open: !this.state.open})}}
           />
-          
+
         </ListItem>
 
         <Collapse style={{ paddingBottom: 10 }} in={this.state.open} timeout="auto" unmountOnExit>
