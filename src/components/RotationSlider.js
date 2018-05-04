@@ -12,7 +12,6 @@ const RotationSlider = ({rotation, onRotationChange}) => {
   }
   return (
     <Slider
-      value={rotation}
       style={style}
       onChange={(r)=> {onRotationChange(r)}}
       min={0}

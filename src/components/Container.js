@@ -18,7 +18,6 @@ import appStyles from '../styles/drawer';
 import TrailList from './TrailList';
 import OpenLayersMap from './OpenLayersMap';
 import ImportExport from './ImportExport';
-import HydrantForm from './HydrantForm';
 import TrailForm from './TrailForm';
 import AutoAssociate from './AutoAssociate';
 import ManualAssociateHydrantsForm from './ManualAssociateHydrantsForm';
@@ -81,9 +80,9 @@ class Container extends React.Component {
 
   drawEnd(e) {
     const { feature } = e;
-    const { interaction, selectedTrail, editableTrail, trails, addTrail, addHydrant, modifyTrail } = this.props;
+    const { interaction, selectedTrail, editableTrail, trails, addTrail, addHydrant, modifyTrail, hydrants } = this.props;
     if (interaction === 'DRAW_MODIFY_TRAIL') {
-      const trail = trails.get(editableTrail);
+      const trail = trails.get(selectedTrail);
       // set attributes on the feature, create a unique feature id
       _.each(trail.get('features'), (f, index) => {
         const id = `t-${trail.get('id')}-${index}`;
@@ -103,7 +102,9 @@ class Container extends React.Component {
     } else if (interaction === 'DRAW_MODIFY_HYDRANTS') {
       const mapCoords = feature.getGeometry().getCoordinates();
       const coords = Projection.toLonLat(mapCoords);
-      const name = '';
+
+      const name = `${hydrants.filter(h => h.get('trail') === selectedTrail).size + 1}`;
+
       let id = new Date().getTime();
       id = id.toString();
       const newHydrant = new Hydrant({
@@ -114,6 +115,7 @@ class Container extends React.Component {
         trail: selectedTrail,
       });
       feature.setId(`h-${id}-0`);
+      feature.set('name', name);
       if (selectedTrail) {
         feature.set('selected', true);
       }
@@ -136,7 +138,7 @@ class Container extends React.Component {
   renderDrawerContents = () => {
 
     const {
-      hydrants, trails,editableTrail,trailEditable,
+      hydrants, trails,editableTrail,toggledEditing,
       selectedTrail, trailSelected,
       modifyTrail, modifyHydrant,
       dataImported, interaction, interactionChanged,
@@ -165,8 +167,8 @@ class Container extends React.Component {
           trailDeleted={trailDeleted}
           interactionChanged={interactionChanged}
           interaction={interaction}
-          trailEditable={trailEditable}
-          editableTrail={trails.get(editableTrail)}
+          toggledEditing={toggledEditing}
+          trail={trails.get(selectedTrail)}
           modifyTrail={modifyTrail}
           hydrants={hydrants}
           hydrantDeleted={hydrantDeleted}
@@ -177,7 +179,7 @@ class Container extends React.Component {
     return (
       <div>
         <TrailList
-          trailEditable={trailEditable}
+          toggledEditing={toggledEditing}
           newTrailClicked={this.newTrailClicked}
           modifyTrail={modifyTrail}
           trails={trails}
@@ -192,7 +194,7 @@ class Container extends React.Component {
 
   render() {
     const {
-      trailEditable,
+      toggledEditing,
       editableTrail,
       hydrants, trails,
       selectedTrail, trailSelected,
@@ -215,8 +217,8 @@ class Container extends React.Component {
               [classes[`appBarShift-left`]]: drawerOpen,
             })}
           >
-            <Toolbar disableGutters={!drawerOpen}>
 
+            <Toolbar disableGutters={!drawerOpen}>
             {drawerOpen? (
               <IconButton style={{color:'white'}} onClick={()=> { this.setState({drawerOpen:false})} }>
                 {<ChevronLeftIcon />}
@@ -231,9 +233,7 @@ class Container extends React.Component {
                 <MenuIcon />
               </IconButton>
             )
-
             }
-
 
               <Typography variant="title" color="inherit" noWrap>
                 SnoTrack
@@ -361,8 +361,8 @@ const mapDispatchToProps = dispatch => ({
   focusHydrant: id => dispatch({
     type: MANUAL_ASSIGNMENT_HYDRANT_FOCUSED, data: id,
   }),
-  trailEditable: id => dispatch({
-    type: EDIT_TRAIL, data: id
+  toggledEditing: state => dispatch({
+    type: EDIT_TRAIL, data: state
   }),
   trailDeleted: id => dispatch({
     type: TRAIL_DELETED, data: id

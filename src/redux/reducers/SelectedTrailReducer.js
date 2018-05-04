@@ -7,7 +7,7 @@ const {
   EDIT_TRAIL
 } = ActionTypes;
 
-const initialState = { selected: null, editable: null };
+const initialState = { selected: null, editable: false };
 
 export default (state = initialState, action) => {
   switch (action.type) {
@@ -15,7 +15,7 @@ export default (state = initialState, action) => {
       return {
         ...state,
         selected: action.data.selected,
-        editable: null
+        editable: false
       };
     }
     case TRAIL_DELETED: {
@@ -33,7 +33,7 @@ export default (state = initialState, action) => {
       return {
         ...state,
         selected: action.data.get('id'),
-        editable: action.data.get('id'),
+        editable: true,
       };
     case EDIT_TRAIL:
       return {
