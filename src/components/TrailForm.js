@@ -177,8 +177,6 @@ class TrailForm extends React.Component {
 
               <HydrantList
                 trailHydrants={trailHydrants}
-                trail={trail}
-                hydrants={hydrants}
                 hydrantDeleted={hydrantDeleted}
                 modifyHydrant={modifyHydrant}
               />

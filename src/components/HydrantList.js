@@ -77,8 +77,6 @@ class HydrantList extends React.Component {
 
     const {
       classes,
-      trail,
-      hydrants,
       modifyHydrant,
       hydrantDeleted,
       trailHydrants
