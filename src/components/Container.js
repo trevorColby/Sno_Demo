@@ -21,6 +21,7 @@ import ImportExport from './ImportExport';
 import TrailForm from './TrailForm';
 import AutoAssociate from './AutoAssociate';
 import ManualAssociateHydrantsForm from './ManualAssociateHydrantsForm';
+import OperationMessage from './OperationMessage';
 
 import ActionTypes from '../redux/ActionTypes';
 
@@ -51,7 +52,8 @@ class Container extends React.Component {
     this.drawEnd = this.drawEnd.bind(this);
     this.modifyEnd = this.modifyEnd.bind(this);
     this.state = {
-      drawerOpen: false
+      drawerOpen: false,
+      message: null,
     };
   }
 
@@ -64,6 +66,16 @@ class Container extends React.Component {
     const name = 'New Trail';
     const trail = new Trail({ id, name, features: [] });
     addTrail(trail);
+    this.setState({
+      message: 'New Trail Added',
+      drawerOpen: true
+    });
+  }
+
+  setMessageToNull = () => {
+    this.setState({
+        message: null
+    })
   }
 
   drawEnd(e) {
@@ -195,7 +207,7 @@ class Container extends React.Component {
 
 
 
-    const { drawerOpen } = this.state;
+    const { drawerOpen, message } = this.state;
     return (
       <div className={classes.root}>
         <div className={classes.appFrame}>
@@ -226,6 +238,7 @@ class Container extends React.Component {
               <Typography variant="title" color="inherit" noWrap>
                 SnoTrack
               </Typography>
+
               <div style={{ marginLeft: '200px' }}>
                 <AutoAssociate
                   trails={trails}
@@ -240,7 +253,16 @@ class Container extends React.Component {
                   trails={trails}
                   hydrants={hydrants}
                 />
+
+                <Button variant='raised' color='secondary' onClick={this.newTrailClicked}>
+                  ADD TRAIL
+                </Button>
+
+                <Button variant='raised' color='secondary' onClick={() => { interactionChanged('DRAW_MODIFY_HYDRANTS'); }}>
+                  ADD HYDRANTS
+                </Button>
               </div>
+
             </Toolbar>
             <div id="searchLocations"></div>
           </AppBar>
@@ -274,6 +296,11 @@ class Container extends React.Component {
             hydrantSelected={hydrantSelected}
             focusedHydrant={focusedHydrant}
           />
+
+          <OperationMessage
+            setMessageToNull={this.setMessageToNull}
+            message={message}
+           />
 
         </main>
       </div>

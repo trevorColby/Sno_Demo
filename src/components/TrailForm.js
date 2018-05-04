@@ -66,6 +66,8 @@ class TrailForm extends React.Component {
       dialogOpen: onOff
     })
   }
+
+
   render() {
     const {
       classes,
@@ -84,6 +86,11 @@ class TrailForm extends React.Component {
     const {  dialogOpen } = this.state
 
     const isTrailMode = interaction === 'DRAW_MODIFY_TRAIL'
+
+    const trailHydrants = hydrants
+      .filter(h => h.get('trail') === trail.get('id'))
+      .sort((a, b) => a.get('name').localeCompare(b.get('name'), undefined, { numeric: true }))
+      .valueSeq()
 
     const highlightFeature = (feature) => {
       feature.set('highlighted', true)
@@ -169,8 +176,7 @@ class TrailForm extends React.Component {
 
 
               <HydrantList
-                trail={trail}
-                hydrants={hydrants}
+                trailHydrants={trailHydrants}
                 hydrantDeleted={hydrantDeleted}
                 modifyHydrant={modifyHydrant}
               />
