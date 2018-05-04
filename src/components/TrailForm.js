@@ -203,7 +203,7 @@ class TrailForm extends React.Component {
           <DialogActions>
             <Button
               color="primary"
-              onClick={() => { trailDeleted(editableTrail.get('id'))}}
+              onClick={() => { trailDeleted(trail.get('id'))}}
             > Confirm Delete
             </Button>
 
