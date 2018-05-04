@@ -6,7 +6,7 @@ import _ from 'lodash';
 import {
   withStyles,
   IconButton, Drawer, Button, Typography,
-  Toolbar, AppBar,
+  Toolbar, AppBar, InputLabel
 } from 'material-ui';
 import MenuIcon from '@material-ui/icons/Menu';
 import ChevronLeftIcon from '@material-ui/icons/ChevronLeft';
@@ -22,6 +22,11 @@ import TrailForm from './TrailForm';
 import AutoAssociate from './AutoAssociate';
 import ManualAssociateHydrantsForm from './ManualAssociateHydrantsForm';
 import OperationMessage from './OperationMessage';
+import TimeLine from '@material-ui/icons/Timeline';
+import Tooltip from 'material-ui/Tooltip';
+import AddLocation from '@material-ui/icons/AddLocation';
+import Card, { CardContent, CardHeader } from 'material-ui/Card';
+
 
 import ActionTypes from '../redux/ActionTypes';
 
@@ -58,25 +63,24 @@ class Container extends React.Component {
   }
 
 
-
-  newTrailClicked = () => {
-    const { addTrail } = this.props;
-    let id = new Date().getTime();
-    id = id.toString();
-    const name = 'New Trail';
-    const trail = new Trail({ id, name, features: [] });
-    addTrail(trail);
-    this.setState({
-      message: 'New Trail Added',
-      drawerOpen: true
-    });
-  }
-
   setMessageToNull = () => {
     this.setState({
         message: null
     })
   }
+    newTrailClicked = () => {
+      const { addTrail, trailSelected, selectedTrail } = this.props;
+      let id = new Date().getTime();
+      id = id.toString();
+      const name = 'New Trail';
+      const trail = new Trail({ id, name, features: [] });
+      addTrail(trail);
+      this.setState({
+        message: 'New Trail Added',
+        drawerOpen: true
+      });
+    }
+
 
   drawEnd(e) {
     const { feature } = e;
@@ -136,7 +140,6 @@ class Container extends React.Component {
   }
 
   renderDrawerContents = () => {
-
     const {
       hydrants, trails,editableTrail,toggledEditing,
       selectedTrail, trailSelected,
@@ -145,8 +148,11 @@ class Container extends React.Component {
       classes, theme, selectedHydrant, hydrantDeleted,
       hydrantSelected, closeManualAssignment,
       manualAssignmentItems, focusedHydrant,
-      focusHydrant, manualAssignmentOpen, trailDeleted
+      focusHydrant, manualAssignmentOpen, trailDeleted, manualAssignmentItemsAdded,
+      openManualAssignment
     } = this.props;
+
+    const orphanCount = hydrants.filter((h) => h.get('trail') === null).size;
 
     if (manualAssignmentOpen) {
       return (
@@ -176,9 +182,44 @@ class Container extends React.Component {
         />
       )
     }
+
+    if (trails.size === 0 && orphanCount === 0) {
+      return (
+
+        <Card raised={true} >
+          <CardHeader
+          title="Getting Started"
+
+          />
+          <CardContent>
+            <Typography variant="body2" >
+              Get Started By Importing exisiting KML Trail Features
+              or Adding Features Manually.
+            </Typography>
+
+            <Button color='primary' variant='raised' onClick={this.newTrailClicked} fullWidth>
+            Create A Trail
+            </Button>
+
+            <Button color='primary' variant='raised' onClick={() => { interactionChanged('DRAW_MODIFY_HYDRANTS')}} fullWidth>
+            Drop Hydrants
+            </Button>
+
+          </CardContent>
+        </Card>
+
+
+      )
+
+    }
+
     return (
       <div>
         <TrailList
+          dataImported={dataImported}
+          manualAssignmentItemsAdded={manualAssignmentItemsAdded}
+          openManualAssignment={openManualAssignment}
+          manualAssignmentItems={manualAssignmentItems}
           toggledEditing={toggledEditing}
           newTrailClicked={this.newTrailClicked}
           modifyTrail={modifyTrail}
@@ -212,6 +253,7 @@ class Container extends React.Component {
       <div className={classes.root}>
         <div className={classes.appFrame}>
           <AppBar
+            color='primary'
             className={classNames(classes.appBar, {
               [classes.appBarShift]: drawerOpen,
               [classes[`appBarShift-left`]]: drawerOpen,
@@ -239,28 +281,42 @@ class Container extends React.Component {
                 SnoTrack
               </Typography>
 
-              <div style={{ marginLeft: '200px' }}>
-                <AutoAssociate
-                  trails={trails}
-                  hydrants={hydrants}
-                  dataImported={dataImported}
-                  manualAssignmentItemsAdded={manualAssignmentItemsAdded}
-                  openManualAssignment={openManualAssignment}
-                  manualAssignmentItems={manualAssignmentItems}
-                />
+              <div>
+
+              <Tooltip title="New Trail"
+              style={{marginLeft: 50}}
+              >
+                <IconButton
+                  color='secondary'
+                  onClick={this.newTrailClicked}
+                >
+                  <TimeLine />
+                  <Typography color='secondary' variant="caption">
+                  New Trail
+                  </Typography>
+                </IconButton>
+              </Tooltip>
+
+              <Tooltip title="Add Hydrants"
+              style={{marginLeft: 50}}
+              >
+                <IconButton
+                  color='secondary'
+                  onClick={() => { interactionChanged('DRAW_MODIFY_HYDRANTS')}}
+                >
+                  <AddLocation />
+                  <Typography color='secondary' variant="caption">
+                  New Hydrant
+                  </Typography>
+                </IconButton>
+              </Tooltip>
+
                 <ImportExport
                   importKMLClicked={dataImported}
                   trails={trails}
                   hydrants={hydrants}
                 />
 
-                <Button variant='raised' color='secondary' onClick={this.newTrailClicked}>
-                  ADD TRAIL
-                </Button>
-
-                <Button variant='raised' color='secondary' onClick={() => { interactionChanged('DRAW_MODIFY_HYDRANTS'); }}>
-                  ADD HYDRANTS
-                </Button>
               </div>
 
             </Toolbar>

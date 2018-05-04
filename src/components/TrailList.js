@@ -6,12 +6,9 @@ import {
   TableRow, withStyles, Button } from 'material-ui';
 import TrailNameForm from './TrailNameForm';
 import ModeEdit from '@material-ui/icons/ModeEdit';
+import AutoAssociate from './AutoAssociate';
 
 const CustomTableCell = withStyles(theme => ({
-  head: {
-    backgroundColor: theme.palette.common.black,
-    color: theme.palette.common.white,
-  },
   body: {
     fontSize: 14,
   },
@@ -62,7 +59,7 @@ class TrailList extends React.Component {
         <TableCell>{hydrants.filter((h) => h.get('trail') === id).size}</TableCell>
         <TableCell>
           {isSelected ? (
-            <Icon className="fa-xs fa fa-pencil-alt" style={{ fontSize: 20 }} onClick={(e) => {e.stopPropagation(); toggledEditing(true)}} />
+            <Icon className="fa-xs fa fa-pencil-alt" color="primary" style={{ fontSize: 20 }} onClick={(e) => {e.stopPropagation(); toggledEditing(true)}} />
           ) : null
           }
         </TableCell>
@@ -72,8 +69,9 @@ class TrailList extends React.Component {
   }
 
   render() {
-    const {trails, trailSelected, selected, hydrants, newTrailClicked, interactionChanged} = this.props;
+    const {trails, trailSelected, selected, hydrants, newTrailClicked, interactionChanged, dataImported, manualAssignmentItemsAdded, openManualAssignment, manualAssignmentItems} = this.props;
     const orphanCount = hydrants.filter((h) => h.get('trail') === null).size;
+
     return (
       <div>
           <Table>
@@ -89,11 +87,20 @@ class TrailList extends React.Component {
                 <TableRow
                   className={selected === null ? 'selected' : ''}
                   style={{borderTop: '2px solid black', cursor: 'pointer'}}
-                  onClick={() => trailSelected(null)}
+                  onClick={(e) => { e.stopPropagation(); trailSelected(null)}}
                 >
                   <TableCell padding="dense">Orphans</TableCell>
                   <TableCell padding="dense">{orphanCount}</TableCell>
-                  <TableCell padding="dense" />
+                  <TableCell padding="dense" >
+                    <AutoAssociate
+                      trails={trails}
+                      hydrants={hydrants}
+                      dataImported={dataImported}
+                      manualAssignmentItemsAdded={manualAssignmentItemsAdded}
+                      openManualAssignment={openManualAssignment}
+                      manualAssignmentItems={manualAssignmentItems}
+                    />
+                  </TableCell>
                 </TableRow>
                 ) : null
               }
