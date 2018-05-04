@@ -104,6 +104,7 @@ class Container extends React.Component {
         trail: selectedTrail,
       });
       feature.setId(`h-${id}-0`);
+      feature.set('name', name);
       if (selectedTrail) {
         feature.set('selected', true);
       }

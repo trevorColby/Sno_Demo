@@ -10,6 +10,7 @@ import ModeEdit from '@material-ui/icons/ModeEdit';
 import { FormControl, FormHelperText } from 'material-ui/Form';
 import TextField from 'material-ui/TextField';
 import _ from 'lodash';
+import HydrantListItem from './HydrantListItem';
 
 
 const styles = theme => ({
@@ -51,70 +52,14 @@ class HydrantList extends React.Component {
   };
 
 
-
-  renderHydrant(h) {
-    const {
-      modifyHydrant,
-      classes,
-      hydrantDeleted,
-    } = this.props;
-
-
-    return (
-      <ListItem
-        key={h.get('id')}
-        onMouseLeave={() => this.toggleHighLight(h.get('feature'), false)}
-        onMouseEnter={() => this.toggleHighLight(h.get('feature'), true)}
-        className={classes.root}
-      >
-        <Input
-          onChange={(e) => { modifyHydrant(h.get('id'), { name: e.target.value }); }}
-          value={h.get('name')}
-          placeholder="Enter Hydrant Name"
-        />
-
-        <Delete onClick={()=> { hydrantDeleted((h.get('id'))); }} />
-        <ModeEdit onClick={() => this.toggleEdit(h.get('id'))} />
-
-        <Collapse
-          style={{ padding: 20 }}
-          in={this.state.showDetails[h.get('id')]}
-          timeout="auto"
-          unmountOnExit>
-
-          <FormControl>
-            <Input
-              type="number"
-              value={h.get('coords')[1]}
-              onChange={(e) => { this.updateCoords(e, h, 1); }}
-            />
-            <FormHelperText>Lat.</FormHelperText>
-            <Input
-              type="number"
-              value={h.get('coords')[0]}
-              onChange={(e)=> { this.updateCoords(e, h, 0); }}
-            />
-            <FormHelperText>Lng.</FormHelperText>
-
-            <Input
-              type="number"
-              onChange={(e) => { modifyHydrant(h.get('id'), { elevation: e.target.value }); }}
-              value={h.get('elevation') || 'Null'}
-            />
-
-            <FormHelperText>Elevation</FormHelperText>
-          </FormControl>
-        </Collapse>
-      </ListItem>
-    )
-  }
-
   render() {
 
     const {
       classes,
       trail,
       hydrants,
+      modifyHydrant,
+      hydrantDeleted,
     } = this.props;
 
     const trailHydrants = hydrants
@@ -130,7 +75,18 @@ class HydrantList extends React.Component {
         </ListItem>
         <Collapse in={this.state.open} timeout="auto" unmountOnExit>
           <List>
-            {trailHydrants.map(h => this.renderHydrant(h))}
+            {trailHydrants.map((h) => {
+              const key = h.get('id')
+              return (
+                <HydrantListItem
+                  key={key}
+                  hydrant={h}
+                  modifyHydrant={modifyHydrant}
+                  hydrantDeleted={hydrantDeleted}
+                />
+              )
+            })}
+
           </List>
         </Collapse>
       </div>
