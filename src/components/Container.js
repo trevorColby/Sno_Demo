@@ -61,14 +61,14 @@ class Container extends React.Component {
 
   newTrailClicked = () => {
     const { addTrail } = this.props;
-    this.setState({drawerOpen: true })
     let id = new Date().getTime();
     id = id.toString();
     const name = 'New Trail';
     const trail = new Trail({ id, name, features: [] });
     addTrail(trail);
     this.setState({
-      message: 'New Trail Added'
+      message: 'New Trail Added',
+      drawerOpen: true
     });
   }
 
