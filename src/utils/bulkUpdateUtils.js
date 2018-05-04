@@ -65,7 +65,8 @@ export function assignHydrantsToTrails(hydrants, trails) {
     } else {
       feature = sourceVector.getClosestFeatureToCoordinate(point);
     }
-    const trailId = feature.getId().split('-')[1];
+    
+    const trailId = feature ? feature.getId().split('-')[1] : null;
     return h.set('trail', trailId);
   });
 

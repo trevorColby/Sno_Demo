@@ -152,6 +152,8 @@ class Container extends React.Component {
       openManualAssignment
     } = this.props;
 
+    const orphanCount = hydrants.filter((h) => h.get('trail') === null).size;
+
     if (manualAssignmentOpen) {
       return (
         <ManualAssociateHydrantsForm
@@ -181,7 +183,7 @@ class Container extends React.Component {
       )
     }
 
-    if (trails.size === 0) {
+    if (trails.size === 0 && orphanCount === 0) {
       return (
 
         <Card raised={true} >
@@ -202,7 +204,6 @@ class Container extends React.Component {
             <Button color='primary' variant='raised' onClick={() => { interactionChanged('DRAW_MODIFY_HYDRANTS')}} fullWidth>
             Drop Hydrants
             </Button>
-
 
           </CardContent>
         </Card>

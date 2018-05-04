@@ -77,13 +77,11 @@ class AutoAssociate extends React.Component {
   render() {
     const { dialogOpen } = this.state;
     const { hydrants, trails, dataImported, manualAssignmentItems } = this.props;
-
-    console.log(manualAssignmentItems)
     const orphans = hydrants.filter(h => h.get('trail') === null);
     const noElevation = hydrants.filter(h => !h.get('elevation'));
     return (
       <div style={{ display: 'inline' }}>
-        <Tooltip title="AutoAssociate" placement="top-start">
+        <Tooltip title="AutoAssociate" placement="left-end">
           <IconButton
             onClick={this.openDialog}
             color='primary'

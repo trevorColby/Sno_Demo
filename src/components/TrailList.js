@@ -71,7 +71,7 @@ class TrailList extends React.Component {
   render() {
     const {trails, trailSelected, selected, hydrants, newTrailClicked, interactionChanged, dataImported, manualAssignmentItemsAdded, openManualAssignment, manualAssignmentItems} = this.props;
     const orphanCount = hydrants.filter((h) => h.get('trail') === null).size;
-    
+
     return (
       <div>
           <Table>
@@ -87,7 +87,7 @@ class TrailList extends React.Component {
                 <TableRow
                   className={selected === null ? 'selected' : ''}
                   style={{borderTop: '2px solid black', cursor: 'pointer'}}
-                  onClick={() => trailSelected(null)}
+                  onClick={(e) => { e.stopPropagation(); trailSelected(null)}}
                 >
                   <TableCell padding="dense">Orphans</TableCell>
                   <TableCell padding="dense">{orphanCount}</TableCell>
