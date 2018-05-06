@@ -13,7 +13,6 @@ import List, { ListItem, ListItemText } from 'material-ui/List';
 import Radio from 'material-ui/Radio';
 import { FormGroup, FormControl, FormControlLabel, FormHelperText } from 'material-ui/Form';
 import downloadjs from 'downloadjs';
-import ImportExportIcon from '@material-ui/icons/ImportExport';
 import Tooltip from 'material-ui/Tooltip';
 import { getMapStyle, convertTrailFeaturesToDonuts } from '../utils/mapUtils';
 import { hexToRgb } from '../utils/convertToRGB'
@@ -242,17 +241,6 @@ class ImportExport extends React.Component {
     downloadjs(encodedUri, `Hydrants_Table.csv`);
   }
 
-  handleClose = () => {
-    this.setState({
-      dialogOpen: false,
-    });
-  }
-
-  handleOpen = () => {
-    this.setState({
-      dialogOpen: true,
-    });
-  }
 
   handleSelect = (event) => {
     this.setState({
@@ -260,29 +248,15 @@ class ImportExport extends React.Component {
     })
   }
 
-
-
-
   render() {
-    const { classes } = this.props;
+    const { classes, setImportExportOpen, importExportOpen } = this.props;
 
-    const { dialogOpen, selectedExport } = this.state;
+    const { selectedExport  } = this.state;
 
     return (
       <div style={{display: 'inline'}}>
-        <Tooltip style={{marginLeft: 50}} title="Import/Export" placement="top-start">
-          <IconButton
-            onClick={this.handleOpen}
-            variant='raised'
-            color='secondary'
-          >
-          <ImportExportIcon />
-          <Typography color='secondary' variant="caption">
-          Import Export
-          </Typography>
-          </IconButton>
-        </Tooltip>
-        <Dialog onBackdropClick={this.handleClose} open={dialogOpen} >
+
+        <Dialog onBackdropClick={() => setImportExportOpen(false)} open={importExportOpen} >
           <DialogTitle >Import/Export</DialogTitle>
 
           <List>

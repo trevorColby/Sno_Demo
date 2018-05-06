@@ -26,6 +26,7 @@ import TimeLine from '@material-ui/icons/Timeline';
 import Tooltip from 'material-ui/Tooltip';
 import AddLocation from '@material-ui/icons/AddLocation';
 import Card, { CardContent, CardHeader } from 'material-ui/Card';
+import ImportExportIcon from '@material-ui/icons/ImportExport';
 
 
 import ActionTypes from '../redux/ActionTypes';
@@ -59,9 +60,9 @@ class Container extends React.Component {
     this.state = {
       drawerOpen: false,
       message: null,
+      importExportOpen: false
     };
   }
-
 
   setMessageToNull = () => {
     this.setState({
@@ -78,6 +79,13 @@ class Container extends React.Component {
       this.setState({
         message: 'New Trail Added',
         drawerOpen: true
+      });
+    }
+
+
+  setImportExportOpen = (bool) => {
+      this.setState({
+        importExportOpen: bool
       });
     }
 
@@ -205,6 +213,10 @@ class Container extends React.Component {
             Drop Hydrants
             </Button>
 
+            <Button color='primary' variant='raised' onClick={() => this.setImportExportOpen(true)} fullWidth>
+              Import Features
+            </Button>
+
           </CardContent>
         </Card>
 
@@ -248,7 +260,7 @@ class Container extends React.Component {
 
 
 
-    const { drawerOpen, message } = this.state;
+    const { drawerOpen, message, importExportOpen } = this.state;
     return (
       <div className={classes.root}>
         <div className={classes.appFrame}>
@@ -311,11 +323,18 @@ class Container extends React.Component {
                 </IconButton>
               </Tooltip>
 
-                <ImportExport
-                  importKMLClicked={dataImported}
-                  trails={trails}
-                  hydrants={hydrants}
-                />
+              <Tooltip style={{marginLeft: 50}} title="Import/Export" >
+                <IconButton
+                  onClick={()=> this.setImportExportOpen(true)}
+                  variant='raised'
+                  color='secondary'
+                >
+                <ImportExportIcon />
+                <Typography color='secondary' variant="caption">
+                Import Export
+                </Typography>
+                </IconButton>
+              </Tooltip>
 
               </div>
 
@@ -356,6 +375,14 @@ class Container extends React.Component {
           <OperationMessage
             setMessageToNull={this.setMessageToNull}
             message={message}
+           />
+
+           <ImportExport
+             setImportExportOpen={this.setImportExportOpen}
+             importExportOpen={importExportOpen}
+             importKMLClicked={dataImported}
+             trails={trails}
+             hydrants={hydrants}
            />
 
         </main>
