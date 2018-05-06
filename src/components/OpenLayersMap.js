@@ -129,7 +129,7 @@ class OpenLayersMap extends React.Component {
 
     // Orientation
     const projection = Projection.get('EPSG:3857');
-    const centerCoords = [-106.553668, 39.612616];
+    const centerCoords = [-98.58533300673075, 38.5157497923837];
 
     // Map
     const map = new Map({
@@ -139,7 +139,7 @@ class OpenLayersMap extends React.Component {
       view: new View({
         projection,
         center: Projection.fromLonLat(centerCoords),
-        zoom: 14.2,
+        zoom: 5,
         rotation: 0,
       }),
     });
@@ -150,6 +150,7 @@ class OpenLayersMap extends React.Component {
       map.getView().animate({
         center: mapCoords,
         duration: 100,
+        zoom: 15
       });
     };
     createGeocoder('searchLocations', onGeocoderChange);
