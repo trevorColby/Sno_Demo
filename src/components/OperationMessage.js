@@ -28,7 +28,7 @@ class OperationMessage extends React.Component {
     return (
       <Snackbar
         open={this.state.open}
-        autoHideDuration={1000}
+        autoHideDuration={3000}
         message={message}
         onClose={()=> { setMessageToNull(); this.setState({ open: false})}}
         anchorOrigin={{ vertical: 'bottom', horizontal: 'left'}}

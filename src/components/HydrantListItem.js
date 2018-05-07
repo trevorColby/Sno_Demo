@@ -7,6 +7,10 @@ import Collapse from 'material-ui/transitions/Collapse';
 import { FormControl, FormHelperText } from 'material-ui/Form';
 import { withStyles } from 'material-ui/styles';
 import _ from 'lodash';
+import { getElevations } from '../utils/bulkUpdateUtils';
+import {Button} from 'material-ui';
+import OperationMessage from './OperationMessage';
+
 
 const styles = theme => ({
   root: {
@@ -24,7 +28,8 @@ class HydrantListItem extends React.Component {
     super(props);
     this.state = {
       showDetails: false,
-      name: props.hydrant.get('name')
+      name: props.hydrant.get('name'),
+      message: null,
     }
   }
 
@@ -57,55 +62,73 @@ class HydrantListItem extends React.Component {
       hydrant,
     } = this.props;
 
-    const { name, showDetails } = this.state
+    const { name, showDetails, message } = this.state
+    const hydrantElevation = hydrant.get('elevation')
 
     return (
-      <ListItem
-        onMouseLeave={() => this.toggleHighLight(hydrant.get('feature'), false)}
-        onMouseEnter={() => this.toggleHighLight(hydrant.get('feature'), true)}
-        className={classes.root}
-      >
+      <div>
+        <OperationMessage
+          setMessageToNull={()=> this.setState({ message:null })}
+          message={message}
+         />
 
-        <Input
-          onBlur={(e) => { modifyHydrant(hydrant.get('id'), { name: e.target.value })}}
-          onChange={(e) => { this.setState({ name: e.target.value }); }}
-          value={name}
-          placeholder="Enter Hydrant Name"
-        />
+        <ListItem
+          onMouseLeave={() => this.toggleHighLight(hydrant.get('feature'), false)}
+          onMouseEnter={() => this.toggleHighLight(hydrant.get('feature'), true)}
+          className={classes.root}
+        >
 
-        <Delete onClick={()=> { hydrantDeleted((hydrant.get('id'))); }} />
-        <ModeEdit onClick={() => this.setState({ showDetails: !showDetails })} />
+          <Input
+            onBlur={(e) => { modifyHydrant(hydrant.get('id'), { name: e.target.value })}}
+            onChange={(e) => { this.setState({ name: e.target.value }); }}
+            value={name}
+            placeholder="Enter Hydrant Name"
+          />
 
-        <Collapse
-          style={{ padding: 20 }}
-          in={showDetails}
-          timeout="auto"
-          unmountOnExit>
+          <Delete onClick={()=> { hydrantDeleted((hydrant.get('id'))); }} />
+          <ModeEdit onClick={() => this.setState({ showDetails: !showDetails })} />
 
-          <FormControl>
-            <Input
-              type="number"
-              value={hydrant.get('coords')[1]}
-              onChange={(e) => { this.updateCoords(e, hydrant, 1); }}
-            />
-            <FormHelperText>Lat.</FormHelperText>
-            <Input
-              type="number"
-              value={hydrant.get('coords')[0]}
-              onChange={(e) => { this.updateCoords(e, hydrant, 0); }}
-            />
-            <FormHelperText>Lng.</FormHelperText>
+          <Collapse
+            style={{ padding: 20 }}
+            in={showDetails}
+            timeout="auto"
+            unmountOnExit>
 
-            <Input
-              type="number"
-              onChange={(e) => { modifyHydrant(hydrant.get('id'), { elevation: e.target.value }); }}
-              value={hydrant.get('elevation') || 'Null'}
-            />
-
-            <FormHelperText>Elevation</FormHelperText>
-          </FormControl>
-        </Collapse>
-      </ListItem>
+            <FormControl>
+              <Input
+                type="number"
+                value={hydrant.get('coords')[1]}
+                onChange={(e) => { this.updateCoords(e, hydrant, 1); }}
+              />
+              <FormHelperText>Lat.</FormHelperText>
+              <Input
+                type="number"
+                value={hydrant.get('coords')[0]}
+                onChange={(e) => { this.updateCoords(e, hydrant, 0); }}
+              />
+              <FormHelperText>Lng.</FormHelperText>
+               { hydrantElevation ? (
+                 <Input
+                   type="number"
+                   onChange={(e) => { modifyHydrant(hydrant.get('id'), { elevation: e.target.value }); }}
+                   value={hydrant.get('elevation') || 'Null'}
+                 />
+               ) : (
+                 <Button
+                 color='primary'
+                 variant='raised'
+                 onClick={() => {
+                   getElevations()
+                   .then(elevMessage => this.setState({ message: elevMessage }))}}
+                 >
+                 Refresh Data
+                 </Button>
+               )}
+              <FormHelperText>Elevation</FormHelperText>
+            </FormControl>
+          </Collapse>
+        </ListItem>
+      </div>
     )
   }
 }

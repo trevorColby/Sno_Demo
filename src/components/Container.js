@@ -341,9 +341,7 @@ class Container extends React.Component {
                   <IconButton
                     onClick={() => {
                       getElevations()
-                      .then((updated) => this.setState({ message: `Fetched Elevation for ${updated} hydrants` })
-
-                    )}}
+                      .then(elevMessage => this.setState({ message: elevMessage }))}}
                     variant='raised'
                     color='secondary'
                   >

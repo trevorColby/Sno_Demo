@@ -23,9 +23,10 @@ export function getElevations() {
           const updatedHydrantsMap = Immutable.Map(_.keyBy(updatedHydrants, h => h.get('id')));
           store.dispatch({ type: DATA_IMPORTED, data: { hydrants: updatedHydrantsMap } });
         }
-        return needsElevation.length
+        return `Fetched Elevation for ${needsElevation.length} hydrants`
       });
   }
+    return Promise.resolve('Hydrant Elevation Data Already Synched')
 }
 
 export function autonameHydrants(hydrants, override = false) {
