@@ -13,7 +13,7 @@ export function getElevations() {
   const needsElevation = hydrants.filter(h => !h.get('elevation')).toArray();
   if (needsElevation.length) {
     const coords = _.map(needsElevation, h => _.clone(h.get('coords')).reverse());
-    mapquestApi.fetchElevationForCoords(coords)
+    return mapquestApi.fetchElevationForCoords(coords)
       .then((resp) => {
         const updatedHydrants = _.filter(_.map(needsElevation, (h, index) => {
           return h.set('elevation', resp[index].elevation);
@@ -23,6 +23,7 @@ export function getElevations() {
           const updatedHydrantsMap = Immutable.Map(_.keyBy(updatedHydrants, h => h.get('id')));
           store.dispatch({ type: DATA_IMPORTED, data: { hydrants: updatedHydrantsMap } });
         }
+        return needsElevation.length
       });
   }
 }
@@ -65,7 +66,7 @@ export function assignHydrantsToTrails(hydrants, trails) {
     } else {
       feature = sourceVector.getClosestFeatureToCoordinate(point);
     }
-    
+
     const trailId = feature ? feature.getId().split('-')[1] : null;
     return h.set('trail', trailId);
   });

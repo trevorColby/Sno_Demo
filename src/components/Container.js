@@ -27,7 +27,8 @@ import Tooltip from 'material-ui/Tooltip';
 import AddLocation from '@material-ui/icons/AddLocation';
 import Card, { CardContent, CardHeader } from 'material-ui/Card';
 import ImportExportIcon from '@material-ui/icons/ImportExport';
-
+import Refresh from '@material-ui/icons/Refresh';
+import { getElevations } from '../utils/bulkUpdateUtils'
 
 import ActionTypes from '../redux/ActionTypes';
 
@@ -295,46 +296,63 @@ class Container extends React.Component {
 
               <div>
 
-              <Tooltip title="New Trail"
-              style={{marginLeft: 50}}
-              >
-                <IconButton
-                  color='secondary'
-                  onClick={this.newTrailClicked}
+                <Tooltip title="New Trail"
+                  style={{marginLeft: 50}}
                 >
-                  <TimeLine />
-                  <Typography color='secondary' variant="caption">
-                  New Trail
-                  </Typography>
-                </IconButton>
-              </Tooltip>
+                  <IconButton
+                    color='secondary'
+                    onClick={this.newTrailClicked}
+                  >
+                    <TimeLine />
+                    <Typography color='secondary' variant="caption">
+                    New Trail
+                    </Typography>
+                  </IconButton>
+                </Tooltip>
 
-              <Tooltip title="Add Hydrants"
-              style={{marginLeft: 50}}
-              >
-                <IconButton
-                  color='secondary'
-                  onClick={() => { interactionChanged('DRAW_MODIFY_HYDRANTS')}}
+                <Tooltip title="Add Hydrants"
+                  style={{marginLeft: 50}}
                 >
-                  <AddLocation />
-                  <Typography color='secondary' variant="caption">
-                  New Hydrant
-                  </Typography>
-                </IconButton>
-              </Tooltip>
+                  <IconButton
+                    color='secondary'
+                    onClick={() => { interactionChanged('DRAW_MODIFY_HYDRANTS')}}
+                  >
+                    <AddLocation />
+                    <Typography color='secondary' variant="caption">
+                    New Hydrant
+                    </Typography>
+                  </IconButton>
+                </Tooltip>
 
-              <Tooltip style={{marginLeft: 50}} title="Import/Export" >
-                <IconButton
-                  onClick={()=> this.setImportExportOpen(true)}
-                  variant='raised'
-                  color='secondary'
-                >
-                <ImportExportIcon />
-                <Typography color='secondary' variant="caption">
-                Import Export
-                </Typography>
-                </IconButton>
-              </Tooltip>
+                <Tooltip style={{marginLeft: 50}} title="Import/Export" >
+                  <IconButton
+                    onClick={()=> this.setImportExportOpen(true)}
+                    variant='raised'
+                    color='secondary'
+                  >
+                    <ImportExportIcon />
+                    <Typography color='secondary' variant="caption">
+                    Import Export
+                    </Typography>
+                  </IconButton>
+                </Tooltip>
+
+                <Tooltip style={{marginLeft: 50}} title="Import/Export" >
+                  <IconButton
+                    onClick={() => {
+                      getElevations()
+                      .then((updated) => this.setState({ message: `Fetched Elevation for ${updated} hydrants` })
+
+                    )}}
+                    variant='raised'
+                    color='secondary'
+                  >
+                    <Refresh />
+                    <Typography color='secondary' variant="caption">
+                    Fetch Elevation Data
+                    </Typography>
+                  </IconButton>
+                </Tooltip>
 
               </div>
 
