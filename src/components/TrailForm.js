@@ -80,7 +80,8 @@ class TrailForm extends React.Component {
       modifyHydrant,
       trail,
       selectedTrail,
-      trailDeleted
+      trailDeleted,
+      dataImported
     } = this.props;
 
     const {  dialogOpen } = this.state
@@ -170,6 +171,8 @@ class TrailForm extends React.Component {
               </Collapse>
 
               <HydrantList
+                trail={trail.get('id')}
+                dataImported={dataImported}
                 trailHydrants={trailHydrants}
                 hydrantDeleted={hydrantDeleted}
                 modifyHydrant={modifyHydrant}

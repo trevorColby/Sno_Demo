@@ -182,6 +182,7 @@ class Container extends React.Component {
     if (editableTrail) {
       return (
         <TrailForm
+          dataImported={dataImported}
           trailDeleted={trailDeleted}
           interactionChanged={interactionChanged}
           interaction={interaction}

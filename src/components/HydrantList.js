@@ -14,6 +14,8 @@ import HydrantListItem from './HydrantListItem';
 import Button from 'material-ui/Button';
 import Check from '@material-ui/icons/Check';
 import Tooltip from 'material-ui/Tooltip';
+import { autonameHydrants, getElevations } from '../utils/bulkUpdateUtils';
+import OperationMessage from './OperationMessage';
 
 
 const styles = theme => ({
@@ -32,6 +34,7 @@ class HydrantList extends React.Component {
     this.state = {
       open: true,
       prefix: this.getPrefix(props.trailHydrants),
+      message: null
     }
   }
 
@@ -56,6 +59,16 @@ class HydrantList extends React.Component {
       }, hydrants.getIn([0,'name']) )
     }
     return ''
+  }
+
+  renameHydrants = () => {
+    const { dataImported, trail } = this.props;
+    getElevations()
+      .then(() => {
+        const renamed = autonameHydrants(trail)
+        dataImported({ hydrants: renamed})
+      })
+      .then(() => { this.setState({ message: 'Hydrants Renamed Based on Elevation Data' }); })
   }
 
   applyPrefix = () => {
@@ -83,11 +96,16 @@ class HydrantList extends React.Component {
     } = this.props;
 
 
-    const { prefix } = this.state
+    const { prefix, message } = this.state
 
 
     return (
       <div>
+      <OperationMessage
+        setMessageToNull={()=> this.setState({ message:null })}
+        message={message}
+       />
+
         <ListItem disableGutters onClick={() => { this.setState({ open: !this.state.open }); }}>
           <ListItemText className={classes.inset} primary="Hydrants" />
           {this.state.open ? <ExpandLess /> : <ExpandMore />}
@@ -111,6 +129,15 @@ class HydrantList extends React.Component {
                 <Check style={{ color: 'green' }} />
               </Button>
             </Tooltip>
+          </ListItem>
+          <ListItem>
+            <Button
+              color='primary'
+              variant='raised'
+              onClick={this.renameHydrants}
+            >
+              Re-Name By Elevation
+            </Button>
           </ListItem>
 
 

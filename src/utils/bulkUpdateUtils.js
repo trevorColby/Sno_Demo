@@ -29,20 +29,17 @@ export function getElevations() {
     return Promise.resolve('Hydrant Elevation Data Already Synched')
 }
 
-export function autonameHydrants(hydrants, override = false) {
-  const sortedTrailGroupedHydrants = hydrants.groupBy(h => h.get('trail'))
-    .map((trailGroup) => {
-      return trailGroup.toList().sort((h1, h2) => h1.get('elevation') - h2.get('elevation'));
-    });
-  const newHydrants = hydrants.map((h) => {
-    const trail = h.get('trail');
-    if (trail) {
-      const elevationIndex = sortedTrailGroupedHydrants.get(trail).indexOf(h);
-      return h.set('name', String(elevationIndex + 1));
-    }
-    return h;
-  });
-  return newHydrants;
+export function autonameHydrants(trail) {
+
+  const { hydrants } = store.getState().hydrants
+    const trailHydrants = hydrants.filter(h => h.get('trail') === trail)
+    const sortedHydrants = trailHydrants.toList().sort((h1, h2) => h1.get('elevation') - h2.get('elevation'));
+    const newHydrants = trailHydrants.map((h) => {
+        const elevationIndex = sortedHydrants.indexOf(h);
+        return h.set('name', String(elevationIndex + 1));
+      });
+
+    return newHydrants;
 }
 
 export function assignHydrantsToTrails(hydrants, trails) {

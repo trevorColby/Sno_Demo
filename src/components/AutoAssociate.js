@@ -37,7 +37,6 @@ class AutoAssociate extends React.Component {
 
   openDialog = () => {
     this.assignHydrants();
-    setTimeout(getElevations, 20);
     this.setState({ dialogOpen: true });
   }
 
@@ -93,7 +92,6 @@ class AutoAssociate extends React.Component {
           <DialogTitle>Hydrant Association and Renaming</DialogTitle>
           <DialogContent>
             {this.renderTrailAssignment()}
-            <Button onClick={this.renameHydrants}>Rename hydrants by elevation</Button>
           </DialogContent>
         </Dialog>
       </div>
