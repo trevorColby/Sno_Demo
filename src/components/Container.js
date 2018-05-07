@@ -70,25 +70,28 @@ class Container extends React.Component {
         message: null
     })
   }
-    newTrailClicked = () => {
-      const { addTrail, trailSelected, selectedTrail } = this.props;
-      let id = new Date().getTime();
-      id = id.toString();
-      const name = 'New Trail';
-      const trail = new Trail({ id, name, features: [] });
-      addTrail(trail);
-      this.setState({
-        message: 'New Trail Added',
-        drawerOpen: true
-      });
-    }
-
 
   setImportExportOpen = (bool) => {
       this.setState({
         importExportOpen: bool
       });
     }
+
+  newTrailClicked = () => {
+    const { addTrail, trailSelected, selectedTrail,toggledEditing } = this.props;
+    let id = new Date().getTime();
+    id = id.toString();
+    const name = 'New Trail';
+    const trail = new Trail({ id, name, features: [] });
+    addTrail(trail);
+    trailSelected(selectedTrail, trail.get('id'))
+    toggledEditing(true)
+
+    this.setState({
+      message: 'New Trail Added',
+      drawerOpen: true
+    });
+  }
 
 
   drawEnd(e) {

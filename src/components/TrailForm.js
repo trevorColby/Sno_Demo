@@ -159,8 +159,6 @@ class TrailForm extends React.Component {
                 trail={trail}
                 modifyTrail={modifyTrail}
               />
-
-
               <ListItem disableGutters onClick={()=> { this.setState({ trailSectionsOpen: !this.state.trailSectionsOpen })} }>
                 <ListItemText className={classes.inset} primary="Trail Sections" />
                 {this.state.trailSectionsOpen ? <ExpandLess /> : <ExpandMore />}
@@ -170,7 +168,6 @@ class TrailForm extends React.Component {
                 {trailsSectionsList}
                 </List>
               </Collapse>
-
 
               <HydrantList
                 trailHydrants={trailHydrants}
