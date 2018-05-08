@@ -1,9 +1,10 @@
 import React from 'react';
 import Immutable from 'immutable';
 import _ from 'lodash';
-import { Button, Select, MenuItem, Card, CardContent, CardHeader } from 'material-ui';
+import { Button, MenuItem, Card, CardContent, CardHeader } from 'material-ui';
 import Close from '@material-ui/icons/Close';
 import Check from '@material-ui/icons/Check';
+import Select from 'react-select';
 
 class ManualAssociateHydrantsForm extends React.Component {
   constructor(props) {
@@ -62,20 +63,18 @@ class ManualAssociateHydrantsForm extends React.Component {
 
   renderHydrantItem = (hydrant, index, trailMenuItems) => {
     return (
-      <div key={index} onMouseEnter={() => this.hydrantHovered(hydrant.get('id'))}>
+      <div style={{marginTop:10}} key={index} onMouseEnter={() => this.hydrantHovered(hydrant.get('id'))}>
         <Select
-          onChange={e => this.updateManualTrailAssociation(hydrant.get('id'), e.target.value)}
+          name="Trail-Assignment"
+          onChange={selectedOption => this.updateManualTrailAssociation(hydrant.get('id'), selectedOption)}
           value={hydrant.get('trail')}
-          inputProps={{
-            name: 'trail',
-            id: 'trail-simple',
-          }}
-          style={{ width: "70%", marginLeft: '10px' }}
+          options={trailMenuItems.toJS()}
+          style={{ width: '80%', float: 'left'}}
         >
           {trailMenuItems}
         </Select>
         <Button
-          style={{ cursor: 'pointer', marginLeft: '10px', marginTop: 10, backgroundColor: 'green'}}
+          style={{ cursor: 'pointer', backgroundColor: 'green', marginLeft: 10}}
           onClick={() => this.confirmAssignment(hydrant)}
           variant='fab'
           mini
@@ -95,7 +94,8 @@ class ManualAssociateHydrantsForm extends React.Component {
       .sort((a, b) => a.get('name') > b.get('name'))
       .map((trail) => {
         const id = trail.get('id');
-        return <MenuItem key={id} value={id}>{trail.get('name')}</MenuItem>;
+        const name = trail.get('name')
+        return { value: id, label: name };
       });
 
     const limit_to = 10;
