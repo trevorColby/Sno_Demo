@@ -86,6 +86,7 @@ class ImportExport extends React.Component {
       feature.set('originalTrailName', originalTrailName)
       feature.set('name', name);
       feature.set('fillColor', fillColor)
+      feature.unset('selected')
       feature.changed()
       feature.setStyle(getMapStyle);
 
@@ -187,7 +188,7 @@ class ImportExport extends React.Component {
         const description = trailName
         f.unset('features')
         f.set('description', description)
-        f.setStyle()
+        f.setStyle(getMapStyle)
         trailFeatures.push(f)
       })
       // Iterate through Trail's Hydrants
@@ -199,6 +200,7 @@ class ImportExport extends React.Component {
         .forEach((h, index) => {
            const feature = h.feature
            feature.set('description', `${trailName},${index},${feature.get('name')}`)
+           feature.unset('selected')
            hydrantFeatures.push(feature)
          })
     })

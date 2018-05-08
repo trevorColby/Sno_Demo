@@ -166,6 +166,7 @@ class Container extends React.Component {
 
     const orphanCount = hydrants.filter((h) => h.get('trail') === null).size;
 
+
     if (manualAssignmentOpen) {
       return (
         <ManualAssociateHydrantsForm

@@ -63,9 +63,10 @@ class HydrantList extends React.Component {
 
   renameHydrants = () => {
     const { dataImported, trail } = this.props;
+    const { prefix } = this.state;
     getElevations()
       .then(() => {
-        const renamed = autonameHydrants(trail)
+        const renamed = autonameHydrants(trail, prefix)
         dataImported({ hydrants: renamed})
       })
       .then(() => { this.setState({ message: 'Hydrants Renamed Based on Elevation Data' }); })

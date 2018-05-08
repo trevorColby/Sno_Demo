@@ -1,7 +1,9 @@
 import React from 'react';
 import Immutable from 'immutable';
 import _ from 'lodash';
-import { Button, Select, MenuItem } from 'material-ui';
+import { Button, Select, MenuItem, Card, CardContent, CardHeader } from 'material-ui';
+import Close from '@material-ui/icons/Close';
+import Check from '@material-ui/icons/Check';
 
 class ManualAssociateHydrantsForm extends React.Component {
   constructor(props) {
@@ -61,7 +63,6 @@ class ManualAssociateHydrantsForm extends React.Component {
   renderHydrantItem = (hydrant, index, trailMenuItems) => {
     return (
       <div key={index} onMouseEnter={() => this.hydrantHovered(hydrant.get('id'))}>
-        <span style={{ width: '100px' }}>{index + 1}</span>
         <Select
           onChange={e => this.updateManualTrailAssociation(hydrant.get('id'), e.target.value)}
           value={hydrant.get('trail')}
@@ -69,15 +70,19 @@ class ManualAssociateHydrantsForm extends React.Component {
             name: 'trail',
             id: 'trail-simple',
           }}
-          style={{ width: '200px', marginLeft: '10px' }}
+          style={{ width: "70%", marginLeft: '10px' }}
         >
           {trailMenuItems}
         </Select>
         <Button
-          style={{ width: '50px', cursor: 'pointer', marginLeft: '15px' }}
+          style={{ cursor: 'pointer', marginLeft: '10px', marginTop: 10, backgroundColor: 'green'}}
           onClick={() => this.confirmAssignment(hydrant)}
+          variant='fab'
+          mini
         >
-          OK
+          <Check
+            style={{ color: 'white', fontSize: 20 }}
+            />
         </Button>
       </div>
     );
@@ -93,12 +98,20 @@ class ManualAssociateHydrantsForm extends React.Component {
         return <MenuItem key={id} value={id}>{trail.get('name')}</MenuItem>;
       });
 
-    const limit_to = 20;
+    const limit_to = 10;
 
     return (
       <div>
-        <h4>Confirm hydrant trails</h4>
-        <Button onClick={this.endManualAssignment}>Back to Menu</Button>
+        <Card>
+          <CardContent>
+            <Close
+              style={{ float: 'right'}}
+              onClick={this.endManualAssignment}
+            />
+
+            <CardHeader
+            title="Confirm Hydrant Assignments"
+            />
         {hydrants
           .valueSeq()
           .take(limit_to)
@@ -108,9 +121,19 @@ class ManualAssociateHydrantsForm extends React.Component {
           <p>...and {hydrants.size - limit_to} others</p>
           ) : null
         }
-        <Button onClick={() => {dataImported({ hydrants }); this.endManualAssignment();}}>
-          Confirm all hydrant assignments
+        <Button
+          onClick={() => {dataImported({ hydrants });
+          this.endManualAssignment();}}
+          variant='raised'
+          color='primary'
+          style={{marginTop: 10}}
+          fullWidth
+          >
+          Confirm All
         </Button>
+
+        </CardContent>
+        </Card>
       </div>
     );
   }
