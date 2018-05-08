@@ -27,8 +27,11 @@ function updateHydrantFeatures(hydrant, editedFields) {
   if (editedFields.coords) {
     feature.getGeometry().setCoordinates(Projection.fromLonLat(editedFields.coords));
   }
-  if (_.has(editedFields, 'trail') && feature.get('selected')) {
+  if (editedFields.trail === null) {
     feature.unset('selected');
+  }
+  if (_.has(editedFields, 'trail') && feature.get('selected')) {
+    // Use if we decide to allow hydrant trail reassignment.
   }
   feature.changed();
 }

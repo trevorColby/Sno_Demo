@@ -1,7 +1,10 @@
 import React from 'react';
 import Immutable from 'immutable';
 import _ from 'lodash';
-import { Button, Select, MenuItem } from 'material-ui';
+import { Button, MenuItem, Card, CardContent, CardHeader, CardActions } from 'material-ui';
+import Close from '@material-ui/icons/Close';
+import Check from '@material-ui/icons/Check';
+import Select from 'react-select';
 
 class ManualAssociateHydrantsForm extends React.Component {
   constructor(props) {
@@ -60,24 +63,25 @@ class ManualAssociateHydrantsForm extends React.Component {
 
   renderHydrantItem = (hydrant, index, trailMenuItems) => {
     return (
-      <div key={index} onMouseEnter={() => this.hydrantHovered(hydrant.get('id'))}>
-        <span style={{ width: '100px' }}>{index + 1}</span>
+      <div style={{marginTop:10}} key={index} onMouseEnter={() => this.hydrantHovered(hydrant.get('id'))}>
         <Select
-          onChange={e => this.updateManualTrailAssociation(hydrant.get('id'), e.target.value)}
+          name="Trail-Assignment"
+          onChange={selectedOption => this.updateManualTrailAssociation(hydrant.get('id'), selectedOption)}
           value={hydrant.get('trail')}
-          inputProps={{
-            name: 'trail',
-            id: 'trail-simple',
-          }}
-          style={{ width: '200px', marginLeft: '10px' }}
+          options={trailMenuItems.toJS()}
+          style={{ width: '80%', float: 'left'}}
         >
           {trailMenuItems}
         </Select>
         <Button
-          style={{ width: '50px', cursor: 'pointer', marginLeft: '15px' }}
+          style={{ cursor: 'pointer', backgroundColor: 'green', marginLeft: 10}}
           onClick={() => this.confirmAssignment(hydrant)}
+          variant='fab'
+          mini
         >
-          OK
+          <Check
+            style={{ color: 'white', fontSize: 20 }}
+            />
         </Button>
       </div>
     );
@@ -90,15 +94,24 @@ class ManualAssociateHydrantsForm extends React.Component {
       .sort((a, b) => a.get('name') > b.get('name'))
       .map((trail) => {
         const id = trail.get('id');
-        return <MenuItem key={id} value={id}>{trail.get('name')}</MenuItem>;
+        const name = trail.get('name')
+        return { value: id, label: name };
       });
 
-    const limit_to = 20;
+    const limit_to = 10;
 
     return (
       <div>
-        <h4>Confirm hydrant trails</h4>
-        <Button onClick={this.endManualAssignment}>Back to Menu</Button>
+        <Card>
+          <CardContent>
+            <Close
+              style={{ float: 'right'}}
+              onClick={this.endManualAssignment}
+            />
+
+            <CardHeader
+            title="Confirm Hydrant Assignments"
+            />
         {hydrants
           .valueSeq()
           .take(limit_to)
@@ -108,9 +121,19 @@ class ManualAssociateHydrantsForm extends React.Component {
           <p>...and {hydrants.size - limit_to} others</p>
           ) : null
         }
-        <Button onClick={() => {dataImported({ hydrants }); this.endManualAssignment();}}>
-          Confirm all hydrant assignments
+        <Button
+          onClick={() => {dataImported({ hydrants });
+          this.endManualAssignment();}}
+          variant='raised'
+          color='primary'
+          style={{marginTop: 10}}
+          fullWidth
+          >
+          Confirm All
         </Button>
+
+        </CardContent>
+        </Card>
       </div>
     );
   }

@@ -26,7 +26,9 @@ import TimeLine from '@material-ui/icons/Timeline';
 import Tooltip from 'material-ui/Tooltip';
 import AddLocation from '@material-ui/icons/AddLocation';
 import Card, { CardContent, CardHeader } from 'material-ui/Card';
-
+import ImportExportIcon from '@material-ui/icons/ImportExport';
+import Refresh from '@material-ui/icons/Refresh';
+import { getElevations } from '../utils/bulkUpdateUtils'
 
 import ActionTypes from '../redux/ActionTypes';
 
@@ -59,27 +61,37 @@ class Container extends React.Component {
     this.state = {
       drawerOpen: false,
       message: null,
+      importExportOpen: false
     };
   }
-
 
   setMessageToNull = () => {
     this.setState({
         message: null
     })
   }
-    newTrailClicked = () => {
-      const { addTrail, trailSelected, selectedTrail } = this.props;
-      let id = new Date().getTime();
-      id = id.toString();
-      const name = 'New Trail';
-      const trail = new Trail({ id, name, features: [] });
-      addTrail(trail);
+
+  setImportExportOpen = (bool) => {
       this.setState({
-        message: 'New Trail Added',
-        drawerOpen: true
+        importExportOpen: bool
       });
     }
+
+  newTrailClicked = () => {
+    const { addTrail, trailSelected, selectedTrail,toggledEditing } = this.props;
+    let id = new Date().getTime();
+    id = id.toString();
+    const name = 'New Trail';
+    const trail = new Trail({ id, name, features: [] });
+    addTrail(trail);
+    trailSelected(selectedTrail, trail.get('id'))
+    toggledEditing(true)
+
+    this.setState({
+      message: 'New Trail Added',
+      drawerOpen: true
+    });
+  }
 
 
   drawEnd(e) {
@@ -154,6 +166,7 @@ class Container extends React.Component {
 
     const orphanCount = hydrants.filter((h) => h.get('trail') === null).size;
 
+
     if (manualAssignmentOpen) {
       return (
         <ManualAssociateHydrantsForm
@@ -170,6 +183,7 @@ class Container extends React.Component {
     if (editableTrail) {
       return (
         <TrailForm
+          dataImported={dataImported}
           trailDeleted={trailDeleted}
           interactionChanged={interactionChanged}
           interaction={interaction}
@@ -193,8 +207,8 @@ class Container extends React.Component {
           />
           <CardContent>
             <Typography variant="body2" >
-              Get Started By Importing exisiting KML Trail Features
-              or Adding Features Manually.
+              Get started by importing exisiting KML trail features
+              or adding features manually.
             </Typography>
 
             <Button color='primary' variant='raised' onClick={this.newTrailClicked} fullWidth>
@@ -203,6 +217,10 @@ class Container extends React.Component {
 
             <Button color='primary' variant='raised' onClick={() => { interactionChanged('DRAW_MODIFY_HYDRANTS')}} fullWidth>
             Drop Hydrants
+            </Button>
+
+            <Button color='primary' variant='raised' onClick={() => this.setImportExportOpen(true)} fullWidth>
+              Import Features
             </Button>
 
           </CardContent>
@@ -248,7 +266,7 @@ class Container extends React.Component {
 
 
 
-    const { drawerOpen, message } = this.state;
+    const { drawerOpen, message, importExportOpen } = this.state;
     return (
       <div className={classes.root}>
         <div className={classes.appFrame}>
@@ -283,40 +301,61 @@ class Container extends React.Component {
 
               <div>
 
-              <Tooltip title="New Trail"
-              style={{marginLeft: 50}}
-              >
-                <IconButton
-                  color='secondary'
-                  onClick={this.newTrailClicked}
+                <Tooltip title="New Trail"
+                  style={{marginLeft: 50}}
                 >
-                  <TimeLine />
-                  <Typography color='secondary' variant="caption">
-                  New Trail
-                  </Typography>
-                </IconButton>
-              </Tooltip>
+                  <IconButton
+                    color='secondary'
+                    onClick={this.newTrailClicked}
+                  >
+                    <TimeLine />
+                    <Typography color='secondary' variant="caption">
+                    New Trail
+                    </Typography>
+                  </IconButton>
+                </Tooltip>
 
-              <Tooltip title="Add Hydrants"
-              style={{marginLeft: 50}}
-              >
-                <IconButton
-                  color='secondary'
-                  onClick={() => { interactionChanged('DRAW_MODIFY_HYDRANTS')}}
+                <Tooltip title="Add Hydrants"
+                  style={{marginLeft: 50}}
                 >
-                  <AddLocation />
-                  <Typography color='secondary' variant="caption">
-                  New Hydrant
-                  </Typography>
-                </IconButton>
-              </Tooltip>
+                  <IconButton
+                    color='secondary'
+                    onClick={() => { interactionChanged('DRAW_MODIFY_HYDRANTS')}}
+                  >
+                    <AddLocation />
+                    <Typography color='secondary' variant="caption">
+                    New Hydrant
+                    </Typography>
+                  </IconButton>
+                </Tooltip>
 
-                <ImportExport
-                  importKMLClicked={dataImported}
-                  trails={trails}
-                  hydrants={hydrants}
-                />
+                <Tooltip style={{marginLeft: 50}} title="Import/Export" >
+                  <IconButton
+                    onClick={()=> this.setImportExportOpen(true)}
+                    variant='raised'
+                    color='secondary'
+                  >
+                    <ImportExportIcon />
+                    <Typography color='secondary' variant="caption">
+                    Import Export
+                    </Typography>
+                  </IconButton>
+                </Tooltip>
 
+                <Tooltip style={{marginLeft: 50}} title="Import/Export" >
+                  <IconButton
+                    onClick={() => {
+                      getElevations()
+                      .then(elevMessage => this.setState({ message: elevMessage }))}}
+                    variant='raised'
+                    color='secondary'
+                  >
+                    <Refresh />
+                    <Typography color='secondary' variant="caption">
+                    Fetch Elevation Data
+                    </Typography>
+                  </IconButton>
+                </Tooltip>
               </div>
 
             </Toolbar>
@@ -356,6 +395,14 @@ class Container extends React.Component {
           <OperationMessage
             setMessageToNull={this.setMessageToNull}
             message={message}
+           />
+
+           <ImportExport
+             setImportExportOpen={this.setImportExportOpen}
+             importExportOpen={importExportOpen}
+             importKMLClicked={dataImported}
+             trails={trails}
+             hydrants={hydrants}
            />
 
         </main>

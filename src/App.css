@@ -45,6 +45,10 @@
   width: 16em !important;
 }
 
+input[type='file'] {
+  display: none;
+}
+
 
 
 #searchLocations{

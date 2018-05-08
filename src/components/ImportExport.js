@@ -13,7 +13,6 @@ import List, { ListItem, ListItemText } from 'material-ui/List';
 import Radio from 'material-ui/Radio';
 import { FormGroup, FormControl, FormControlLabel, FormHelperText } from 'material-ui/Form';
 import downloadjs from 'downloadjs';
-import ImportExportIcon from '@material-ui/icons/ImportExport';
 import Tooltip from 'material-ui/Tooltip';
 import { getMapStyle, convertTrailFeaturesToDonuts } from '../utils/mapUtils';
 import { hexToRgb } from '../utils/convertToRGB'
@@ -21,7 +20,9 @@ import { Trail, Hydrant } from '../utils/records';
 import Select from 'material-ui/Select';
 import { MenuItem } from 'material-ui/Menu';
 import Typography from 'material-ui/Typography';
-import {IconButton, InputLabel} from 'material-ui';
+import {IconButton, InputLabel, Input} from 'material-ui';
+import FileUpload from '@material-ui/icons/FileUpload';
+import OperationMessage from './OperationMessage';
 
 
 
@@ -47,6 +48,7 @@ class ImportExport extends React.Component {
       dialogOpen: false,
       selectedExport: 'trails',
       exportType: 'KML',
+      message: null,
     };
     this.changeFile = this.changeFile.bind(this);
     this.importFile = this.importFile.bind(this);
@@ -58,11 +60,14 @@ class ImportExport extends React.Component {
     });
   }
 
-  importFile = () => {
+  importFile = (event) => {
     const { selectedFiles } = this.state;
     const { importKMLClicked, trails, hydrants } = this.props;
 
-    function processTrail(feature, index) {
+
+    this.changeFile(event)
+
+   function processTrail(feature, index) {
       let [name, ...otherThings] = feature.get('description').split(',') ;
       const originalTrailName = name
       name = _.words(name).join(' ');
@@ -81,14 +86,12 @@ class ImportExport extends React.Component {
       feature.set('originalTrailName', originalTrailName)
       feature.set('name', name);
       feature.set('fillColor', fillColor)
+      feature.unset('selected')
       feature.changed()
       feature.setStyle(getMapStyle);
 
       return new Trail({ name, features: [feature], fillColor });
     }
-
-
-
 
    function processHydrant(feature, index) {
       let [trailName, hydrantIndex, name]  = feature.get('description').split(',');
@@ -137,6 +140,21 @@ class ImportExport extends React.Component {
           }
         });
 
+        const newTrailSize = Object.keys(newTrails).length;
+        const newHydrantSize = Object.keys(newHydrants).length;
+
+        if (newTrailSize) {
+          this.setState({
+            message: `${newTrailSize} new Trails imported!`
+          })
+        }
+
+        if (newHydrantSize) {
+          this.setState({
+            message: `${newHydrantSize} new Hydrants imported!`
+          })
+        }
+
         importKMLClicked({
           trails: Immutable.Map(newTrails).map(t => convertTrailFeaturesToDonuts(t)),
           hydrants:  Immutable.Map(newHydrants),
@@ -146,8 +164,10 @@ class ImportExport extends React.Component {
         console.log(err);
       }
     };
-    if (selectedFiles && selectedFiles.length) {
-      reader.readAsText(selectedFiles[0]);
+
+
+    if (event.target.files && event.target.files.length) {
+      reader.readAsText(event.target.files[0]);
     }
   }
 
@@ -168,7 +188,7 @@ class ImportExport extends React.Component {
         const description = trailName
         f.unset('features')
         f.set('description', description)
-        f.setStyle()
+        f.setStyle(getMapStyle)
         trailFeatures.push(f)
       })
       // Iterate through Trail's Hydrants
@@ -180,6 +200,7 @@ class ImportExport extends React.Component {
         .forEach((h, index) => {
            const feature = h.feature
            feature.set('description', `${trailName},${index},${feature.get('name')}`)
+           feature.unset('selected')
            hydrantFeatures.push(feature)
          })
     })
@@ -242,17 +263,6 @@ class ImportExport extends React.Component {
     downloadjs(encodedUri, `Hydrants_Table.csv`);
   }
 
-  handleClose = () => {
-    this.setState({
-      dialogOpen: false,
-    });
-  }
-
-  handleOpen = () => {
-    this.setState({
-      dialogOpen: true,
-    });
-  }
 
   handleSelect = (event) => {
     this.setState({
@@ -260,40 +270,53 @@ class ImportExport extends React.Component {
     })
   }
 
-
-
-
   render() {
-    const { classes } = this.props;
+    const { classes, setImportExportOpen, importExportOpen } = this.props;
 
-    const { dialogOpen, selectedExport } = this.state;
+    const { selectedExport, selectedFiles, message  } = this.state;
+
 
     return (
       <div style={{display: 'inline'}}>
-        <Tooltip style={{marginLeft: 50}} title="Import/Export" placement="top-start">
-          <IconButton
-            onClick={this.handleOpen}
-            variant='raised'
-            color='secondary'
-          >
-          <ImportExportIcon />
-          <Typography color='secondary' variant="caption">
-          Import Export
-          </Typography>
-          </IconButton>
-        </Tooltip>
-        <Dialog onBackdropClick={this.handleClose} open={dialogOpen} >
-          <DialogTitle >Import/Export</DialogTitle>
+
+        <OperationMessage
+          setMessageToNull={() => { this.setState({ message: null }); }}
+          message={message}
+         />
+
+        <Dialog onBackdropClick={() => setImportExportOpen(false)} open={importExportOpen} >
+          <DialogTitle >Import Export</DialogTitle>
 
           <List>
             <ListItem divider>
-               <ListItemText primary="Import" />
-               <input onChange={this.changeFile} type="file" accept=".kml" />
-               <Button variant="raised" onClick={this.importFile} > Import </Button>
+              <ListItemText primary="Import" />
+
+              <div style={{width: '100%', paddingLeft: 10}}>
+                <input
+                  className={classes.input}
+                  onChange={this.importFile}
+                  type="file" accept=".kml"
+                  id="file-upload"
+                />
+                <Input
+                  value={ selectedFiles? selectedFiles[0].name : "" }
+                />
+                <label htmlFor="file-upload">
+                  <Button
+                    component="span"
+                    color="primary"
+                    variant="raised"
+                    variant="fab"
+                    mini
+                  >
+                    <FileUpload />
+                  </Button>
+                </label>
+              </div>
             </ListItem>
 
             <ListItem>
-              <ListItemText primary="Export" />
+             <ListItemText primary="Export" />
               <div style={{ paddingRight: 35 }}>
                 <FormControl className={classes.formControl}>
                   <Select
@@ -318,14 +341,16 @@ class ImportExport extends React.Component {
                   <FormHelperText> Format </FormHelperText>
                   </FormControl>
                 </div>
-                <Button variant="raised"  onClick={this.exportFile} > Export </Button>
+                <Button variant="raised" color='primary'onClick={this.exportFile} > Export </Button>
             </ListItem>
 
             <Button
+              style={{float: 'right', marginRight: 24}}
+              variant="raised"
+              color='primary'
               onClick={this.generateCSV}
             >
-
-            Download Hydrants_Table.CSV
+            Download Hydrants Table
             </Button>
           </List>
           <Divider />

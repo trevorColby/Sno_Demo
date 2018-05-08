@@ -80,7 +80,8 @@ class TrailForm extends React.Component {
       modifyHydrant,
       trail,
       selectedTrail,
-      trailDeleted
+      trailDeleted,
+      dataImported
     } = this.props;
 
     const {  dialogOpen } = this.state
@@ -159,8 +160,6 @@ class TrailForm extends React.Component {
                 trail={trail}
                 modifyTrail={modifyTrail}
               />
-
-
               <ListItem disableGutters onClick={()=> { this.setState({ trailSectionsOpen: !this.state.trailSectionsOpen })} }>
                 <ListItemText className={classes.inset} primary="Trail Sections" />
                 {this.state.trailSectionsOpen ? <ExpandLess /> : <ExpandMore />}
@@ -171,8 +170,9 @@ class TrailForm extends React.Component {
                 </List>
               </Collapse>
 
-
               <HydrantList
+                trail={trail.get('id')}
+                dataImported={dataImported}
                 trailHydrants={trailHydrants}
                 hydrantDeleted={hydrantDeleted}
                 modifyHydrant={modifyHydrant}
