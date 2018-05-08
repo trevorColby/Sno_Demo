@@ -1,7 +1,7 @@
 import React from 'react';
 import Immutable from 'immutable';
 import _ from 'lodash';
-import { Button, MenuItem, Card, CardContent, CardHeader } from 'material-ui';
+import { Button, MenuItem, Card, CardContent, CardHeader, CardActions } from 'material-ui';
 import Close from '@material-ui/icons/Close';
 import Check from '@material-ui/icons/Check';
 import Select from 'react-select';

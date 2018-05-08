@@ -115,13 +115,13 @@ class HydrantListItem extends React.Component {
                  />
                ) : (
                  <Button
-                 color='primary'
-                 variant='raised'
+                 style={{borderBottom: '1px solid'}}
+                 variant='flat'
                  onClick={() => {
                    getElevations()
                    .then(elevMessage => this.setState({ message: elevMessage }))}}
                  >
-                 Refresh Data
+                 Fetch
                  </Button>
                )}
               <FormHelperText>Elevation</FormHelperText>

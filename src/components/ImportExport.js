@@ -291,7 +291,7 @@ class ImportExport extends React.Component {
             <ListItem divider>
               <ListItemText primary="Import" />
 
-              <div>
+              <div style={{width: '100%', paddingLeft: 10}}>
                 <input
                   className={classes.input}
                   onChange={this.importFile}
@@ -316,7 +316,7 @@ class ImportExport extends React.Component {
             </ListItem>
 
             <ListItem>
-              <ListItemText primary="Export" />
+             <ListItemText primary="Export" />
               <div style={{ paddingRight: 35 }}>
                 <FormControl className={classes.formControl}>
                   <Select
@@ -345,12 +345,12 @@ class ImportExport extends React.Component {
             </ListItem>
 
             <Button
+              style={{float: 'right', marginRight: 24}}
               variant="raised"
-              color='secondary'
+              color='primary'
               onClick={this.generateCSV}
             >
-
-            Download Hydrants_Table.CSV
+            Download Hydrants Table
             </Button>
           </List>
           <Divider />

@@ -207,8 +207,8 @@ class Container extends React.Component {
           />
           <CardContent>
             <Typography variant="body2" >
-              Get Started By Importing exisiting KML Trail Features
-              or Adding Features Manually.
+              Get started by importing exisiting KML trail features
+              or adding features manually.
             </Typography>
 
             <Button color='primary' variant='raised' onClick={this.newTrailClicked} fullWidth>
