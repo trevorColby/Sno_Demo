@@ -356,7 +356,6 @@ class Container extends React.Component {
                     </Typography>
                   </IconButton>
                 </Tooltip>
-
               </div>
 
             </Toolbar>

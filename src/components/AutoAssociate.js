@@ -3,7 +3,7 @@ import Immutable from 'immutable';
 import _ from 'lodash';
 import {
   Button, Dialog,
-  DialogTitle, DialogContent,
+  DialogTitle, DialogContent, DialogActions, DialogContentText,
   Tooltip,
   IconButton,
   Typography
@@ -47,25 +47,22 @@ class AutoAssociate extends React.Component {
   }
 
   renderTrailAssignment = () => {
-    const { hydrants, manualAssignmentItems, openManualAssignment } = this.props;
+    const { hydrants, manualAssignmentItems } = this.props;
     const { assigned } = this.state;
     const orphans = hydrants.filter(h => h.get('trail') === null);
     if (!assigned && !orphans.size ) {
-      return <p>All hydrants are aready assigned to trails</p>;
+      return <DialogContentText>All hydrants are aready assigned to trails</DialogContentText>;
     }
 
     return (
       <div>
         { assigned ? (
-          <p>Auto-assigned {assigned} hydrants located inside of trails. </p>
+          <DialogContentText>Auto-assigned {assigned} hydrants located inside of trails. </DialogContentText>
           ) : null
         }
         { manualAssignmentItems.size ? (
           <div>
-            <p>{manualAssignmentItems.size} hydrants require review</p>
-            <Button onClick={() => {openManualAssignment(); this.setState({ dialogOpen: false });}}>
-              Assign now
-            </Button>
+            <DialogContentText>{manualAssignmentItems.size} hydrants require review</DialogContentText>
           </div>
           ) : null
         }
@@ -75,7 +72,7 @@ class AutoAssociate extends React.Component {
 
   render() {
     const { dialogOpen } = this.state;
-    const { hydrants, trails, dataImported, manualAssignmentItems } = this.props;
+    const { hydrants, trails, dataImported, manualAssignmentItems, openManualAssignment } = this.props;
     const orphans = hydrants.filter(h => h.get('trail') === null);
     const noElevation = hydrants.filter(h => !h.get('elevation'));
     return (
@@ -89,10 +86,18 @@ class AutoAssociate extends React.Component {
           </IconButton>
         </Tooltip>
         <Dialog onBackdropClick={() => this.setState({ dialogOpen: false })} open={dialogOpen} >
-          <DialogTitle>Hydrant Association and Renaming</DialogTitle>
+          <DialogTitle>Hydrant Auto Association</DialogTitle>
           <DialogContent>
             {this.renderTrailAssignment()}
           </DialogContent>
+
+          {manualAssignmentItems.size ? (
+            <DialogActions>
+              <Button color="primary" onClick={() => { openManualAssignment(); this.setState({ dialogOpen: false });}}>
+                Assign now
+              </Button>
+            </DialogActions>
+          ) : null}
         </Dialog>
       </div>
     );
