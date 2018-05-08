@@ -178,14 +178,18 @@ class ImportExport extends React.Component {
     const trailFeatures = []
     const hydrantFeatures = []
 
-    trails.valueSeq().forEach((v) => {
+    trails
+      .sortBy((a) => a.get('name'))
+      .valueSeq()
+      .forEach((v, trailIndex) => {
+
       let trailName = v.get('name').split(' ').join('_')
       // Iterate through Trail's Features
-      v.get('features').forEach((f) => {
+      v.get('features').forEach((f, fIndex) => {
         if (f.get('originalTrailName')) {
           trailName = f.get('originalTrailName')
         }
-        const description = trailName
+        const description = `${trailName},${trailIndex + fIndex + 1}`
         f.unset('features')
         f.set('description', description)
         f.setStyle(getMapStyle)
@@ -195,7 +199,7 @@ class ImportExport extends React.Component {
       _.chain(hydrants.toJS())
         .values()
         .filter({ trail: v.get('id') })
-        .orderBy('name', 'asc')
+        .sort((a, b) => a.name.localeCompare(b.name, undefined, { numeric: true }))
         .value()
         .forEach((h, index) => {
            const feature = h.feature
