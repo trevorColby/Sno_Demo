@@ -238,9 +238,6 @@ class ImportExport extends React.Component {
         .sort((a, b) => a.name.localeCompare(b.name, undefined, { numeric: true }))
         .value();
 
-
-        console.log(trailHydrants)
-
       for (let i = 0; i < 100; i += 1) {
         let hydId = i + 1
         let elevation = 0
