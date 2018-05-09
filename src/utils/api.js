@@ -10,7 +10,7 @@ export const mapquestApi = {
     const coordsChunks = _.chunk(coordsArray, 50);
     const promises = _.map(coordsChunks, (coords) => {
       const coordsStr = _.reduce(coords, (curr, coordPair) => `${curr}${coordPair.join(',')},`, '');
-      return axios.get('http://open.mapquestapi.com/elevation/v1/profile', {
+      return axios.get('https://open.mapquestapi.com/elevation/v1/profile', {
         params: {
           key,
           unit: 'f',
@@ -20,7 +20,7 @@ export const mapquestApi = {
       });
     });
     return axios.all(promises).then(allResp => {
-      // make array of {lat, lon, elevation} objects from 
+      // make array of {lat, lon, elevation} objects from
       // promise responses if they all succeed
       if (_.reduce(allResp, (failedRequest, resp) => failedRequest || resp.status !== 200, false)) {
         console.log("At least one request failed. Problem! ");
