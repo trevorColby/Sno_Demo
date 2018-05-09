@@ -233,7 +233,12 @@ class ImportExport extends React.Component {
     ]
     trails.keySeq().forEach((trailId) => {
       const trail = trails.get(trailId)
-      const trailName = trail.get('features') ? trail.get('features')[0].get('originalTrailName') : trail.get('name').split(' ').join('_')
+
+      let trailName = trail.get('name').split(' ').join('_')
+
+      if (trail.get('features')[0]) {
+        trailName = trail.get('features')[0].get('originalTrailName') ? trail.get('features')[0].get('originalTrailName') : trailName
+      }
 
       const trailHydrants = _
         .chain(hydrants.toJS())
