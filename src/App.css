@@ -49,6 +49,11 @@ input[type='file'] {
   display: none;
 }
 
+main{
+  position: absolute,
+  width: 100%
+}
+
 
 
 #searchLocations{
