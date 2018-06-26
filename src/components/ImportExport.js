@@ -65,6 +65,7 @@ class ImportExport extends React.Component {
     const { importKMLClicked, trails, hydrants } = this.props;
 
 
+
     this.changeFile(event)
 
    function processTrail(feature, index) {
@@ -111,10 +112,11 @@ class ImportExport extends React.Component {
       feature.setStyle(getMapStyle);
       return new Hydrant({ id, name, coords, feature, trail: trailId });
     }
-    const reader = new FileReader();
-    reader.onload = (event) => {
+  const reader = new FileReader();
+  reader.onload = (event) => {
       try {
         const kml = new KML().readFeatures(event.target.result);
+        console.log(event.target.results)
         const newTrails = {};
         const newHydrants = {};
         _.each(kml, (feature, index) => {
@@ -167,6 +169,7 @@ class ImportExport extends React.Component {
 
 
     if (event.target.files && event.target.files.length) {
+      console.log(event.target.files[0])
       reader.readAsText(event.target.files[0]);
     }
   }

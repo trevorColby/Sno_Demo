@@ -1,5 +1,7 @@
 import _ from 'lodash';
 import axios from 'axios';
+import {processKMLData} from './processKML.js';
+
 
 export const mapquestApi = {
   fetchElevationForCoords: (coordsArray) => {
@@ -38,5 +40,18 @@ export const mapquestApi = {
       });
       return _.flatten(mappedResponses);
     });
+  }
+}
+
+export const iSnoApp = {
+  fetchTrails: () => {
+      return axios.get("http://localhost:51092/Kml/Trails.kml")
+      .then((r) => processKMLData(r.data))
+      .catch(console.error)
+  },
+  fetchHydrants: () => {
+    return axios.get("http://localhost:51092/Kml/Hydrants.kml")
+    .then((r) => processKMLData(r.data))
+    .catch(console.error)
   }
 }

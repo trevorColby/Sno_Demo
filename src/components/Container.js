@@ -3,6 +3,7 @@ import { compose } from 'redux';
 import { connect } from 'react-redux';
 import classNames from 'classnames';
 import _ from 'lodash';
+import { iSnoApp } from './../utils/api';
 import {
   withStyles,
   IconButton, Drawer, Button, Typography,
@@ -92,7 +93,6 @@ class Container extends React.Component {
       drawerOpen: true
     });
   }
-
 
   drawEnd(e) {
     const { feature } = e;
@@ -249,6 +249,18 @@ class Container extends React.Component {
         />
       </div>
     );
+  }
+
+  componentDidMount = () => {
+    const {dataImported} = this.props;
+
+    iSnoApp.fetchHydrants()
+      .then(dataImported)
+
+    iSnoApp.fetchTrails()
+      .then(dataImported)
+
+
   }
 
   render() {
