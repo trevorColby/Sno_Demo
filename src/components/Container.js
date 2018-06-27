@@ -7,15 +7,17 @@ import { iSnoApp } from './../utils/api';
 import {
   withStyles,
   IconButton, Drawer, Button, Typography,
-  Toolbar, AppBar, InputLabel
+  Toolbar, AppBar, InputLabel, Grid
 } from 'material-ui';
 import MenuIcon from '@material-ui/icons/Menu';
 import ChevronLeftIcon from '@material-ui/icons/ChevronLeft';
 import ChevronRightIcon from '@material-ui/icons/ChevronRight';
+import Save from '@material-ui/icons/Save';
 import Projection from 'ol/proj';
 import { Trail, Hydrant } from '../utils/records';
 import appStyles from '../styles/drawer';
 
+import CommitModal from './CommitModal';
 import TrailList from './TrailList';
 import OpenLayersMap from './OpenLayersMap';
 import ImportExport from './ImportExport';
@@ -62,7 +64,8 @@ class Container extends React.Component {
     this.state = {
       drawerOpen: false,
       message: null,
-      importExportOpen: false
+      importExportOpen: false,
+      commitOpen: false
     };
   }
 
@@ -77,6 +80,12 @@ class Container extends React.Component {
         importExportOpen: bool
       });
     }
+
+  setCommitOpen = (bool) => {
+    this.setState({
+      commitOpen: bool
+    })
+  }
 
   newTrailClicked = () => {
     const { addTrail, trailSelected, selectedTrail,toggledEditing } = this.props;
@@ -278,7 +287,7 @@ class Container extends React.Component {
 
 
 
-    const { drawerOpen, message, importExportOpen } = this.state;
+    const { drawerOpen, message, importExportOpen, commitOpen } = this.state;
     return (
       <div className={classes.root}>
         <div className={classes.appFrame}>
@@ -311,21 +320,26 @@ class Container extends React.Component {
                 SnoTrack
               </Typography>
 
-              <div>
 
-                <Tooltip title="New Trail"
-                  style={{marginLeft: 50}}
-                >
-                  <IconButton
-                    color='secondary'
-                    onClick={this.newTrailClicked}
+                <Grid container style={{marginLeft:10}} spacing={24}>
+
+                <Grid item xs={3} sm={1}>
+                  <Tooltip title="New Trail"
+                    style={{marginLeft: 50}}
                   >
-                    <TimeLine />
-                    <Typography color='secondary' variant="caption">
-                    New Trail
-                    </Typography>
-                  </IconButton>
-                </Tooltip>
+                    <IconButton
+                      color='secondary'
+                      onClick={this.newTrailClicked}
+                    >
+                      <TimeLine />
+                      <Typography color='secondary' variant="caption">
+                      New Trail
+                      </Typography>
+                    </IconButton>
+                  </Tooltip>
+                </Grid>
+
+                <Grid item xs={3} sm={1}>
 
                 <Tooltip title="Add Hydrants"
                   style={{marginLeft: 50}}
@@ -340,6 +354,9 @@ class Container extends React.Component {
                     </Typography>
                   </IconButton>
                 </Tooltip>
+                </Grid>
+
+                <Grid item xs={3} sm={1}>
 
                 <Tooltip style={{marginLeft: 50}} title="Import/Export" >
                   <IconButton
@@ -353,8 +370,11 @@ class Container extends React.Component {
                     </Typography>
                   </IconButton>
                 </Tooltip>
+                </Grid>
 
-                <Tooltip style={{marginLeft: 50}} title="Import/Export" >
+                <Grid item xs={3} sm={1}>
+
+                <Tooltip style={{marginLeft: 50}} title="Get Elevations" >
                   <IconButton
                     onClick={() => {
                       getElevations()
@@ -368,10 +388,33 @@ class Container extends React.Component {
                     </Typography>
                   </IconButton>
                 </Tooltip>
-              </div>
+                </Grid>
 
+                <Grid item xs={3} sm={1}>
+
+                <Tooltip style={{marginLeft: 50}} title="Save Dialog" >
+                  <IconButton
+                    onClick={() => this.setCommitOpen(true)}
+                    variant='raised'
+                    color='secondary'
+                  >
+                    <Save />
+                    <Typography color='secondary' variant="caption">
+                    Save
+                    </Typography>
+                  </IconButton>
+                </Tooltip>
+                </Grid>
+
+              <Grid item xs={12} sm={7}>
+                <div id="searchLocations"></div>
+              </Grid>
+
+              </Grid>
             </Toolbar>
-            <div id="searchLocations"></div>
+
+
+
           </AppBar>
           <Drawer
             variant="persistent"
@@ -416,6 +459,13 @@ class Container extends React.Component {
              trails={trails}
              hydrants={hydrants}
            />
+
+           <CommitModal
+            commitOpen={commitOpen}
+            trails={trails}
+            hydrants={hydrants}
+            setCommitOpen={this.setCommitOpen}
+            />
 
         </main>
       </div>

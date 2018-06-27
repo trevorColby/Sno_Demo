@@ -53,5 +53,11 @@ export const iSnoApp = {
     return axios.get("http://localhost:51092/Kml/Hydrants.kml")
     .then((r) => processKMLData(r.data))
     .catch(console.error)
+  },
+  commitChanges: (data)=> {
+    // Saves data to iSno Database and saves new KML
+
+    return axios.post("/ResortEditor.aspx/uploadData", data )
+
   }
 }
