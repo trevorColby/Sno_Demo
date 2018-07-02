@@ -100,8 +100,9 @@ class ImportExport extends React.Component {
        let [trailName, hydrantIndex, name]  = feature.get('description').split(',');
         id = index + name;
      } else {
-        id = index
-        name = index + ""
+        id = new Date().getTime() + index
+        id = id.toString()
+        name = `${index + 1}`
      }
 
       const originalTrailName = name
@@ -123,7 +124,6 @@ class ImportExport extends React.Component {
     reader.onload = (event) => {
       try {
         const kml = new KML().readFeatures(event.target.result);
-        console.log("readfeatures", kml)
         const newTrails = {};
         const newHydrants = {};
         _.each(kml, (feature, index) => {
@@ -145,7 +145,6 @@ class ImportExport extends React.Component {
             }
           } else {
             const hydrant = processHydrant(feature, index);
-            console.log(hydrant.toJS())
             newHydrants[hydrant.get('id')] = hydrant;
           }
         });

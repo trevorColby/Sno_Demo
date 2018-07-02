@@ -12,8 +12,7 @@ export function getMapStyle(feature, resolution) {
   const HIGHLIGHT_COLOR = 'yellow';
   const DEFAULT_OPACITY = 0.2;
   const SELECTED_OPACITY = 0.4;
-
-
+  
   if (feature.getGeometry().getType() === 'Point') {
     // hydrant styling defaults
     const fill = new Fill({ color: 'rgba(222, 49, 33, 0.4)' });
@@ -82,6 +81,7 @@ export function getMapStyle(feature, resolution) {
       text,
     });
   }
+
 }
 
 export function convertTrailFeaturesToDonuts(trail) {
