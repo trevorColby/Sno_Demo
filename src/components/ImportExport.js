@@ -212,7 +212,7 @@ class ImportExport extends React.Component {
         .value()
         .forEach((h, index) => {
            const feature = h.feature
-           feature.set('description', `${trailName},${index},${feature.get('name')}`)
+           feature.set('description', `${trailName},${index + 1},${feature.get('name')}`)
            feature.unset('selected')
            hydrantFeatures.push(feature)
          })
