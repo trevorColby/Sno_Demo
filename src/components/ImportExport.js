@@ -94,12 +94,21 @@ class ImportExport extends React.Component {
     }
 
    function processHydrant(feature, index) {
-      let [trailName, hydrantIndex, name]  = feature.get('description').split(',');
+    let trailName, hydrantIndex, name, id
+
+     if (feature.get('description')){
+       [trailName, hydrantIndex, name]  = feature.get('description').split(',');
+        id = index + name;
+     } else {
+        id = new Date().getTime() + index
+        id = id.toString()
+        name = `${index + 1}`
+     }
+
       const originalTrailName = name
-      trailName = _.words(trailName).join(' ');
+      trailName = _.words(trailName).join(' ');  
       const trailObj = trails.find(t => t.get('name') === trailName);
       const trailId = trailObj ? trailObj.get('id') : null;
-      const id = index + name;
       const geometry = feature.getGeometry().getType() === 'Point' ?
         feature.getGeometry() : feature.getGeometry().getGeometries()[0];
       feature.setGeometry(geometry);
@@ -203,7 +212,7 @@ class ImportExport extends React.Component {
         .value()
         .forEach((h, index) => {
            const feature = h.feature
-           feature.set('description', `${trailName},${index},${feature.get('name')}`)
+           feature.set('description', `${trailName},${index + 1},${feature.get('name')}`)
            feature.unset('selected')
            hydrantFeatures.push(feature)
          })
