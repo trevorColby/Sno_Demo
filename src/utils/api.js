@@ -57,7 +57,7 @@ export const iSnoApp = {
   commitChanges: (data)=> {
     // Saves data to iSno Database and saves new KML
 
-    return axios.post("/ResortEditor.aspx/uploadData", data )
+    return axios.post("http://localhost:51092/ResortEditor.aspx/uploadData", {data} )
 
   }
 }
