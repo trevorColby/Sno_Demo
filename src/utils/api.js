@@ -57,6 +57,11 @@ export const iSnoApp = {
     .catch(console.error)
   },
 
+  commitChanges: (data)=> {
+    // Saves data to iSno Database and saves new KML
+    return axios.post("http://localhost:51092/ResortEditor.aspx/uploadData", {data} )
+},
+
   fetchAllData: () => {
     return axios({
       method: 'get',
