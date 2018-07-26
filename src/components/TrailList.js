@@ -18,7 +18,6 @@ class TrailList extends React.Component {
 
   renderTrail = (trail) => {
     const { selected, trailSelected, modifyTrail, hydrants, toggledEditing, editableTrail } = this.props;
-
     const id = trail.id;
     const isSelected = selected === id;
     const isEditable = editableTrail === id;

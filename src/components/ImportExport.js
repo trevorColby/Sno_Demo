@@ -312,7 +312,7 @@ class ImportExport extends React.Component {
                 />
                 <Input
                   value={ selectedFiles? selectedFiles[0].name : "" }
-                />
+                /> 
                 <label htmlFor="file-upload">
                   <Button
                     component="span"

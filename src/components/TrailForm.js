@@ -128,7 +128,8 @@ class TrailForm extends React.Component {
             <Input
               className={classes.input}
               value={trail.get('name')}
-              onChange={(e)=>{ modifyTrail(trail.get('id'), { name: e.target.value }) }}
+              onChange={(e)=> modifyTrail(trail.get('id'), {name: e.target.value})}
+              onBlur={() => modifyTrail(trail.get('id'), {name: _.words(trail.get('name')).join(' ')})}
             />
 
             {isTrailMode ?

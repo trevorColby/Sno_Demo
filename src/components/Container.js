@@ -38,6 +38,7 @@ import ActionTypes from '../redux/ActionTypes';
 const {
   DATA_IMPORTED,
   TRAIL_ADDED,
+  DB_DATA_FETCHED,
   TRAIL_MODIFIED,
   TRAIL_SELECTED,
   TRAIL_DELETED,
@@ -261,15 +262,17 @@ class Container extends React.Component {
   }
 
   componentDidMount = () => {
-    const {dataImported} = this.props;
+    const {dataImported, dbDataFetched } = this.props;
 
+    //Match on id = name + index
     iSnoApp.fetchHydrants()
-      .then(dataImported)
+      .then(dataImported);
 
+      //Match on Trail Name
     iSnoApp.fetchTrails()
       .then(dataImported)
-
-
+      .then(iSnoApp.fetchAllData)
+      .then(dbDataFetched)
   }
 
   render() {
@@ -507,6 +510,9 @@ const mapDispatchToProps = dispatch => ({
   }),
   dataImported: data => dispatch({
     type: DATA_IMPORTED, data,
+  }),
+  dbDataFetched: data => dispatch({
+    type: DB_DATA_FETCHED, data,
   }),
   interactionChanged: data => dispatch({
     type: INTERACTION_CHANGED, data,

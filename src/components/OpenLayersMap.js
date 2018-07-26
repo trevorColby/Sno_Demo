@@ -45,6 +45,22 @@ class OpenLayersMap extends React.Component {
     const { selectedTrail, trails, interaction, hydrants, focusedHydrant } = this.props;
     const { map } = this.state;
 
+    // if trails loaded then zoom to new extent
+    if (trails.size != prevProps.trails.size) {
+      const view = map.getView();
+      const geomCollection = new GeometryCollection();
+      const geometries = _.flatMap(trails.toJS(), t => _.flatMap(t['features'], f => f.getGeometry()));
+      geomCollection.setGeometries(geometries);
+      const newExtent = geomCollection.getExtent();
+      const zoomResolution = view.getResolutionForExtent(newExtent);
+      const zoomLevel = view.getZoomForResolution(zoomResolution) - 0.5;
+      view.animate({
+          center: extent.getCenter(newExtent),
+          duration: 0,
+          zoom: zoomLevel,
+        });
+    }
+
     // pan to new selectedTrail
     if (selectedTrail !== prevProps.selectedTrail && selectedTrail) {
 
@@ -62,12 +78,6 @@ class OpenLayersMap extends React.Component {
         const view = map.getView();
         const zoomResolution = view.getResolutionForExtent(newExtent);
         const zoomLevel = view.getZoomForResolution(zoomResolution);
-
-        map.getView().animate({
-          center: extent.getCenter(newExtent),
-          duration: 500,
-          zoom: zoomLevel,
-        });
 
         map.getView().animate({
           center: extent.getCenter(newExtent),

@@ -4,12 +4,14 @@ import ActionTypes from '../ActionTypes';
 import Projection from 'ol/proj';
 
 const {
+  DB_DATA_FETCHED,
   DATA_IMPORTED,
   HYDRANT_ADDED,
   HYDRANT_MODIFIED,
   HYDRANT_SELECTED,
   HYDRANT_DELETED,
   TRAIL_SELECTED,
+  TRAIL_MODIFIED,
   TRAIL_DELETED,
   MANUAL_ASSIGNMENT_HYDRANT_FOCUSED,
   MANUAL_ASSIGNMENT_CLOSED,
@@ -46,6 +48,25 @@ export default (state = initialState, action) => {
         ...state,
         hydrants: newHydrants,
       };
+    }
+
+    case DB_DATA_FETCHED: {
+      const {hydrants} = action.data;
+      const storeHydrants = state.hydrants;
+      const newHydrants = storeHydrants.map(h => {
+
+        const matchedHydrant = _.find(hydrants, dbh => {
+          return dbh.name == h.name || dbh.name == h.name.toUpperCase();
+          // To go down the route of matching by lat/long
+          // return  h.coords[0].toPrecision(5) == dbh.longitude.toString()
+        });
+        if (matchedHydrant) {
+          return h.set('dbId', matchedHydrant.id);
+        } else {
+          console.log("Error finding hydrant", h.toJS());
+        }
+
+      })
     }
     case HYDRANT_DELETED: {
       const hydrantId = action.data.selected;

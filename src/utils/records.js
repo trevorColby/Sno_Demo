@@ -5,6 +5,7 @@ export const Trail = Record({
   name: null,
   features: [],
   fillColor: '255,255,255',
+  dbId: null,
 });
 
 export const Hydrant = Record({
@@ -14,4 +15,5 @@ export const Hydrant = Record({
   trail: null,
   coords: [],
   feature: null,
+  dbId: null,
 });

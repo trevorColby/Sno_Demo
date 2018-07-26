@@ -7,8 +7,6 @@ import Immutable from 'immutable';
 import KML from 'ol/format/kml';
 import Store from '../redux/store';
 
-
-
 export function processKMLData(data){
   const kml = new KML().readFeatures(data)
   const newTrails = {};
@@ -89,4 +87,50 @@ function processTrail(feature, index) {
     feature.setStyle(getMapStyle);
 
     return new Trail({ name, features: [feature], fillColor });
+  }
+
+export function createKML(data){
+    const { trails, hydrants } = data;
+
+
+    const trailFeatures = []
+    const hydrantFeatures = []
+
+    trails
+      .sortBy((a) => a.get('name'))
+      .valueSeq()
+      .forEach((v, trailIndex) => {
+
+      let trailName = v.get('name').split(' ').join('_')
+      // Iterate through Trail's Features
+      v.get('features').forEach((f, fIndex) => {
+        const description = `${trailName},${trailIndex + fIndex + 1}`
+        f.unset('features')
+        f.set('description', description)
+        f.setStyle(getMapStyle)
+        trailFeatures.push(f)
+      })
+      // Iterate through Trail's Hydrants
+      _.chain(hydrants.toJS())
+        .values()
+        .filter({ trail: v.get('id') })
+        .sort((a, b) => a.name.localeCompare(b.name, undefined, { numeric: true }))
+        .value()
+        .forEach((h, index) => {
+           const feature = h.feature
+           feature.set('description', `${trailName},${index},${feature.get('name')}`)
+           feature.unset('selected')
+           hydrantFeatures.push(feature)
+         })
+    })
+
+    function getFileFromFeatures(features) {
+      const format = new KML();
+      const exportFile = format.writeFeatures(features, { featureProjection: 'EPSG:3857' });
+      return exportFile;
+    }
+    const trailsKml = getFileFromFeatures(trailFeatures)
+    const hydrantsKml = getFileFromFeatures(hydrantFeatures)
+
+    return [trailsKml, hydrantsKml]
   }
