@@ -3,6 +3,8 @@ import Dialog, { DialogTitle, DialogContent, DialogContentText, DialogActions } 
 import {Button} from 'material-ui';
 import OperationMessage from './OperationMessage';
 import {iSnoApp} from "./../utils/api";
+import _ from 'lodash';
+import {createKML} from './../utils/processKML.js';
 
 class CommitModal extends React.Component{
 
@@ -13,15 +15,23 @@ class CommitModal extends React.Component{
   confirmChanges = () => {
     const {setCommitOpen, trails, hydrants} = this.props
 
-    const newTrails = trails.toJS()
+    const jsTrails = trails.toJS();
+    const jsHydrants = hydrants.toJS();
 
-    iSnoApp.commitChanges("newTrails")
-    .then(console.log)
-    .catch(console.log)
+    // Remove Open Layers Features since they create circular JSON references
+    // When parsed into JSON
+    const trailData = _.map(jsTrails, t => _.omit(t, ['features']) )
+    const hydrantData = _.map(jsHydrants, h => _.omit(h, ['feature']))
 
-    // this.setState({message:"Changes Saved To Database"})
-    //
-    // setCommitOpen(false)
+    //commit Changes to database, then write and send new kmls to iSnoApp
+    iSnoApp.commitChanges({trails: trailData, hydrants: hydrantData})
+      .then(()=> createKML({trails, hydrants}))
+      .then(iSnoApp.postKML)
+      .catch(console.log)
+
+
+    this.setState({message:"Changes Saved To Database"})
+    setCommitOpen(false)
   }
 
   render(){

@@ -11,6 +11,7 @@ const ActionTypes = keyMirror({
   HYDRANT_MODIFIED: null,
   HYDRANT_DELETED: null,
 
+  DB_DATA_FETCHED: null,
   TRAIL_SELECTED: null,
   INTERACTION_CHANGED: null,
   HYDRANT_SELECTED: null,

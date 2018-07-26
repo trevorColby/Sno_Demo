@@ -1,6 +1,8 @@
 import _ from 'lodash';
 import axios from 'axios';
 import {processKMLData} from './processKML.js';
+import {matchDbData} from './bulkUpdateUtils';
+
 
 
 export const mapquestApi = {
@@ -54,10 +56,20 @@ export const iSnoApp = {
     .then((r) => processKMLData(r.data))
     .catch(console.error)
   },
+
+  fetchAllData: () => {
+    return axios({
+      method: 'get',
+      data: "",
+      url: "http://localhost:51092/ResortEditor.aspx/getAllData",
+      headers: {"Content-Type": "application/json; charset=utf-8"},
+    })
+    .then((d)=> JSON.parse(d.data.d) )
+  },
   commitChanges: (data)=> {
-    // Saves data to iSno Database and saves new KML
-
-    return axios.post("/ResortEditor.aspx/uploadData", data )
-
+    return axios.post("http://localhost:51092/ResortEditor.aspx/uploadData", {data})
+  },
+  postKML: (data) => {
+    console.log(data)
   }
 }

@@ -71,3 +71,42 @@ export function assignHydrantsToTrails(hydrants, trails) {
 
   return [newHydrants, matchedIds];
 }
+
+
+export function matchDbData(dbData){
+    const { hydrants } = store.getState().hydrants;
+    const { trails  } = store.getState().trails;
+
+    const storeHydrants = hydrants.toJS()
+    const storeTrails = trails.toJS()
+
+    const jsonDbData = JSON.parse(dbData.data.d)
+
+    const dbHydrants = jsonDbData.hydrants
+    const dbTrails = jsonDbData.trails
+
+    // console.log(dbTrails, storeTrails)
+
+    //iterate over database trail
+    //find storeTrail where it's id = dbTrail.Name
+    //update storeTrail[name][dbID] = current trails key.
+
+     _.map(dbTrails, (trail) => {
+      storeTrails[trail.name]['dbID'] = trail.id
+      })
+
+      //iterate over storeHydrants
+
+      console.log(dbHydrants, storeHydrants)
+
+
+
+
+
+
+
+
+
+
+
+}

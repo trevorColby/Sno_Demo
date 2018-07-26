@@ -9,6 +9,7 @@ const {
   TRAIL_MODIFIED,
   TRAIL_SELECTED,
   TRAIL_DELETED,
+  DB_DATA_FETCHED,
 } = ActionTypes;
 
 const initialState = {
@@ -39,6 +40,22 @@ export default (state = initialState, action) => {
         ...state,
         trails: newTrails,
       };
+    }
+    case DB_DATA_FETCHED: {
+      //Create new trails where dbID = trails.id
+      const {trails} = action.data;
+      const storeTrails = state.trails;
+
+      const newTrails = storeTrails.map((t)=>{
+        const matchedTrail = _.find(trails, (dbt)=> dbt.name == t.name )
+        return t.set("dbId", matchedTrail.id)
+      })
+
+      return {
+        ...state,
+        trails: newTrails
+      }
+
     }
     case TRAIL_SELECTED: {
       // this is actually bad because state shouldnt cause side effects
