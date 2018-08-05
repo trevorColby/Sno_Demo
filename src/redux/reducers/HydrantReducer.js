@@ -42,6 +42,7 @@ export default (state = initialState, action) => {
       const { hydrants } = state;
       const hydrant = action.data;
       const newHydrants = hydrants.set(hydrant.id, hydrant);
+
       return {
         ...state,
         hydrants: newHydrants,
@@ -49,6 +50,7 @@ export default (state = initialState, action) => {
     }
     case HYDRANT_DELETED: {
       const hydrantId = action.data.selected;
+      
       return {
         ...state,
         hydrants: state.hydrants.delete(hydrantId),

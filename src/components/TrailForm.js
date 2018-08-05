@@ -11,6 +11,7 @@ import { FormControl, FormHelperText } from 'material-ui/Form';
 import _ from 'lodash';
 import Input, { InputLabel } from 'material-ui/Input';
 import Collapse from 'material-ui/transitions/Collapse';
+import { RadioGroup, Radio, FormLabel, FormControlLabel } from 'material-ui';
 import List, { ListItem, ListItemIcon, ListItemText } from 'material-ui/List';
 import ExpandLess from '@material-ui/icons/ExpandLess';
 import ExpandMore from '@material-ui/icons/ExpandMore';
@@ -65,6 +66,15 @@ class TrailForm extends React.Component {
     this.setState({
       dialogOpen: onOff
     })
+  }
+
+  toggleEditMode = () => {
+    const { interaction, interactionChanged} = this.props;
+    if(interaction === "DRAW_MODIFY_TRAIL" ){
+      interactionChanged("DRAW_MODIFY_HYDRANTS")
+    } else {
+      interactionChanged("DRAW_MODIFY_TRAIL")
+    }
   }
 
 
@@ -131,35 +141,28 @@ class TrailForm extends React.Component {
               onChange={(e)=>{ modifyTrail(trail.get('id'), { name: e.target.value }) }}
             />
 
-            {isTrailMode ?
-            (
-              <Button
-              className={classes.root}
-              style={{marginTop: 10}}
-              color="primary"
-              onClick={()=> interactionChanged('DRAW_MODIFY_HYDRANTS')}
-              variant="raised"
-              >
-              Edit Hydrants
-              </Button>
-            ) :
-            <Button
-            className={classes.root}
-            color="primary"
-            style={{marginTop: 10}}
-            onClick={()=> interactionChanged('DRAW_MODIFY_TRAIL')}
-            variant="raised"
-            >
-              Edit Trail
-            </Button>
-
-          }
 
             <List className={classes.root}>
+
+              <ListItem disableGutters >
+                <FormControl>
+                  <Typography variant='subheading'> Edit Mode: </Typography>
+                  <RadioGroup
+                    style={{flexDirection: "row"}}
+                    value={interaction}
+                    onChange={this.toggleEditMode}
+                  >
+                    <FormControlLabel value="DRAW_MODIFY_TRAIL" control={<Radio color='primary' />} label="Trails" />
+                    <FormControlLabel value="DRAW_MODIFY_HYDRANTS" control={<Radio color='primary' />} label="Hydrants" />
+                  </RadioGroup>
+                </FormControl>
+              </ListItem>
+
               <ColorPicker
                 trail={trail}
                 modifyTrail={modifyTrail}
               />
+
               <ListItem disableGutters onClick={()=> { this.setState({ trailSectionsOpen: !this.state.trailSectionsOpen })} }>
                 <ListItemText className={classes.inset} primary="Trail Sections" />
                 {this.state.trailSectionsOpen ? <ExpandLess /> : <ExpandMore />}
