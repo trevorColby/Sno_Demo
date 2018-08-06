@@ -143,7 +143,6 @@ class TrailForm extends React.Component {
 
 
             <List className={classes.root}>
-
               <ListItem disableGutters >
                 <FormControl>
                   <Typography variant='subheading'> Edit Mode: </Typography>
