@@ -107,6 +107,7 @@ class TrailForm extends React.Component {
       feature.set('highlighted', true)
       feature.changed()
     }
+    
     const unhighlightFeature = (feature) => {
       feature.unset('highlighted')
       feature.changed()

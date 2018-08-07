@@ -28,7 +28,6 @@ function updateTrailFeatures(trail, editedFields) {
 }
 
 
-
 export default (state = initialState, action) => {
   switch (action.type) {
     case TRAIL_ADDED: {

@@ -42,7 +42,6 @@ class OpenLayersMap extends React.Component {
   escapeInteractions = ()=> {
     const {map, mapInteractions } = this.state;
     _.each(mapInteractions, i => map.removeInteraction(i))
-    console.log(mapInteractions)
     this.setState({ mapInteractions: []})
   }
 
@@ -67,9 +66,6 @@ class OpenLayersMap extends React.Component {
 
     };
   }
-
-
-
 
   componentWillReceiveProps(nextProps) {
     const { trails, hydrants } = nextProps;

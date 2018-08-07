@@ -120,6 +120,7 @@ class ImportExport extends React.Component {
       feature.setStyle(getMapStyle);
       return new Hydrant({ id, name, coords, feature, trail: trailId });
     }
+
     const reader = new FileReader();
     reader.onload = (event) => {
       try {
@@ -145,7 +146,12 @@ class ImportExport extends React.Component {
             }
           } else {
             const hydrant = processHydrant(feature, index);
-            newHydrants[hydrant.get('id')] = hydrant;
+
+            //Only Allow Hydrants With ids
+            if(hydrant.get('id')){
+              newHydrants[hydrant.get('id')] = hydrant;
+            }
+
           }
         });
 
@@ -208,9 +214,14 @@ class ImportExport extends React.Component {
       _.chain(hydrants.toJS())
         .values()
         .filter({ trail: v.get('id') })
-        .sort((a, b) => a.name.localeCompare(b.name, undefined, { numeric: true }))
+        .sort((a, b) => {
+          if(a.name && b.name) {
+            return a.name.localeCompare(b.name, undefined, { numeric: true })
+          }
+        })
         .value()
         .forEach((h, index) => {
+          console.log(h.name)
            const feature = h.feature
            feature.set('description', `${trailName},${index + 1},${feature.get('name')}`)
            feature.unset('selected')
@@ -249,12 +260,19 @@ class ImportExport extends React.Component {
         trailName = trail.get('features')[0].get('originalTrailName') ? trail.get('features')[0].get('originalTrailName') : trailName
       }
 
+      const testHydrants = hydrants.toJS()
+
       const trailHydrants = _
         .chain(hydrants.toJS())
         .values()
         .filter({ trail: trailId })
-        .sort((a, b) => a.name.localeCompare(b.name, undefined, { numeric: true }))
+        .sort((a, b) => {
+          if(a.name && b.name) {
+            return a.name.localeCompare(b.name, undefined, { numeric: true })
+          }
+        })
         .value();
+
 
       for (let i = 0; i < 100; i += 1) {
         let hydId = i + 1
