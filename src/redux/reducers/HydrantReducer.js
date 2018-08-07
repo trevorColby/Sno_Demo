@@ -13,6 +13,7 @@ const {
   TRAIL_DELETED,
   MANUAL_ASSIGNMENT_HYDRANT_FOCUSED,
   MANUAL_ASSIGNMENT_CLOSED,
+  ORPHANS_SELECTED
 } = ActionTypes;
 
 const initialState = {
@@ -38,10 +39,23 @@ function updateHydrantFeatures(hydrant, editedFields) {
 
 export default (state = initialState, action) => {
   switch (action.type) {
+    case ORPHANS_SELECTED: {
+      state.hydrants
+        .filter(h => h.get('trail') === null)
+        .forEach(hydrant => {
+          const feature = hydrant.get('feature');
+          feature.set('selected', action.data);
+          feature.changed();
+          })
+      return {
+        ...state
+      }
+    }
     case HYDRANT_ADDED: {
       const { hydrants } = state;
       const hydrant = action.data;
       const newHydrants = hydrants.set(hydrant.id, hydrant);
+
       return {
         ...state,
         hydrants: newHydrants,
@@ -49,6 +63,7 @@ export default (state = initialState, action) => {
     }
     case HYDRANT_DELETED: {
       const hydrantId = action.data.selected;
+
       return {
         ...state,
         hydrants: state.hydrants.delete(hydrantId),

@@ -10,7 +10,8 @@ const ActionTypes = keyMirror({
   HYDRANT_ADDED: null,
   HYDRANT_MODIFIED: null,
   HYDRANT_DELETED: null,
-
+  
+  ORPHANS_SELECTED: null,
   TRAIL_SELECTED: null,
   INTERACTION_CHANGED: null,
   HYDRANT_SELECTED: null,

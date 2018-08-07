@@ -17,6 +17,7 @@ import { getMapStyle } from '../utils/mapUtils';
 import RotationSlider from './RotationSlider';
 import extent from 'ol/extent';
 
+
 class OpenLayersMap extends React.Component {
   constructor(props) {
     super(props);
@@ -29,8 +30,41 @@ class OpenLayersMap extends React.Component {
     };
   }
 
+  deleteLastLine = ()=> {
+    const {mapInteractions, map } = this.state;
+    _.each(mapInteractions, i => {
+      if(i.geometryName_ === 'Polygon'){
+        i.removeLastPoint()
+      }
+    })
+  }
+
+  escapeInteractions = ()=> {
+    const {map, mapInteractions } = this.state;
+    _.each(mapInteractions, i => map.removeInteraction(i))
+    this.setState({ mapInteractions: []})
+  }
+
   componentDidMount() {
     this.setupMap();
+
+    const triggerEscape = ()=> {
+      this.escapeInteractions()
+    }
+    const triggerDeleteLast = ()=> {
+      this.deleteLastLine()
+    }
+    document.onkeydown = function(evt) {
+        evt = evt || window.event;
+        if (evt.keyCode == 27) {
+          triggerEscape()
+        }
+
+        if (evt.keyCode == 8){
+          triggerDeleteLast()
+        }
+
+    };
   }
 
   componentWillReceiveProps(nextProps) {
@@ -108,6 +142,8 @@ class OpenLayersMap extends React.Component {
     }
   }
 
+
+
   setupMap() {
     const { source } = this.state;
     const { hydrantSelected } = this.props;
@@ -157,6 +193,7 @@ class OpenLayersMap extends React.Component {
 
     map.on('click', this.onMapClick);
     this.setState({ map });
+
   }
 
   updateInteractions(nextProps) {

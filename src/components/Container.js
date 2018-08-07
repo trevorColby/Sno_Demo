@@ -48,7 +48,8 @@ const {
   MANUAL_ASSIGNMENT_OPENED,
   MANUAL_ASSIGNMENT_CLOSED,
   MANUAL_ASSIGNMENT_HYDRANT_FOCUSED,
-  UPDATE_MANUAL_TRAIL_ASSOCIATION
+  UPDATE_MANUAL_TRAIL_ASSOCIATION,
+  ORPHANS_SELECTED,
 } = ActionTypes;
 
 
@@ -61,8 +62,17 @@ class Container extends React.Component {
     this.state = {
       drawerOpen: false,
       message: null,
-      importExportOpen: false
+      importExportOpen: false,
+      orphanRowSelected: false,
     };
+  }
+
+  toggleOrphanSelect = () => {
+    const {orphansSelected } = this.props
+    this.setState({
+      orphanRowSelected: !this.state.orphanRowSelected
+    })
+    orphansSelected(!this.state.orphanRowSelected)
   }
 
   setMessageToNull = () => {
@@ -92,7 +102,6 @@ class Container extends React.Component {
       drawerOpen: true
     });
   }
-
 
   drawEnd(e) {
     const { feature } = e;
@@ -161,12 +170,14 @@ class Container extends React.Component {
       hydrantSelected, closeManualAssignment,
       manualAssignmentItems, focusedHydrant,
       focusHydrant, manualAssignmentOpen, trailDeleted, manualAssignmentItemsAdded,
-      openManualAssignment
+      openManualAssignment,
     } = this.props;
+
+    const {orphanRowSelected} = this.state;
 
     const orphanCount = hydrants.filter((h) => h.get('trail') === null).size;
 
-
+    //Displays the Assignment Forms
     if (manualAssignmentOpen) {
       return (
         <ManualAssociateHydrantsForm
@@ -179,7 +190,7 @@ class Container extends React.Component {
         />
       );
     }
-
+    //Displays The Edit Form For a Given Trail
     if (editableTrail) {
       return (
         <TrailForm
@@ -196,7 +207,7 @@ class Container extends React.Component {
         />
       )
     }
-
+    // Displays Intro Card If Nothing has Been Added
     if (trails.size === 0 && orphanCount === 0) {
       return (
 
@@ -231,9 +242,12 @@ class Container extends React.Component {
 
     }
 
+    //Displays the Default Trail List.
     return (
       <div>
         <TrailList
+          orphanRowSelected={orphanRowSelected}
+          toggleOrphanSelect={this.toggleOrphanSelect}
           dataImported={dataImported}
           manualAssignmentItemsAdded={manualAssignmentItemsAdded}
           openManualAssignment={openManualAssignment}
@@ -478,6 +492,9 @@ const mapDispatchToProps = dispatch => ({
   trailDeleted: id => dispatch({
     type: TRAIL_DELETED, data: id
   }),
+  orphansSelected: bool => dispatch({
+    type: ORPHANS_SELECTED, data: bool
+  })
 });
 
 export default compose(
