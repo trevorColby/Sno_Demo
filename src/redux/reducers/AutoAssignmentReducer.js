@@ -31,7 +31,7 @@ export default (state = initialState, action) => {
     }
     case MANUAL_ASSIGNMENT_ITEMS_ADDED: {
       return {
-        ...state, 
+        ...state,
         manualAssignmentItems: action.data
       };
     }

@@ -221,7 +221,6 @@ class ImportExport extends React.Component {
         })
         .value()
         .forEach((h, index) => {
-          console.log(h.name)
            const feature = h.feature
            feature.set('description', `${trailName},${index + 1},${feature.get('name')}`)
            feature.unset('selected')

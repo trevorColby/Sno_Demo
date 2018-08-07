@@ -16,8 +16,13 @@ const CustomTableCell = withStyles(theme => ({
 
 class TrailList extends React.Component {
 
+  state = {
+    isSelected: false
+  }
+
+
   renderTrail = (trail) => {
-    const { selected, trailSelected, modifyTrail, hydrants, toggledEditing, editableTrail } = this.props;
+    const { selected, trailSelected, modifyTrail, hydrants, toggledEditing, editableTrail} = this.props;
 
     const id = trail.id;
     const isSelected = selected === id;
@@ -69,8 +74,12 @@ class TrailList extends React.Component {
   }
 
   render() {
-    const {trails, trailSelected, selected, hydrants, newTrailClicked, interactionChanged, dataImported, manualAssignmentItemsAdded, openManualAssignment, manualAssignmentItems} = this.props;
+    const {trails, trailSelected, selected, hydrants, newTrailClicked,
+      interactionChanged, dataImported, manualAssignmentItemsAdded, openManualAssignment,
+      manualAssignmentItems, toggleOrphanSelect, orphanRowSelected  } = this.props;
+
     const orphanCount = hydrants.filter((h) => h.get('trail') === null).size;
+
 
     return (
       <div>
@@ -85,9 +94,9 @@ class TrailList extends React.Component {
             <TableBody style={{overflowY: 'auto', height: '100%', width: '95%'}}>
               {orphanCount ? (
                 <TableRow
-                  className={selected === null ? 'selected' : ''}
+                  className={ orphanRowSelected ? 'selected': ''}
                   style={{borderTop: '2px solid black', cursor: 'pointer'}}
-                  onClick={(e) => { e.stopPropagation(); trailSelected(null)}}
+                  onClick={(e) => { e.stopPropagation(); toggleOrphanSelect();}}
                 >
                   <TableCell padding="dense">Orphans</TableCell>
                   <TableCell padding="dense">{orphanCount}</TableCell>
