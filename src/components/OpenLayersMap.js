@@ -24,6 +24,17 @@ const layerOptions = ['Road',
   'AerialWithLabels'
 ]
 
+const controlBoxStyle = {
+  position: 'absolute',
+  zIndex: 99,
+  background: '#ffffff91',
+  border: '1px solid #fbfbfb',
+  borderRadius: 10,
+  padding: 20,
+  bottom: '10%',
+  right: '5%',
+}
+
 
 class OpenLayersMap extends React.Component {
   constructor(props) {
@@ -334,15 +345,18 @@ class OpenLayersMap extends React.Component {
     const { rotation } = this.state
 
     return (
-      <div>
-        <div id="map-container" />
+    <div id="map-container"
+    style={{ position: "fixed", height: "100%", width: "100%"}}
+    >
 
-        <RotationSlider
-          rotation={rotation}
-          onRotationChange={this.onRotationChange}
-        />
+        <FormControl
+          style={controlBoxStyle}
+        >
+          <RotationSlider
+            rotation={rotation}
+            onRotationChange={this.onRotationChange}
+          />
 
-        <FormControl>
           <RadioGroup
             style={{flexDirection: "row"}}
             value={this.state.currentLayer}
@@ -357,7 +371,6 @@ class OpenLayersMap extends React.Component {
           }
           </RadioGroup>
         </FormControl>
-
 
       </div>
     )

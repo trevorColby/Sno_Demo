@@ -12,7 +12,7 @@ const RotationSlider = ({rotation, onRotationChange}) => {
   }
   return (
     <Slider
-      style={style}
+      railStyle={{backgroundColor:'#1564c0'}}
       onChange={(r)=> {onRotationChange(r)}}
       min={0}
       max={7}
