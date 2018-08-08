@@ -349,7 +349,7 @@ class OpenLayersMap extends React.Component {
             {_.map(layerOptions, l => {
 
               return (
-                  <FormControlLabel value={l} control={<Radio color='primary' />} label={l}/>
+                  <FormControlLabel key={l} value={l} control={<Radio color='primary' />} label={l}/>
               )
             })
           }
