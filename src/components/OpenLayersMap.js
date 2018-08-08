@@ -142,8 +142,6 @@ class OpenLayersMap extends React.Component {
     }
   }
 
-
-
   setupMap() {
     const { source } = this.state;
     const { hydrantSelected } = this.props;
