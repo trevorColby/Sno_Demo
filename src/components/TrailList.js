@@ -96,12 +96,14 @@ class TrailList extends React.Component {
                 <TableRow
                   className={ orphanRowSelected ? 'selected': ''}
                   style={{borderTop: '2px solid black', cursor: 'pointer'}}
-                  onClick={(e) => { e.stopPropagation(); toggleOrphanSelect();}}
+                  onClick={(e) => {toggleOrphanSelect();}}
                 >
                   <TableCell padding="dense">Orphans</TableCell>
                   <TableCell padding="dense">{orphanCount}</TableCell>
                   <TableCell padding="dense" >
                     <AutoAssociate
+                      orphanRowSelected={orphanRowSelected}
+                      toggleOrphanSelect={toggleOrphanSelect}
                       trails={trails}
                       hydrants={hydrants}
                       dataImported={dataImported}

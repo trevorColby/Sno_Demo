@@ -16,6 +16,24 @@ import createGeocoder from './Geocoder';
 import { getMapStyle } from '../utils/mapUtils';
 import RotationSlider from './RotationSlider';
 import extent from 'ol/extent';
+import Select from 'react-select';
+import { FormControl, RadioGroup, Radio, FormControlLabel, Typography} from 'material-ui';
+
+const layerOptions = ['Road',
+  'Aerial',
+  'AerialWithLabels'
+]
+
+const controlBoxStyle = {
+  position: 'absolute',
+  zIndex: 99,
+  background: '#ffffff91',
+  border: '1px solid #fbfbfb',
+  borderRadius: 10,
+  padding: 20,
+  bottom: '10%',
+  right: '5%',
+}
 
 
 class OpenLayersMap extends React.Component {
@@ -27,7 +45,23 @@ class OpenLayersMap extends React.Component {
       source: new SourceVector({ wrapX: false }),
       map: null,
       mapInteractions: [],
+      currentLayer: 'Aerial',
+      mapLayers: null
     };
+  }
+
+  switchLayers = (e) => {
+    const {mapLayers} = this.state;
+    const selected = e.target.value
+
+    _.each(mapLayers, (layer, index) => {
+      layer.setVisible(selected === layerOptions[index] || layer.type === "VECTOR")
+      console.log(layer)
+    })
+
+    this.setState({
+      currentLayer: selected
+    })
   }
 
   deleteLastLine = ()=> {
@@ -142,26 +176,42 @@ class OpenLayersMap extends React.Component {
     }
   }
 
-
-
   setupMap() {
     const { source } = this.state;
     const { hydrantSelected } = this.props;
-    const bingMapsLayer = new TileLayer({
-      visible: true,
-      preload: Infinity,
-      source: new BingMaps({
-        hidpi: false,
-        key: 'ApcR8_wnFxnsXwuY_W2mPQuMb-QB0Kg-My65RJYZL2g9fN6NCFA8-s0lsvxTTs2G',
-        imagerySet: 'Aerial',
-        maxZoom: 19,
-      }),
-    });
+
+    const layers = _.map(layerOptions, l => {
+        return new TileLayer({
+          visible: false,
+          preload: Infinity,
+          source: new BingMaps({
+            visible: false,
+            hidpi: false,
+            key: 'ApcR8_wnFxnsXwuY_W2mPQuMb-QB0Kg-My65RJYZL2g9fN6NCFA8-s0lsvxTTs2G',
+            imagerySet: l,
+            maxZoom: 19,
+          }),
+        })
+      })
+
+    //   const bingMapsLayer = new TileLayer({
+    //   visible: true,
+    //   preload: Infinity,
+    //   source: new BingMaps({
+    //     visible: false,
+    //     hidpi: false,
+    //     key: 'ApcR8_wnFxnsXwuY_W2mPQuMb-QB0Kg-My65RJYZL2g9fN6NCFA8-s0lsvxTTs2G',
+    //     imagerySet: 'Aerial',
+    //     maxZoom: 19,
+    //   }),
+    // });
 
     const resortLayer = new LayerVector({
       source,
       style: getMapStyle,
     });
+
+    layers.push(resortLayer)
 
     // Orientation
     const projection = Projection.get('EPSG:3857');
@@ -171,7 +221,7 @@ class OpenLayersMap extends React.Component {
     const map = new Map({
       loadTilesWhileInteracting: false,
       target: 'map-container',
-      layers: [bingMapsLayer, resortLayer],
+      layers: layers,
       view: new View({
         projection,
         center: Projection.fromLonLat(centerCoords),
@@ -191,8 +241,13 @@ class OpenLayersMap extends React.Component {
     };
     createGeocoder('searchLocations', onGeocoderChange);
 
+    layers[1].setVisible(true)
+
     map.on('click', this.onMapClick);
-    this.setState({ map });
+    this.setState({
+      mapLayers: layers,
+      map
+    });
 
   }
 
@@ -288,13 +343,35 @@ class OpenLayersMap extends React.Component {
 
   render() {
     const { rotation } = this.state
+
     return (
-      <div>
-        <div id="map-container" />
-        <RotationSlider
-          rotation={rotation}
-          onRotationChange={this.onRotationChange}
-        />
+    <div id="map-container"
+    style={{ position: "fixed", height: "100%", width: "100%"}}
+    >
+
+        <FormControl
+          style={controlBoxStyle}
+        >
+          <RotationSlider
+            rotation={rotation}
+            onRotationChange={this.onRotationChange}
+          />
+
+          <RadioGroup
+            style={{flexDirection: "row"}}
+            value={this.state.currentLayer}
+            onChange={this.switchLayers}
+          >
+            {_.map(layerOptions, l => {
+
+              return (
+                  <FormControlLabel key={l} value={l} control={<Radio color='primary' />} label={l}/>
+              )
+            })
+          }
+          </RadioGroup>
+        </FormControl>
+
       </div>
     )
   }

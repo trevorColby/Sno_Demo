@@ -35,7 +35,9 @@ class AutoAssociate extends React.Component {
     dataImported({ hydrants: instantAssign });
   }
 
-  openDialog = () => {
+  openDialog = (e) => {
+    e.stopPropagation()
+
     this.assignHydrants();
     this.setState({ dialogOpen: true });
   }
@@ -72,7 +74,7 @@ class AutoAssociate extends React.Component {
 
   render() {
     const { dialogOpen } = this.state;
-    const { hydrants, trails, dataImported, manualAssignmentItems, openManualAssignment } = this.props;
+    const { hydrants, trails, dataImported, manualAssignmentItems, openManualAssignment, orphanRowSelected, toggleOrphanSelect  } = this.props;
     const orphans = hydrants.filter(h => h.get('trail') === null);
     const noElevation = hydrants.filter(h => !h.get('elevation'));
     return (
@@ -93,7 +95,10 @@ class AutoAssociate extends React.Component {
 
           {manualAssignmentItems.size ? (
             <DialogActions>
-              <Button color="primary" onClick={() => { openManualAssignment(); this.setState({ dialogOpen: false });}}>
+              <Button color="primary" onClick={(e) => {
+                e.stopPropagation()
+                if (orphanRowSelected){toggleOrphanSelect()}
+                 openManualAssignment(); this.setState({ dialogOpen: false });}}>
                 Assign now
               </Button>
             </DialogActions>
