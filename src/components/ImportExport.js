@@ -105,6 +105,10 @@ class ImportExport extends React.Component {
         name = `${index + 1}`
      }
 
+     if (feature.get('name')){
+       name = feature.get('name')
+     }
+
       const originalTrailName = name
       trailName = _.words(trailName).join(' ');
       const trailObj = trails.find(t => t.get('name') === trailName);
