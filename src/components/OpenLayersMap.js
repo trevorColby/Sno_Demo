@@ -21,7 +21,7 @@ import { FormControl, RadioGroup, Radio, FormControlLabel, Typography} from 'mat
 
 const layerOptions = ['Road',
   'Aerial',
-  'AerialWithLabels',
+  'AerialWithLabels'
 ]
 
 
@@ -44,7 +44,8 @@ class OpenLayersMap extends React.Component {
     const selected = e.target.value
 
     _.each(mapLayers, (layer, index) => {
-      layer.setVisible(selected === layerOptions[index] )
+      layer.setVisible(selected === layerOptions[index] || layer.type === "VECTOR")
+      console.log(layer)
     })
 
     this.setState({
@@ -182,23 +183,24 @@ class OpenLayersMap extends React.Component {
         })
       })
 
-    const bingMapsLayer = new TileLayer({
-      visible: true,
-      preload: Infinity,
-      source: new BingMaps({
-        visible: false,
-        hidpi: false,
-        key: 'ApcR8_wnFxnsXwuY_W2mPQuMb-QB0Kg-My65RJYZL2g9fN6NCFA8-s0lsvxTTs2G',
-        imagerySet: 'Aerial',
-        maxZoom: 19,
-      }),
-    });
+    //   const bingMapsLayer = new TileLayer({
+    //   visible: true,
+    //   preload: Infinity,
+    //   source: new BingMaps({
+    //     visible: false,
+    //     hidpi: false,
+    //     key: 'ApcR8_wnFxnsXwuY_W2mPQuMb-QB0Kg-My65RJYZL2g9fN6NCFA8-s0lsvxTTs2G',
+    //     imagerySet: 'Aerial',
+    //     maxZoom: 19,
+    //   }),
+    // });
 
     const resortLayer = new LayerVector({
       source,
       style: getMapStyle,
     });
 
+    layers.push(resortLayer)
 
     // Orientation
     const projection = Projection.get('EPSG:3857');
