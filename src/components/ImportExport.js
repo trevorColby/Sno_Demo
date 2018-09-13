@@ -68,7 +68,15 @@ class ImportExport extends React.Component {
     this.changeFile(event)
 
    function processTrail(feature, index) {
-      let [name, ...otherThings] = feature.get('description').split(',') ;
+      // let [name, ...otherThings] = feature.get('description').split(',') ;
+      let name
+
+      if(feature.get('description')){
+        let [name, ...otherThings] = feature.get('description').split(',') ;
+      } else {
+        name = feature.get('name')
+      }
+
       const originalTrailName = name
       name = _.words(name).join(' ');
       const coords = feature.getGeometry().getCoordinates()[0];
@@ -95,10 +103,8 @@ class ImportExport extends React.Component {
 
    function processHydrant(feature, index) {
     let trailName, hydrantIndex, name, id
-
-
     //Format is TrailName, hydrantIndex, hydrantName
-     if (feature.get('description') & feature.get('description').split(',').length == 3){
+     if (feature.get('description') && feature.get('description').split(',').length == 3){
        [trailName, hydrantIndex, name]  = feature.get('description').split(',');
         id = index + name;
      } else {
