@@ -96,7 +96,9 @@ class ImportExport extends React.Component {
    function processHydrant(feature, index) {
     let trailName, hydrantIndex, name, id
 
-     if (feature.get('description')){
+
+    //Format is TrailName, hydrantIndex, hydrantName
+     if (feature.get('description') & feature.get('description').split(',').length == 3){
        [trailName, hydrantIndex, name]  = feature.get('description').split(',');
         id = index + name;
      } else {
@@ -108,6 +110,7 @@ class ImportExport extends React.Component {
      if (feature.get('name')){
        name = feature.get('name')
      }
+
 
       const originalTrailName = name
       trailName = _.words(trailName).join(' ');
