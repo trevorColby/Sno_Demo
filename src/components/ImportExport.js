@@ -68,14 +68,16 @@ class ImportExport extends React.Component {
     this.changeFile(event)
 
    function processTrail(feature, index) {
-      // let [name, ...otherThings] = feature.get('description').split(',') ;
-      let name
+      let [name, ...otherThings] = feature.get('description').split(',') ;
 
-      if(feature.get('description')){
-        let [name, ...otherThings] = feature.get('description').split(',') ;
-      } else {
-        name = feature.get('name')
-      }
+      // let name
+      //
+      //
+      // if(feature.get('description')){
+      //   let [name, ...otherThings] = feature.get('description').split(',') ;
+      // } else {
+      //   name = feature.get('name')
+      // }
 
       const originalTrailName = name
       name = _.words(name).join(' ');
