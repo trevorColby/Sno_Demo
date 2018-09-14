@@ -23,6 +23,7 @@ import Typography from 'material-ui/Typography';
 import {IconButton, InputLabel, Input} from 'material-ui';
 import FileUpload from '@material-ui/icons/FileUpload';
 import OperationMessage from './OperationMessage';
+import Checkbox from '@material-ui/core/Checkbox';
 
 
 
@@ -48,6 +49,7 @@ class ImportExport extends React.Component {
       dialogOpen: false,
       selectedExport: 'trails',
       exportType: 'KML',
+      excludeOrphans: true,
       message: null,
     };
     this.changeFile = this.changeFile.bind(this);
@@ -204,10 +206,24 @@ class ImportExport extends React.Component {
 
   exportFile = () => {
     const { trails, hydrants } = this.props;
-    const { selectedExport, exportType } = this.state;
+    const { selectedExport, exportType, excludeOrphans } = this.state;
 
     const trailFeatures = []
     const hydrantFeatures = []
+
+
+    if(!excludeOrphans){
+      _.chain(hydrants.toJS())
+        .values()
+        .filter({trail: null})
+        .value()
+        .forEach((h)=>{
+           const feature = h.feature
+           feature.unset('selected')
+           hydrantFeatures.push(feature)
+        })
+    }
+
 
     trails
       .sortBy((a) => a.get('name'))
@@ -242,7 +258,12 @@ class ImportExport extends React.Component {
            feature.unset('selected')
            hydrantFeatures.push(feature)
          })
+
+
     })
+
+
+
 
     const ext = exportType === 'GJ' ? 'json' : 'kml';
 
@@ -369,6 +390,7 @@ class ImportExport extends React.Component {
             <ListItem>
              <ListItemText primary="Export" />
               <div style={{ paddingRight: 35 }}>
+
                 <FormControl className={classes.formControl}>
                   <Select
                     value={this.state.selectedExport}
@@ -391,6 +413,25 @@ class ImportExport extends React.Component {
                   </Select>
                   <FormHelperText> Format </FormHelperText>
                   </FormControl>
+
+                  {
+                    selectedExport === 'hydrants' ? (
+                      <FormControlLabel
+                        control={
+                          <Checkbox
+                            checked={this.state.excludeOrphans}
+                            onChange={()=> {this.setState({excludeOrphans: !this.state.excludeOrphans})}}
+                            color="primary"
+                          />
+                        }
+                        label='Exclude Orphans'
+                      />
+                    ) : (null)
+                  }
+
+
+
+
                 </div>
                 <Button variant="raised" color='primary'onClick={this.exportFile} > Export </Button>
             </ListItem>
