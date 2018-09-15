@@ -416,14 +416,12 @@ class ImportExport extends React.Component {
                   <FormHelperText> Format </FormHelperText>
               </Grid>
               <Grid style={{marginTop:15}} item xs={6}>
-                <FormControl>
                   <Input
                     id='export-name'
                     value={this.state.exportName}
                     onChange={(e)=> {this.setState({exportName: e.target.value})}}
                   />
                   <FormHelperText>File Name </FormHelperText>
-                </FormControl>
                  {
                    selectedExport === 'hydrants' ? (
                      <FormControlLabel
