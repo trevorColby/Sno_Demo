@@ -21,7 +21,9 @@ const initialState = {
 };
 
 function updateHydrantFeatures(hydrant, editedFields) {
+
   const feature = hydrant.get('feature');
+
   if (editedFields.name) {
     feature.set('name', editedFields.name);
   }
@@ -30,7 +32,11 @@ function updateHydrantFeatures(hydrant, editedFields) {
   }
   if (editedFields.trail === null) {
     feature.unset('selected');
+    feature.set('orphan', true);
+  } else if(editedFields.trail) {
+    feature.unset('orphan');
   }
+
   if (_.has(editedFields, 'trail') && feature.get('selected')) {
     // Use if we decide to allow hydrant trail reassignment.
   }
@@ -54,6 +60,11 @@ export default (state = initialState, action) => {
     case HYDRANT_ADDED: {
       const { hydrants } = state;
       const hydrant = action.data;
+
+      if(!hydrant.trail){
+        hydrant.feature.set('orphan', true)
+      }
+
       const newHydrants = hydrants.set(hydrant.id, hydrant);
 
       return {
@@ -61,6 +72,7 @@ export default (state = initialState, action) => {
         hydrants: newHydrants,
       };
     }
+
     case HYDRANT_DELETED: {
       const hydrantId = action.data.selected;
 
@@ -69,6 +81,7 @@ export default (state = initialState, action) => {
         hydrants: state.hydrants.delete(hydrantId),
       };
     }
+
     case HYDRANT_MODIFIED: {
       const { id, editedFields } = action.data;
       const newHydrant = state.hydrants.get(id).withMutations((h) => {
@@ -125,12 +138,11 @@ export default (state = initialState, action) => {
     }
     case DATA_IMPORTED: {
       const { hydrants } = action.data;
+
       const mergedHydrants = state.hydrants.withMutations((map) => {
         hydrants.forEach((h) => {
           const id = h.get('id');
-          if (map.get(id)) {
             updateHydrantFeatures(h, h.toJS());
-          }
           map.set(id, h);
         });
       });

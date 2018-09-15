@@ -18,7 +18,7 @@ class ManualAssociateHydrantsForm extends React.Component {
     const {closeManualAssignment, focusedHydrant, manualAssignmentItems} = this.props;
     const feature = manualAssignmentItems.getIn([focusedHydrant, 'feature']);
     if (feature) {
-      feature.unset('selected');
+      feature.unset('highlighted');
       feature.changed();
     }
     closeManualAssignment();
@@ -34,8 +34,14 @@ class ManualAssociateHydrantsForm extends React.Component {
     const { dataImported } = this.props;
     const { hydrants } = this.state;
     const id = hydrant.get('id');
+    hydrant.feature.unset('highlighted');
+    hydrant.feature.changed();
+
     this.setState({ hydrants: hydrants.delete(id) });
     dataImported({ hydrants: Immutable.Map({ [id]: hydrant }) });
+    if(hydrants.size === 1){
+      this.endManualAssignment()
+    }
   }
 
   updateManualTrailAssociation(hydrantId, trailId) {
@@ -49,21 +55,20 @@ class ManualAssociateHydrantsForm extends React.Component {
     const { hydrants } = this.state;
     const { focusHydrant, focusedHydrant } = this.props;
     const newFeature = hydrants.getIn([id, 'feature']);
-    if (newFeature) {
-      newFeature.set('selected', true);
-      newFeature.changed();
-    }
-    const oldFeature = hydrants.getIn([focusedHydrant, 'feature']);
-    if (oldFeature) {
-      oldFeature.unset('selected');
-      oldFeature.changed();
-    }
+    newFeature.set('highlighted', true);
+    newFeature.changed();
     focusHydrant(id);
   }
 
+  hydrantExited = (hydrant) => {
+    hydrant.feature.unset('highlighted');
+    hydrant.feature.changed();
+  }
+
   renderHydrantItem = (hydrant, index, trailMenuItems) => {
+
     return (
-      <div style={{marginTop:10}} key={index} onMouseEnter={() => this.hydrantHovered(hydrant.get('id'))}>
+      <div style={{marginTop:10}} key={index} onMouseLeave={()=> this.hydrantExited(hydrant)} onMouseEnter={() => this.hydrantHovered(hydrant.get('id'))}>
         <Select
           name="Trail-Assignment"
           onChange={selectedOption => this.updateManualTrailAssociation(hydrant.get('id'), selectedOption)}
@@ -87,6 +92,11 @@ class ManualAssociateHydrantsForm extends React.Component {
     );
   }
 
+  componentDidUpdate(){
+    const { hydrants } = this.state;
+    this.hydrantHovered(hydrants.first().get('id'));
+  }
+
   render() {
     const { dataImported, trails } = this.props;
     const { hydrants } = this.state;
@@ -97,8 +107,8 @@ class ManualAssociateHydrantsForm extends React.Component {
         const name = trail.get('name')
         return { value: id, label: name };
       });
-
     const limit_to = 10;
+
 
     return (
       <div>

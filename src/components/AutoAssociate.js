@@ -24,12 +24,17 @@ class AutoAssociate extends React.Component {
     const { dataImported, hydrants, trails, manualAssignmentItemsAdded } = this.props;
     const orphans = hydrants.filter(h => h.get('trail') === null);
     const [newHydrants, matchedIds] = assignHydrantsToTrails(orphans, trails);
+
     const instantAssign = newHydrants.filter((h) => {
       return matchedIds.indexOf(h.get('id')) !== -1;
     });
+
+
     const manualAssignmentNeeded = newHydrants.filter((h) => {
       return matchedIds.indexOf(h.get('id')) === -1;
     });
+
+
     this.setState({ assigned: instantAssign.size });
     manualAssignmentItemsAdded(manualAssignmentNeeded);
     dataImported({ hydrants: instantAssign });

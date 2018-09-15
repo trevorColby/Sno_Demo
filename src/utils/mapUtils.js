@@ -12,19 +12,28 @@ export function getMapStyle(feature, resolution) {
   const HIGHLIGHT_COLOR = 'yellow';
   const DEFAULT_OPACITY = 0.2;
   const SELECTED_OPACITY = 0.4;
-  
+
+
+
   if (feature.getGeometry().getType() === 'Point') {
     // hydrant styling defaults
-    const fill = new Fill({ color: 'rgba(222, 49, 33, 0.4)' });
+    const ORPHAN_COLOR = 'rgba(255, 0, 0, 0.56)';
+    const DEFAULT_COLOR = 'rgba(63, 249, 132, 0.56)';
+
+
+    const fill = new Fill({ color: feature.get('orphan') ? ORPHAN_COLOR : DEFAULT_COLOR });
+
+
     const stroke = new Stroke({
       color: 'black',
       width: 2,
     });
-    let radius = 3;
+
+    let radius = 5;
+
     let text;
     if (feature.get('selected')) {
       // changes for selected hydrants
-      fill.setColor('rgba(222, 49, 33, 0.8)');
       radius = 11;
       text = new Text({
         text: feature.get('name') || feature.getId(),
@@ -38,6 +47,7 @@ export function getMapStyle(feature, resolution) {
     if (feature.get('highlighted')) {
       fill.setColor(HIGHLIGHT_COLOR)
     }
+
     return new Style({
       image: new RegularShape({
         fill,
