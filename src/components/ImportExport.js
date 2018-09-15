@@ -25,17 +25,13 @@ import FileUpload from '@material-ui/icons/FileUpload';
 import OperationMessage from './OperationMessage';
 import Checkbox from '@material-ui/core/Checkbox';
 import Grid from '@material-ui/core/Grid';
+import TextField from '@material-ui/core/TextField';
 
 
 
 const styles = theme => ({
-  root: {
-    display: 'flex',
-    flexWrap: 'wrap',
-  },
   formControl: {
-    margin: theme.spacing.unit,
-    flexDirection: 'row',
+    marginTop: 10,
   },
   selectEmpty: {
     marginTop: theme.spacing.unit * 2,
@@ -354,8 +350,9 @@ class ImportExport extends React.Component {
         <Dialog onBackdropClick={() => setImportExportOpen(false)} open={importExportOpen} >
 
           <DialogTitle >Import Export</DialogTitle>
-          <Grid container>
-            <Grid item xs={12}>
+
+          <Grid container style={{padding:15}}>
+            <Grid item xs={6}>
               <FormControl className={classes.formControl}>
                 <FormLabel>Import</FormLabel>
                 <FormGroup>
@@ -389,62 +386,69 @@ class ImportExport extends React.Component {
               </FormControl>
             </Grid>
 
+            <Grid item xs={6}>
+
+            <FormLabel> Export </FormLabel>
+
             <FormControl fullWidth className={classes.formControl}>
-              <FormLabel> Export </FormLabel>
+              <InputLabel>Layer</InputLabel>
+              <Select
+                value={this.state.selectedExport}
+                onChange={(e)=> { this.setState({
+                  selectedExport: e.target.value,
+                  exportName: e.target.value
+                })}}
+              >
+                <MenuItem value={'trails'}>Trails</MenuItem>
+                <MenuItem value={'hydrants'}>Hydrants</MenuItem>
+              </Select>
+             </FormControl>
 
-              <Grid style={{marginTop:15}} item xs={6} >
-
-                  <Select
-                    value={this.state.selectedExport}
-                    onChange={(e)=> { this.setState({
-                      selectedExport: e.target.value,
-                      exportName: e.target.value
-                    })}}
-                  >
-                    <MenuItem value={'trails'}>Trails</MenuItem>
-                    <MenuItem value={'hydrants'}>Hydrants</MenuItem>
-                  </Select>
-                  <FormHelperText> Layer </FormHelperText>
-
-                  <Select
-                    value={this.state.exportType}
-                    onChange={(e)=> { this.setState({ exportType: e.target.value })}}
-                  >
-                    <MenuItem value={'KML'}>KML</MenuItem>
-                    <MenuItem value={'GJ'}>GeoJson</MenuItem>
-                  </Select>
-                  <FormHelperText> Format </FormHelperText>
-              </Grid>
-              <Grid style={{marginTop:15}} item xs={6}>
-                  <Input
-                    id='export-name'
-                    value={this.state.exportName}
-                    onChange={(e)=> {this.setState({exportName: e.target.value})}}
-                  />
-                  <FormHelperText>File Name </FormHelperText>
-                 {
-                   selectedExport === 'hydrants' ? (
-                     <FormControlLabel
-                       control={
-                         <Checkbox
-                           checked={this.state.excludeOrphans}
-                           onChange={()=> {this.setState({excludeOrphans: !this.state.excludeOrphans})}}
-                           color="primary"
-                         />
-                       }
-                       label='Exclude Orphans'
-                     />
-                   ) : (null)
-                 }
-                <Button color='primary' onClick={this.exportFile} > Export {this.state.exportType} </Button>
-                 <Button
-                   color='primary'
-                   onClick={this.generateCSV}
-                 >
-                 Download Hydrants CSV
-                 </Button>
-              </Grid>
+            <FormControl fullWidth className={classes.formControl}>
+              <InputLabel htmlFor='format-select'>Format</InputLabel>
+              <Select
+                inputProps={{
+                    id: 'format-select',
+                  }}
+                value={this.state.exportType}
+                onChange={(e)=> { this.setState({ exportType: e.target.value })}}
+              >
+                <MenuItem value={'KML'}>KML</MenuItem>
+                <MenuItem value={'GJ'}>GeoJson</MenuItem>
+              </Select>
             </FormControl>
+
+            <FormControl fullWidth className={classes.formControl}>
+              <TextField
+                label='File Name'
+                value={this.state.exportName}
+                onChange={(e)=> {this.setState({exportName: e.target.value})}}
+              />
+            </FormControl>
+
+            {
+              selectedExport === 'hydrants' ? (
+                <FormControlLabel
+                  control={
+                    <Checkbox
+                      checked={this.state.excludeOrphans}
+                      onChange={()=> {this.setState({excludeOrphans: !this.state.excludeOrphans})}}
+                      color="primary"
+                    />
+                  }
+                  label='Exclude Orphans'
+                />
+              ) : (null)
+            }
+
+                  <Button color='primary' onClick={this.exportFile} > Export {this.state.exportType} </Button>
+                   <Button
+                     color='primary'
+                     onClick={this.generateCSV}
+                   >
+                   Download Hydrants CSV
+                 </Button>
+                </Grid>
           </Grid>
 
           <Divider />
@@ -453,6 +457,101 @@ class ImportExport extends React.Component {
     );
   }
 }
+
+//
+// <Grid container>
+//   <Grid item xs={12}>
+//     <FormControl className={classes.formControl}>
+//       <FormLabel>Import</FormLabel>
+//       <FormGroup>
+//         <div style={{width: '100%', paddingLeft: 10}}>
+//           <input
+//             className={classes.input}
+//             onChange={this.changeFile}
+//             type="file" accept=".kml"
+//             id="file-upload"
+//           />
+//           <Input
+//             value={ selectedFiles? selectedFiles[0].name : "" }
+//           />
+//           <label htmlFor="file-upload">
+//             <Button
+//               component="span"
+//               color="primary"
+//               variant="raised"
+//               variant="fab"
+//               mini
+//             >
+//               <FileUpload />
+//             </Button>
+//           </label>
+//           <Button
+//             onClick={this.importFile}
+//             color='primary'
+//           > Import </Button>
+//         </div>
+//       </FormGroup>
+//     </FormControl>
+//   </Grid>
+//
+//   <FormControl fullWidth className={classes.formControl}>
+//     <FormLabel> Export </FormLabel>
+//
+//     <Grid style={{marginTop:15}} item xs={6} >
+//
+//         <Select
+//           value={this.state.selectedExport}
+//           onChange={(e)=> { this.setState({
+//             selectedExport: e.target.value,
+//             exportName: e.target.value
+//           })}}
+//         >
+//           <MenuItem value={'trails'}>Trails</MenuItem>
+//           <MenuItem value={'hydrants'}>Hydrants</MenuItem>
+//         </Select>
+//         <FormHelperText> Layer </FormHelperText>
+//
+//         <Select
+//           value={this.state.exportType}
+//           onChange={(e)=> { this.setState({ exportType: e.target.value })}}
+//         >
+//           <MenuItem value={'KML'}>KML</MenuItem>
+//           <MenuItem value={'GJ'}>GeoJson</MenuItem>
+//         </Select>
+//         <FormHelperText> Format </FormHelperText>
+//     </Grid>
+//     <Grid style={{marginTop:15}} item xs={6}>
+//         <Input
+//           id='export-name'
+//           value={this.state.exportName}
+//           onChange={(e)=> {this.setState({exportName: e.target.value})}}
+//         />
+//         <FormHelperText>File Name </FormHelperText>
+//        {
+//          selectedExport === 'hydrants' ? (
+//            <FormControlLabel
+//              control={
+//                <Checkbox
+//                  checked={this.state.excludeOrphans}
+//                  onChange={()=> {this.setState({excludeOrphans: !this.state.excludeOrphans})}}
+//                  color="primary"
+//                />
+//              }
+//              label='Exclude Orphans'
+//            />
+//          ) : (null)
+//        }
+//       <Button color='primary' onClick={this.exportFile} > Export {this.state.exportType} </Button>
+//        <Button
+//          color='primary'
+//          onClick={this.generateCSV}
+//        >
+//        Download Hydrants CSV
+//        </Button>
+//     </Grid>
+//   </FormControl>
+// </Grid>
+
 
 // <List>
 //   <ListItem divider>
