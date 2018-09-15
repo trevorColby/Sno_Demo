@@ -139,11 +139,14 @@ class Container extends React.Component {
         feature,
         trail: selectedTrail,
       });
+
       feature.setId(`h-${id}-0`);
       feature.set('name', name);
+
       if (selectedTrail) {
         feature.set('selected', true);
       }
+
       addHydrant(newHydrant);
     }
   }
