@@ -52,7 +52,7 @@ class ImportExport extends React.Component {
       exportType: 'KML',
       excludeOrphans: true,
       message: null,
-      exportName: 'trails.kml',
+      exportName: 'trails',
     };
     this.changeFile = this.changeFile.bind(this);
     this.importFile = this.importFile.bind(this);
