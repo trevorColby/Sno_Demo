@@ -368,7 +368,7 @@ class ImportExport extends React.Component {
                       id="file-upload"
                     />
                     <Input
-                      value={ selectedFiles? selectedFiles[0].name : "" }
+                      value={ selectedFiles && selectedFiles[0] ? selectedFiles[0].name : "" }
                     />
                     <label htmlFor="file-upload">
                       <Button
