@@ -102,6 +102,8 @@ class ImportExport extends React.Component {
     //Format is TrailName, hydrantIndex, hydrantName
      if (feature.get('description') && feature.get('description').split(',').length == 3){
        [trailName, hydrantIndex, name]  = feature.get('description').split(',');
+       //Make Sure there are no hyphens in the name that gets included w/ the ID
+        name = name.split('-').join('_')
         id = index + name;
      } else {
         id = new Date().getTime() + index
