@@ -138,8 +138,9 @@ class ImportExport extends React.Component {
         const kml = new KML().readFeatures(event.target.result);
         const newTrails = {};
         const newHydrants = {};
+        let type;
         _.each(kml, (feature, index) => {
-          const type = feature.getGeometry().getType() === 'Polygon' ? 'trail' : 'hydrant';
+          type = feature.getGeometry().getType() === 'Polygon' ? 'trail' : 'hydrant';
           if (type === 'trail') {
             let trail = processTrail(feature, index);
             const existing = newTrails[trail.get('name')];
@@ -169,13 +170,13 @@ class ImportExport extends React.Component {
         const newTrailSize = Object.keys(newTrails).length;
         const newHydrantSize = Object.keys(newHydrants).length;
 
-        if (newTrailSize) {
+        if (type == 'trail') {
           this.setState({
             message: `${newTrailSize} new Trails imported!`
           })
         }
 
-        if (newHydrantSize) {
+        if (type == 'hydrant') {
           this.setState({
             message: `${newHydrantSize} new Hydrants imported!`
           })
@@ -185,6 +186,8 @@ class ImportExport extends React.Component {
           trails: Immutable.Map(newTrails).map(t => convertTrailFeaturesToDonuts(t)),
           hydrants:  Immutable.Map(newHydrants),
         });
+
+        this.setState({selectedFiles: null})
       } catch (err) {
         // Put error wherever we want to display error msgs.
         console.log(err);
