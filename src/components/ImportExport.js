@@ -1,30 +1,32 @@
 import React from 'react';
-import { Button } from 'material-ui';
 import KML from 'ol/format/kml';
 import GeoJSON from 'ol/format/geojson';
 import _ from 'lodash';
-import { withStyles } from 'material-ui/styles';
 import Immutable from 'immutable';
 import Projection from 'ol/proj';
 import MultiPolygon from 'ol/geom/multipolygon';
-import Dialog, { DialogTitle } from 'material-ui/Dialog';
-import Divider from 'material-ui/Divider';
-import List, { ListItem, ListItemText } from 'material-ui/List';
-import Radio from 'material-ui/Radio';
-import { FormGroup, FormControl, FormControlLabel,FormLabel, FormHelperText } from 'material-ui/Form';
 import downloadjs from 'downloadjs';
-import Tooltip from 'material-ui/Tooltip';
 import { getMapStyle, convertTrailFeaturesToDonuts } from '../utils/mapUtils';
 import { hexToRgb } from '../utils/convertToRGB'
 import { Trail, Hydrant } from '../utils/records';
-import Select from 'material-ui/Select';
-import { MenuItem } from 'material-ui/Menu';
-import Typography from 'material-ui/Typography';
-import {IconButton, InputLabel, Input} from 'material-ui';
-import FileUpload from '@material-ui/icons/FileUpload';
 import OperationMessage from './OperationMessage';
+
+//Material-Ui
+import { withStyles } from '@material-ui/core/styles';
+import Dialog from '@material-ui/core/Dialog';
+import DialogTitle from '@material-ui/core/DialogTitle';
+import { FormGroup, FormControl, FormControlLabel,FormLabel, FormHelperText } from '@material-ui/core';
+import Select from '@material-ui/core/Select';
+import MenuItem from '@material-ui/core/MenuItem';
+import Typography from '@material-ui/core/Typography';
+import IconButton from '@material-ui/core/IconButton';
+import InputLabel from '@material-ui/core/InputLabel';
+import Input from '@material-ui/core/Input';
+import FileUpload from '@material-ui/icons/FileUpload';
 import Checkbox from '@material-ui/core/Checkbox';
 import Grid from '@material-ui/core/Grid';
+import Button from '@material-ui/core/Button';
+
 
 
 
@@ -352,7 +354,6 @@ class ImportExport extends React.Component {
          />
 
         <Dialog onBackdropClick={() => setImportExportOpen(false)} open={importExportOpen} >
-
           <DialogTitle >Import Export</DialogTitle>
           <Grid container>
             <Grid item xs={12}>
@@ -404,6 +405,7 @@ class ImportExport extends React.Component {
                     <MenuItem value={'trails'}>Trails</MenuItem>
                     <MenuItem value={'hydrants'}>Hydrants</MenuItem>
                   </Select>
+
                   <FormHelperText> Layer </FormHelperText>
 
                   <Select
@@ -448,99 +450,10 @@ class ImportExport extends React.Component {
               </Grid>
             </FormControl>
           </Grid>
-
-          <Divider />
         </Dialog>
       </div>
     );
   }
 }
-
-// <List>
-//   <ListItem divider>
-//     <ListItemText primary="Import" />
-//
-//     <div style={{width: '100%', paddingLeft: 10}}>
-//       <input
-//         className={classes.input}
-//         onChange={this.importFile}
-//         type="file" accept=".kml"
-//         id="file-upload"
-//       />
-//       <Input
-//         value={ selectedFiles? selectedFiles[0].name : "" }
-//       />
-//       <label htmlFor="file-upload">
-//         <Button
-//           component="span"
-//           color="primary"
-//           variant="raised"
-//           variant="fab"
-//           mini
-//         >
-//           <FileUpload />
-//         </Button>
-//       </label>
-//     </div>
-//   </ListItem>
-//
-//   <ListItem>
-//    <ListItemText primary="Export" />
-//     <div style={{ paddingRight: 35 }}>
-//
-//       <FormControl className={classes.formControl}>
-//         <Select
-//           value={this.state.selectedExport}
-//           onChange={(e)=> { this.setState({ selectedExport: e.target.value })}}
-//         >
-//           <MenuItem value={'trails'}>Trails</MenuItem>
-//           <MenuItem value={'hydrants'}>Hydrants</MenuItem>
-//         </Select>
-//         <FormHelperText> Layer </FormHelperText>
-//       </FormControl>
-//
-//
-//       <FormControl className={classes.formControl}>
-//         <Select
-//           value={this.state.exportType}
-//           onChange={(e)=> { this.setState({ exportType: e.target.value })}}
-//         >
-//           <MenuItem value={'KML'}>KML</MenuItem>
-//           <MenuItem value={'GJ'}>GeoJson</MenuItem>
-//         </Select>
-//         <FormHelperText> Format </FormHelperText>
-//         </FormControl>
-//
-//         {
-//           selectedExport === 'hydrants' ? (
-//             <FormControlLabel
-//               control={
-//                 <Checkbox
-//                   checked={this.state.excludeOrphans}
-//                   onChange={()=> {this.setState({excludeOrphans: !this.state.excludeOrphans})}}
-//                   color="primary"
-//                 />
-//               }
-//               label='Exclude Orphans'
-//             />
-//           ) : (null)
-//         }
-//
-//
-//
-//
-//       </div>
-//       <Button variant="raised" color='primary'onClick={this.exportFile} > Export </Button>
-//   </ListItem>
-//
-//   <Button
-//     style={{float: 'right', marginRight: 24}}
-//     variant="raised"
-//     color='primary'
-//     onClick={this.generateCSV}
-//   >
-//   Download Hydrants Table
-//   </Button>
-// </List>
 
 export default withStyles(styles)(ImportExport);

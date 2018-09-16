@@ -4,9 +4,12 @@ import 'typeface-roboto';
 import 'react-select/dist/react-select.css';
 import './App.css';
 import Container from './components/Container';
-import CssBaseline from 'material-ui/CssBaseline';
-import { createMuiTheme, MuiThemeProvider } from 'material-ui/styles';
-import blue from 'material-ui/colors/blue';
+import CssBaseline from '@material-ui/core/CssBaseline';
+// import { createMuiTheme, MuiThemeProvider } from 'material-ui/styles';
+// import blue from 'material-ui/colors/blue';
+
+import { createMuiTheme, MuiThemeProvider } from '@material-ui/core/styles';
+import blue from '@material-ui/core/colors/blue';
 
 const theme = createMuiTheme({
   palette: {
