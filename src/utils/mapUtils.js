@@ -20,8 +20,12 @@ export function getMapStyle(feature, resolution) {
     const ORPHAN_COLOR = 'rgba(255, 0, 0, 0.56)';
     const DEFAULT_COLOR = 'rgba(63, 249, 132, 0.56)';
 
+    let fillColor = feature.get('orphan') ? ORPHAN_COLOR : DEFAULT_COLOR
+    // if (feature.get('orphan') && feature.get('selected')){
+    //   fillColor = HIGHLIGHT_COLOR
+    // }
 
-    const fill = new Fill({ color: feature.get('orphan') ? ORPHAN_COLOR : DEFAULT_COLOR });
+    let fill = new Fill({ color: fillColor });
 
 
     const stroke = new Stroke({

@@ -18,7 +18,7 @@ class ManualAssociateHydrantsForm extends React.Component {
     const {closeManualAssignment, focusedHydrant, manualAssignmentItems} = this.props;
     const feature = manualAssignmentItems.getIn([focusedHydrant, 'feature']);
     if (feature) {
-      feature.unset('highlighted');
+      feature.unset('selected');
       feature.changed();
     }
     closeManualAssignment();
@@ -34,7 +34,7 @@ class ManualAssociateHydrantsForm extends React.Component {
     const { dataImported } = this.props;
     const { hydrants } = this.state;
     const id = hydrant.get('id');
-    hydrant.feature.unset('highlighted');
+    hydrant.feature.unset('selected');
     hydrant.feature.changed();
 
     this.setState({ hydrants: hydrants.delete(id) });
@@ -55,13 +55,13 @@ class ManualAssociateHydrantsForm extends React.Component {
     const { hydrants } = this.state;
     const { focusHydrant, focusedHydrant } = this.props;
     const newFeature = hydrants.getIn([id, 'feature']);
-    newFeature.set('highlighted', true);
+    newFeature.set('selected', true);
     newFeature.changed();
     focusHydrant(id);
   }
 
   hydrantExited = (hydrant) => {
-    hydrant.feature.unset('highlighted');
+    hydrant.feature.unset('selected');
     hydrant.feature.changed();
   }
 
@@ -93,13 +93,17 @@ class ManualAssociateHydrantsForm extends React.Component {
   }
 
   componentDidUpdate(){
-    const { hydrants } = this.state;
+    let { hydrants } = this.state;
+    hydrants = hydrants.sortBy( h => h.get('trail'))
     this.hydrantHovered(hydrants.first().get('id'));
   }
 
   render() {
     const { dataImported, trails } = this.props;
-    const { hydrants } = this.state;
+    let { hydrants } = this.state;
+    hydrants = hydrants.sortBy( h => h.get('trail'))
+
+
     const trailMenuItems = trails.valueSeq()
       .sort((a, b) => a.get('name') > b.get('name'))
       .map((trail) => {
@@ -108,7 +112,6 @@ class ManualAssociateHydrantsForm extends React.Component {
         return { value: id, label: name };
       });
     const limit_to = 10;
-
 
     return (
       <div>
@@ -123,6 +126,7 @@ class ManualAssociateHydrantsForm extends React.Component {
             title="Confirm Hydrant Assignments"
             />
         {hydrants
+          .sortBy( h => h.trail )
           .valueSeq()
           .take(limit_to)
           .map((h, i) => this.renderHydrantItem(h, i, trailMenuItems))
