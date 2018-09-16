@@ -389,7 +389,6 @@ class ImportExport extends React.Component {
 
             <FormLabel> Export </FormLabel>
             <FormControl fullWidth className={classes.formControl}>
-              <Grid style={{marginTop:15}} item xs={6} >
                   <Select
                     value={this.state.selectedExport}
                     onChange={(e)=> { this.setState({
@@ -410,7 +409,6 @@ class ImportExport extends React.Component {
                     <MenuItem value={'GJ'}>GeoJson</MenuItem>
                   </Select>
                   <FormHelperText> Format </FormHelperText>
-              </Grid>
 
               <Grid style={{marginTop:15}} item xs={6}>
                 <FormControl>
