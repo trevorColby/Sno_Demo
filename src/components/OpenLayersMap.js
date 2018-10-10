@@ -5,8 +5,10 @@ import View from 'ol/view';
 import GeometryCollection from 'ol/geom/geometrycollection';
 import Collection from 'ol/collection';
 import TileLayer from 'ol/layer/tile';
+// import TileImage from 'ol/source/image';
 import LayerVector from 'ol/layer/vector';
 import BingMaps from 'ol/source/bingmaps';
+import TileImage from 'ol/source/tileimage';
 import Projection from 'ol/proj';
 import SourceVector from 'ol/source/vector';
 import Draw from 'ol/interaction/draw';
@@ -21,7 +23,8 @@ import { FormControl, RadioGroup, Radio, FormControlLabel, Typography} from 'mat
 
 const layerOptions = ['Road',
   'Aerial',
-  'AerialWithLabels'
+  'AerialWithLabels',
+  'Google'
 ]
 
 const controlBoxStyle = {
@@ -52,16 +55,18 @@ class OpenLayersMap extends React.Component {
 
   switchLayers = (e) => {
     const {mapLayers} = this.state;
-    const selected = e.target.value
+    const selected = e.target.value;
 
     _.each(mapLayers, (layer, index) => {
+      // Set True if selected == layeroptions index
+      console.log(selected === layerOptions[index], layer)
       layer.setVisible(selected === layerOptions[index] || layer.type === "VECTOR")
-      console.log(layer)
     })
+
 
     this.setState({
       currentLayer: selected
-    })
+    });
   }
 
   deleteLastLine = ()=> {
@@ -181,30 +186,27 @@ class OpenLayersMap extends React.Component {
     const { hydrantSelected } = this.props;
 
     const layers = _.map(layerOptions, l => {
-        return new TileLayer({
-          visible: false,
-          preload: Infinity,
-          source: new BingMaps({
+        if (l !== 'Google') {
+          return new TileLayer({
             visible: false,
-            hidpi: false,
-            key: 'ApcR8_wnFxnsXwuY_W2mPQuMb-QB0Kg-My65RJYZL2g9fN6NCFA8-s0lsvxTTs2G',
-            imagerySet: l,
-            maxZoom: 19,
-          }),
-        })
+            preload: Infinity,
+            source: new BingMaps({
+              visible: false,
+              hidpi: false,
+              key: 'ApcR8_wnFxnsXwuY_W2mPQuMb-QB0Kg-My65RJYZL2g9fN6NCFA8-s0lsvxTTs2G',
+              imagerySet: l,
+              maxZoom: 19,
+            }),
+          })
+        } else {
+          return new TileLayer({
+                visible: false,
+                preload: Infinity,
+                source: new TileImage({url: 'http://mt1.google.com/vt/lyrs=s&hl=pl&&x={x}&y={y}&z={z}'})
+              });
+        }
       })
 
-    //   const bingMapsLayer = new TileLayer({
-    //   visible: true,
-    //   preload: Infinity,
-    //   source: new BingMaps({
-    //     visible: false,
-    //     hidpi: false,
-    //     key: 'ApcR8_wnFxnsXwuY_W2mPQuMb-QB0Kg-My65RJYZL2g9fN6NCFA8-s0lsvxTTs2G',
-    //     imagerySet: 'Aerial',
-    //     maxZoom: 19,
-    //   }),
-    // });
 
     const resortLayer = new LayerVector({
       source,
