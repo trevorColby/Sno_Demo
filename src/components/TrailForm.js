@@ -49,6 +49,10 @@ const styles = theme => ({
   },
   mini: {
     boxShadow: '0px -1px 6px 6px rgba(0, 0, 0, 0.29), 0px 6px 10px 0px rgba(0, 0, 0, 0.14), 0px 1px 18px 0px rgba(0, 0, 0, 0.12)'
+  },
+  raisedPrimary: {
+    backgroundColor: '#ff0000',
+    color: '#fff'
   }
 });
 
@@ -107,7 +111,7 @@ class TrailForm extends React.Component {
       feature.set('highlighted', true)
       feature.changed()
     }
-    
+
     const unhighlightFeature = (feature) => {
       feature.unset('highlighted')
       feature.changed()
@@ -184,9 +188,9 @@ class TrailForm extends React.Component {
             </List>
 
             <Button
+              className={classes.raisedPrimary}
               fullWidth
               style={{ marginTop: 10 }}
-              color="secondary"
               variant="raised"
               onClick={() => { this.toggleConfirmation(true)}}
             > Delete Trail
@@ -202,7 +206,7 @@ class TrailForm extends React.Component {
           <DialogContent>
             <DialogContentText>
                You are about to delete a trail. Deleting a trail will remove
-               the trail polygon features and dissascociate the hydrants currently assigned.
+               the trail polygon features and unassociate the currently assigned hydrants.
             </DialogContentText>
           </DialogContent>
 

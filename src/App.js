@@ -24,7 +24,7 @@ const theme = createMuiTheme({
       main: '#eeeeee',
       dark: '#bcbcbc',
       contrastText: '#000',
-    },
+    }
   }
 });
 

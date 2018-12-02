@@ -10,6 +10,7 @@ import _ from 'lodash';
 import { getElevations } from '../utils/bulkUpdateUtils';
 import {Button} from 'material-ui';
 import OperationMessage from './OperationMessage';
+import Grid from '@material-ui/core/Grid';
 
 
 const styles = theme => ({
@@ -77,17 +78,20 @@ class HydrantListItem extends React.Component {
           onMouseEnter={() => this.toggleHighLight(hydrant.get('feature'), true)}
           className={classes.root}
         >
-
-          <Input
-            onBlur={(e) => { modifyHydrant(hydrant.get('id'), { name: e.target.value })}}
-            onChange={(e) => { this.setState({ name: e.target.value }); }}
-            value={name}
-            placeholder="Enter Hydrant Name"
-          />
-
-          <Delete onClick={()=> { hydrantDeleted((hydrant.get('id'))); }} />
-          <ModeEdit onClick={() => this.setState({ showDetails: !showDetails })} />
-
+          <Grid container spacing={24}>
+            <Grid item xs={8}>
+              <Input
+                onBlur={(e) => { modifyHydrant(hydrant.get('id'), { name: e.target.value })}}
+                onChange={(e) => { this.setState({ name: e.target.value }); }}
+                value={name}
+                placeholder="Enter Hydrant Name"
+              />
+            </Grid>
+            <Grid item xs={4}>
+              <Delete onClick={()=> { hydrantDeleted((hydrant.get('id'))); }} />
+              <ModeEdit onClick={() => this.setState({ showDetails: !showDetails })} />
+            </Grid>
+          </Grid>
           <Collapse
             style={{ padding: 20 }}
             in={showDetails}
