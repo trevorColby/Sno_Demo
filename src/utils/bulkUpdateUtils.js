@@ -33,7 +33,7 @@ export function autonameHydrants(trail, prefix) {
 
   const { hydrants } = store.getState().hydrants
     const trailHydrants = hydrants.filter(h => h.get('trail') === trail)
-    const sortedHydrants = trailHydrants.toList().sort((h1, h2) => h1.get('elevation') - h2.get('elevation'));
+    const sortedHydrants = trailHydrants.toList().sort((h1, h2) => h2.get('elevation') - h1.get('elevation'));
     const newHydrants = trailHydrants.map((h) => {
         const elevationIndex = sortedHydrants.indexOf(h);
         return h.set('name', prefix + (elevationIndex + 1));
