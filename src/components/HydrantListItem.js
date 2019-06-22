@@ -78,18 +78,22 @@ class HydrantListItem extends React.Component {
           onMouseEnter={() => this.toggleHighLight(hydrant.get('feature'), true)}
           className={classes.root}
         >
-          <Grid container spacing={24}>
+          <Grid container>
             <Grid item xs={8}>
-              <Input
-                onBlur={(e) => { modifyHydrant(hydrant.get('id'), { name: e.target.value })}}
-                onChange={(e) => { this.setState({ name: e.target.value }); }}
-                value={name}
-                placeholder="Enter Hydrant Name"
-              />
+              <FormControl fullWidth>
+                <Input
+                  onBlur={(e) => { modifyHydrant(hydrant.get('id'), { name: e.target.value })}}
+                  onChange={(e) => { this.setState({ name: e.target.value }); }}
+                  value={name}
+                  placeholder="Enter Hydrant Name"
+                />
+              </FormControl>
             </Grid>
-            <Grid item xs={4}>
-              <Delete onClick={()=> { hydrantDeleted((hydrant.get('id'))); }} />
+            <Grid item xs={2}>
               <ModeEdit onClick={() => this.setState({ showDetails: !showDetails })} />
+            </Grid>
+            <Grid item xs={2}>
+              <Delete onClick={() => { hydrantDeleted((hydrant.get('id'))); }} />
             </Grid>
           </Grid>
           <Collapse
