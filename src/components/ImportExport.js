@@ -284,7 +284,9 @@ class ImportExport extends React.Component {
 
   generateCSV = () => {
     const { hydrants, trails } = this.props;
-    const hydrantsRows = this.state.useLegacyCSV ? legacyCsvHeaders : csvHeaders;
+    const hydrantsRows = [];
+    // Header Row Depends on whether we're exporting in legacy format or not
+    hydrantsRows.push(this.state.useLegacyCSV ? [legacyCsvHeaders] : [csvHeaders]);
 
     trails.keySeq().forEach((trailId) => {
       const trail = trails.get(trailId)
@@ -331,7 +333,6 @@ class ImportExport extends React.Component {
 
     const lineArray = []
     hydrantsRows.forEach((r, i) => {
-      console.log(r)
       const line = r.join(",")
       lineArray.push(i === 0 ? "data:text/csv;charset=utf-8," + line : line)
     });
