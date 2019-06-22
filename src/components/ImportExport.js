@@ -27,7 +27,12 @@ import Checkbox from '@material-ui/core/Checkbox';
 import Grid from '@material-ui/core/Grid';
 import TextField from '@material-ui/core/TextField';
 import Button from '@material-ui/core/Button';
+import {Tooltip} from 'material-ui';
 
+const csvHeaders = ['Trail_Name', 'Hyd_ID', 'Hyd_Elevation'];
+const legacyCsvHeaders = ['Trail_Name', 'Hyd_Index', 'Hyd_ID', 'Hyd_State', 'Hyd_Hours',
+'Hyd_Gun', 'Hyd_Gpm', 'Hyd_Notes', 'Hyd_Elevation',
+'Hyd_Target_Gallons', 'Hyd_Total_Gallons', 'Hyd_Cfm', 'Hyd_Pressure_Zone'];
 
 const styles = theme => ({
   formControl: {
@@ -49,6 +54,7 @@ class ImportExport extends React.Component {
       excludeOrphans: true,
       message: null,
       exportName: 'trails',
+      useLegacyCSV: false,
     };
     this.changeFile = this.changeFile.bind(this);
     this.importFile = this.importFile.bind(this);
@@ -97,7 +103,7 @@ class ImportExport extends React.Component {
       return new Trail({ name, features: [feature], fillColor });
     }
 
-   function processHydrant(feature, index) {
+    function processHydrant(feature, index) {
     let trailName, hydrantIndex, name, id
     //Format is TrailName, hydrantIndex, hydrantName
      if (feature.get('description') && feature.get('description').split(',').length == 3){
@@ -278,11 +284,8 @@ class ImportExport extends React.Component {
 
   generateCSV = () => {
     const { hydrants, trails } = this.props;
-    const hydrantsRows = [
-      ['Trail_Name', 'Hyd_Index', 'Hyd_ID', 'Hyd_State', 'Hyd_Hours',
-      'Hyd_Gun', 'Hyd_Gpm', 'Hyd_Notes', 'Hyd_Elevation',
-      'Hyd_Target_Gallons', 'Hyd_Total_Gallons', 'Hyd_Cfm', 'Hyd_Pressure_Zone']
-    ]
+    const hydrantsRows = this.state.useLegacyCSV ? legacyCsvHeaders : csvHeaders;
+
     trails.keySeq().forEach((trailId) => {
       const trail = trails.get(trailId)
 
@@ -291,8 +294,6 @@ class ImportExport extends React.Component {
       if (trail.get('features')[0]) {
         trailName = trail.get('features')[0].get('originalTrailName') ? trail.get('features')[0].get('originalTrailName') : trailName
       }
-
-      const testHydrants = hydrants.toJS()
 
       const trailHydrants = _
         .chain(hydrants.toJS())
@@ -305,23 +306,32 @@ class ImportExport extends React.Component {
         })
         .value();
 
-
-      for (let i = 0; i < 100; i += 1) {
-        let hydId = i + 1
-        let elevation = 0
-        if (trailHydrants[i]) {
-          hydId = trailHydrants[i].name
-          elevation = trailHydrants[i].elevation
+        if (this.state.useLegacyCSV) {
+          for (let i = 0; i < 100; i += 1) {
+            let hydId = i + 1
+            let elevation = 0
+            if (trailHydrants[i]) {
+              hydId = trailHydrants[i].name
+              elevation = trailHydrants[i].elevation
+            }
+            hydrantsRows.push([
+              trailName, i + 1, hydId, 0, 0,
+              'None', 0, 'None', elevation, 0,
+              0, 0, 'None',
+            ]);
+          }
+        } else {
+          trailHydrants.forEach((hydrant) => {
+            hydrantsRows.push([
+              trailName, hydrant.name, hydrant.elevation || 0
+            ])
+          })
         }
-        hydrantsRows.push([
-          trailName, i + 1, hydId, 0, 0,
-          'None', 0, 'None', elevation, 0,
-          0, 0, 'None',
-        ]);
-      }
     });
+
     const lineArray = []
     hydrantsRows.forEach((r, i) => {
+      console.log(r)
       const line = r.join(",")
       lineArray.push(i === 0 ? "data:text/csv;charset=utf-8," + line : line)
     });
@@ -330,7 +340,6 @@ class ImportExport extends React.Component {
     // window.location.assign(encodedUri);
     downloadjs(encodedUri, `Hydrants_Table.csv`);
   }
-
 
   handleSelect = (event) => {
     this.setState({
@@ -448,7 +457,15 @@ class ImportExport extends React.Component {
                      onClick={this.generateCSV}
                    >
                    Download Hydrants CSV
-                 </Button>
+                  </Button>
+                  <Tooltip title="Use Legacy CSV Format"
+                    >
+                    <Checkbox
+                      checked={this.state.useLegacyCSV}
+                      onChange={()=> {this.setState({useLegacyCSV: !this.state.useLegacyCSV})}}
+                      color="primary"
+                    />
+                  </Tooltip>
                 </Grid>
           </Grid>
         </Dialog>
