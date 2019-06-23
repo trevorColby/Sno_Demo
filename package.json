@@ -24,7 +24,7 @@
     "redux": "^3.7.2",
     "typeface-roboto": "0.0.54"
   },
-  "homepage": "https://jolavb.github.io/Sno_Demo",
+  "homepage": "https://snomatic.github.io/Sno_Demo/",
   "scripts": {
     "start": "react-scripts start",
     "build": "react-scripts build",
