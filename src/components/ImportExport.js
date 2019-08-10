@@ -69,15 +69,23 @@ class ImportExport extends React.Component {
   importFile = () => {
     const { selectedFiles } = this.state;
     const { importKMLClicked, trails, hydrants } = this.props;
-   function processTrail(feature, index) {
+    function processTrail(feature, index) {
       // let [name, ...otherThings] = feature.get('description').split(',') ;
       let name;
 
-      if(feature.get('description')){
-        name = feature.get('description').split(',')[0] ;
-      } else {
+
+      // if the feature already has a name, use that if not/derive it from description
+
+      if (feature.get('name')) {
         name = feature.get('name')
+      } else {
+        name = feature.get('description').split(',')[0] ;
       }
+      // if (feature.get('description')){
+      //   name = feature.get('description').split(',')[0] ;
+      // } else {
+      //   name = feature.get('name')
+      // }
 
       const originalTrailName = name
       name = _.words(name).join(' ');
@@ -121,9 +129,8 @@ class ImportExport extends React.Component {
        name = feature.get('name')
      }
 
-
       const originalTrailName = name
-      trailName = _.words(trailName).join(' ');
+    trailName = _.words(trailName).join(' ');
       const trailObj = trails.find(t => t.get('name') === trailName);
       const trailId = trailObj ? trailObj.get('id') : null;
       const geometry = feature.getGeometry().getType() === 'Point' ?
@@ -147,6 +154,8 @@ class ImportExport extends React.Component {
         const newTrails = {};
         const newHydrants = {};
         let type;
+        // For Each Kml Feature determine type and call
+        // corresponding process function
         _.each(kml, (feature, index) => {
           type = feature.getGeometry().getType() === 'Polygon' ? 'trail' : 'hydrant';
           if (type === 'trail') {
@@ -168,7 +177,7 @@ class ImportExport extends React.Component {
             const hydrant = processHydrant(feature, index);
 
             //Only Allow Hydrants With ids
-            if(hydrant.get('id')){
+            if (hydrant.get('id')){
               newHydrants[hydrant.get('id')] = hydrant;
             }
 
@@ -225,17 +234,14 @@ class ImportExport extends React.Component {
            hydrantFeatures.push(feature)
         })
     }
-
-
     trails
       .sortBy((a) => a.get('name'))
       .valueSeq()
       .forEach((v, trailIndex) => {
-
       let trailName = v.get('name').split(' ').join('_')
       // Iterate through Trail's Features
       v.get('features').forEach((f, fIndex) => {
-        if (f.get('originalTrailName')) {
+        if (f.get('originalTrailName') && !trailName) {
           trailName = f.get('originalTrailName')
         }
         const description = `${trailName},${trailIndex + fIndex + 1}`
@@ -260,12 +266,7 @@ class ImportExport extends React.Component {
            feature.unset('selected')
            hydrantFeatures.push(feature)
          })
-
-
     })
-
-
-
 
     const ext = exportType === 'GJ' ? 'json' : 'kml';
 

@@ -6,6 +6,7 @@ import ActionTypes from '../redux/ActionTypes';
 import store from '../redux/store';
 
 const { DATA_IMPORTED } = ActionTypes;
+const STATUS_NO_DATA = 601;
 
 export function getElevations() {
   const { hydrants } = store.getState().hydrants;
@@ -15,6 +16,9 @@ export function getElevations() {
     const coords = _.map(needsElevation, h => _.clone(h.get('coords')).reverse());
     return mapquestApi.fetchElevationForCoords(coords)
       .then((resp) => {
+        if (resp.info.statuscode === STATUS_NO_DATA) {
+          return Promise.resolve(resp.info.message[0])
+        };
         const updatedHydrants = _.filter(_.map(needsElevation, (h, index) => {
           return h.set('elevation', resp[index].elevation);
         }), h => h.get('elevation'));

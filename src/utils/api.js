@@ -20,6 +20,7 @@ export const mapquestApi = {
       });
     });
     return axios.all(promises).then(allResp => {
+      console.log(allResp)
       // make array of {lat, lon, elevation} objects from
       // promise responses if they all succeed
       if (_.reduce(allResp, (failedRequest, resp) => failedRequest || resp.status !== 200, false)) {
