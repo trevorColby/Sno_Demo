@@ -3,6 +3,7 @@ import axios from 'axios';
 
 const JAWG_ACCESS_TOKEN = 's7iSO998IpSBA2Ktgs541UXt2WcXt30qIHBRDzd2aQWOGLCFEJszM5tU6fHBtjYJ'
 const CORS_PROXY = 'https://cors-anywhere.herokuapp.com/'
+const FEET_PER_METER = 3.280839895
 
 export const mapquestApi = {
   fetchElevationForCoords: (coordsArray) => {
@@ -46,20 +47,28 @@ export const mapquestApi = {
 }
 
 
+function delay(t, v) {
+   return new Promise(function(resolve) {
+       setTimeout(resolve.bind(null, v), t)
+   });
+}
+
 export const jawgAPI = {
   fetchElevationForCoords: (coordsArray) => {
     // args: [[lat, lon]. [lat, lon], ...]
     // return: [{lat, lon, elevation}, {lat, lon, elevation}, ...]
     // split up coordinates into chunks so the URI isn't too long
-    const coordsChunks = _.chunk(coordsArray, 500);
-    const promises = _.map(coordsChunks, (coords) => {
-      const jawgUri = process.env.NODE_ENV === 'production' ? 'https://api.jawg.io/elevations' : `${CORS_PROXY}https://api.jawg.io/elevations`;
-      return axios.get(jawgUri, {
-        params: {
-          'access-token': JAWG_ACCESS_TOKEN,
-          locations: coords.join('|'),
-        },
-      });
+    const coordsChunks = _.chunk(coordsArray, 100);
+    const promises = _.map(coordsChunks, (coords, index) => {
+      // Set the delays so that promises get resolved 2 seconds apart
+      return delay(index * 2000).then(() => {
+          return axios.get(`${CORS_PROXY}https://api.jawg.io/elevations`, {
+                  params: {
+                    'access-token': JAWG_ACCESS_TOKEN,
+                    locations: coords.join('|'),
+                  },
+                })
+      })
     });
     return axios.all(promises).then((allResp) => {
       // make array of {lat, lon, elevation} objects from
@@ -70,7 +79,7 @@ export const jawgAPI = {
       }
       const mappedResponses = _.map(allResp, resp => {
         return _.map(resp.data, (pt) => {
-          const { elevation } = pt;
+          const  elevation  = (pt.elevation * FEET_PER_METER);
           const latitude = pt.location.lat;
           const longitude = pt.location.lng;
           return { elevation, latitude, longitude };
