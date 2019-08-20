@@ -1,7 +1,7 @@
 import Immutable from 'immutable';
 import _ from 'lodash';
 import SourceVector from 'ol/source/vector';
-import { mapquestApi } from './api';
+import { mapquestApi, jawgAPI } from './api';
 import ActionTypes from '../redux/ActionTypes';
 import store from '../redux/store';
 
@@ -14,11 +14,8 @@ export function getElevations() {
   const needsElevation = hydrants.filter(h => !h.get('elevation')).toArray();
   if (needsElevation.length) {
     const coords = _.map(needsElevation, h => _.clone(h.get('coords')).reverse());
-    return mapquestApi.fetchElevationForCoords(coords)
+    return jawgAPI.fetchElevationForCoords(coords)
       .then((resp) => {
-        if (resp.info.statuscode === STATUS_NO_DATA) {
-          return Promise.resolve(resp.info.message[0])
-        };
         const updatedHydrants = _.filter(_.map(needsElevation, (h, index) => {
           return h.set('elevation', resp[index].elevation);
         }), h => h.get('elevation'));

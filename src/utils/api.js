@@ -1,6 +1,9 @@
 import _ from 'lodash';
 import axios from 'axios';
 
+const JAWG_ACCESS_TOKEN = 's7iSO998IpSBA2Ktgs541UXt2WcXt30qIHBRDzd2aQWOGLCFEJszM5tU6fHBtjYJ'
+const CORS_PROXY = 'https://cors-anywhere.herokuapp.com/'
+
 export const mapquestApi = {
   fetchElevationForCoords: (coordsArray) => {
     // args: [[lat, lon]. [lat, lon], ...]
@@ -34,6 +37,42 @@ export const mapquestApi = {
           const elevation = pt.height === -32768 ? null : pt.height;
           const latitude = resp.data.shapePoints[index*2];
           const longitude = resp.data.shapePoints[index*2 + 1];
+          return { elevation, latitude, longitude };
+        });
+      });
+      return _.flatten(mappedResponses);
+    });
+  }
+}
+
+
+export const jawgAPI = {
+  fetchElevationForCoords: (coordsArray) => {
+    // args: [[lat, lon]. [lat, lon], ...]
+    // return: [{lat, lon, elevation}, {lat, lon, elevation}, ...]
+    // split up coordinates into chunks so the URI isn't too long
+    const coordsChunks = _.chunk(coordsArray, 500);
+    const promises = _.map(coordsChunks, (coords) => {
+      const jawgUri = process.env.NODE_ENV === 'production' ? 'https://api.jawg.io/elevations' : `${CORS_PROXY}https://api.jawg.io/elevations`;
+      return axios.get(jawgUri, {
+        params: {
+          'access-token': JAWG_ACCESS_TOKEN,
+          locations: coords.join('|'),
+        },
+      });
+    });
+    return axios.all(promises).then((allResp) => {
+      // make array of {lat, lon, elevation} objects from
+      // promise responses if they all succeed
+      if (_.reduce(allResp, (failedRequest, resp) => failedRequest || resp.status !== 200, false)) {
+        console.log("At least one request failed. Problem! ");
+        return [];
+      }
+      const mappedResponses = _.map(allResp, resp => {
+        return _.map(resp.data, (pt) => {
+          const { elevation } = pt;
+          const latitude = pt.location.lat;
+          const longitude = pt.location.lng;
           return { elevation, latitude, longitude };
         });
       });
