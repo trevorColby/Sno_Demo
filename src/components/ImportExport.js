@@ -29,10 +29,10 @@ import TextField from '@material-ui/core/TextField';
 import Button from '@material-ui/core/Button';
 import {Tooltip} from 'material-ui';
 
-const csvHeaders = ['Trail_Name', 'Hyd_ID', 'Hyd_Elevation'];
+const csvHeaders = ['Trail_Name', 'Hyd_ID', 'Hyd_Elevation', 'Hyd_Longitude', 'Hyd_Latitude'];
 const legacyCsvHeaders = ['Trail_Name', 'Hyd_Index', 'Hyd_ID', 'Hyd_State', 'Hyd_Hours',
-'Hyd_Gun', 'Hyd_Gpm', 'Hyd_Notes', 'Hyd_Elevation',
-'Hyd_Target_Gallons', 'Hyd_Total_Gallons', 'Hyd_Cfm', 'Hyd_Pressure_Zone'];
+  'Hyd_Gun', 'Hyd_Gpm', 'Hyd_Notes', 'Hyd_Elevation',
+  'Hyd_Target_Gallons', 'Hyd_Total_Gallons', 'Hyd_Cfm', 'Hyd_Pressure_Zone', 'Hyd_Longitude', 'Hyd_Latitude'];
 
 const styles = theme => ({
   formControl: {
@@ -285,6 +285,7 @@ class ImportExport extends React.Component {
 
   generateCSV = () => {
     const { hydrants, trails } = this.props;
+    console.log(trails);
     const hydrantsRows = [];
     // Header Row Depends on whether we're exporting in legacy format or not
     hydrantsRows.push(this.state.useLegacyCSV ? [legacyCsvHeaders] : [csvHeaders]);
@@ -313,20 +314,28 @@ class ImportExport extends React.Component {
           for (let i = 0; i < 100; i += 1) {
             let hydId = i + 1
             let elevation = 0
+            let longitude = 0;
+            let latitude = 0;
             if (trailHydrants[i]) {
               hydId = trailHydrants[i].name
               elevation = trailHydrants[i].elevation
+              longitude = JSON.stringify(trailHydrants[i].coords[0] || [0, 0]);
+              latitude = JSON.stringify(trailHydrants[i].coords[1] || [0, 0]);
             }
             hydrantsRows.push([
               trailName, i + 1, hydId, 0, 0,
               'None', 0, 'None', elevation, 0,
-              0, 0, 'None',
+              0, 0, 'None', longitude, latitude
             ]);
           }
         } else {
           trailHydrants.forEach((hydrant) => {
             hydrantsRows.push([
-              trailName, hydrant.name, hydrant.elevation || 0
+              trailName, 
+              hydrant.name, 
+              hydrant.elevation || 0,
+              JSON.stringify(hydrant.coords[0] || 0),
+              JSON.stringify(hydrant.coords[1] || 0)  
             ])
           })
         }
