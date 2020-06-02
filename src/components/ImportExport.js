@@ -319,8 +319,8 @@ class ImportExport extends React.Component {
             if (trailHydrants[i]) {
               hydId = trailHydrants[i].name
               elevation = trailHydrants[i].elevation
-              longitude = JSON.stringify(trailHydrants[i].coords[0] || [0, 0]);
-              latitude = JSON.stringify(trailHydrants[i].coords[1] || [0, 0]);
+              longitude = JSON.stringify(trailHydrants[i].coords[0] || 0);
+              latitude = JSON.stringify(trailHydrants[i].coords[1] || 0);
             }
             hydrantsRows.push([
               trailName, i + 1, hydId, 0, 0,
