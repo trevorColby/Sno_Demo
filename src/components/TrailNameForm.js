@@ -1,5 +1,5 @@
 import React from 'react';
-import {Input} from 'material-ui';
+import {Input} from '@material-ui/core/';
 
 class TrailNameForm extends React.Component {
   constructor(props) {

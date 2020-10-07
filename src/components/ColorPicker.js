@@ -1,12 +1,12 @@
 import React from 'react';
 import { SketchPicker } from 'react-color';
 import { CompactPicker } from 'react-color';
-import { withStyles } from 'material-ui/styles';
-import Button from 'material-ui/Button';
-import { ListItem, ListItemText } from 'material-ui/List';
-import Collapse from 'material-ui/transitions/Collapse';
+import { withStyles } from '@material-ui/core/styles';
+import Button from '@material-ui/core/Button';
+import { ListItem, ListItemText } from '@material-ui/core/';
+import Collapse from '@material-ui/core/Collapse';
 import FiberManualRecord from '@material-ui/icons/FiberManualRecord';
-import { Icon } from 'material-ui';
+import { Icon } from '@material-ui/core/';
 
 
 const styles = theme => ({

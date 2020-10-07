@@ -7,7 +7,7 @@ import {
   Tooltip,
   IconButton,
   Typography
-} from 'material-ui';
+} from '@material-ui/core';
 import { getElevations, assignHydrantsToTrails, autonameHydrants } from '../utils/bulkUpdateUtils';
 import MergeType from '@material-ui/icons/MergeType';
 

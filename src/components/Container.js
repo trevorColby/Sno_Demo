@@ -7,7 +7,7 @@ import {
   withStyles,
   IconButton, Drawer, Button, Typography,
   Toolbar, AppBar, InputLabel, Grid
-} from 'material-ui';
+} from '@material-ui/core';
 import MenuIcon from '@material-ui/icons/Menu';
 import ChevronLeftIcon from '@material-ui/icons/ChevronLeft';
 import ChevronRightIcon from '@material-ui/icons/ChevronRight';
@@ -23,9 +23,9 @@ import AutoAssociate from './AutoAssociate';
 import ManualAssociateHydrantsForm from './ManualAssociateHydrantsForm';
 import OperationMessage from './OperationMessage';
 import TimeLine from '@material-ui/icons/Timeline';
-import Tooltip from 'material-ui/Tooltip';
+import Tooltip from '@material-ui/core/Tooltip';
 import AddLocation from '@material-ui/icons/AddLocation';
-import Card, { CardContent, CardHeader } from 'material-ui/Card';
+import { Card, CardContent, CardHeader } from '@material-ui/core/';
 import ImportExportIcon from '@material-ui/icons/ImportExport';
 import Refresh from '@material-ui/icons/Refresh';
 import { getElevations } from '../utils/bulkUpdateUtils'

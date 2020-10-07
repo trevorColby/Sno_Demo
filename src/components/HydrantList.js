@@ -1,19 +1,19 @@
 import React from 'react';
-import List, { ListItem, ListItemText } from 'material-ui/List';
+import { List, ListItem, ListItemText } from '@material-ui/core/';
 import Delete from '@material-ui/icons/Delete';
 import ExpandLess from '@material-ui/icons/ExpandLess';
 import ExpandMore from '@material-ui/icons/ExpandMore';
-import Collapse from 'material-ui/transitions/Collapse';
-import Input, { InputLabel } from 'material-ui/Input';
-import { withStyles } from 'material-ui/styles';
+import Collapse from '@material-ui/core/Collapse';
+import { Input, InputLabel } from '@material-ui/core/';
+import { withStyles } from '@material-ui/core/';
 import ModeEdit from '@material-ui/icons/ModeEdit';
-import { FormControl, FormHelperText } from 'material-ui/Form';
-import TextField from 'material-ui/TextField';
+import { FormControl, FormHelperText } from '@material-ui/core/';
+import TextField from '@material-ui/core/TextField';
 import _ from 'lodash';
 import HydrantListItem from './HydrantListItem';
-import Button from 'material-ui/Button';
+import Button from '@material-ui/core/Button';
 import Check from '@material-ui/icons/Check';
-import Tooltip from 'material-ui/Tooltip';
+import Tooltip from '@material-ui/core/Tooltip';
 import { autonameHydrants, getElevations } from '../utils/bulkUpdateUtils';
 import OperationMessage from './OperationMessage';
 

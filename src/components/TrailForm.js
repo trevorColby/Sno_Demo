@@ -1,18 +1,20 @@
 import React from 'react';
-import { withStyles } from 'material-ui/styles';
-import Card, { CardActions, CardContent } from 'material-ui/Card';
-import Button from 'material-ui/Button';
-import Typography from 'material-ui/Typography';
-import TextField from 'material-ui/TextField';
+import { withStyles } from '@material-ui/core/styles';
+import Card from '@material-ui/core/Card';
+import CardActions from '@material-ui/core/CardActions';
+import CardContent from '@material-ui/core/CardContent';
+import Button from '@material-ui/core/Button';
+import Typography from '@material-ui/core/Typography';
+import TextField from '@material-ui/core/TextField';
 import Delete from '@material-ui/icons/Delete';
-import Select from 'material-ui/Select';
-import { MenuItem } from 'material-ui/Menu';
-import { FormControl, FormHelperText } from 'material-ui/Form';
+import Select from '@material-ui/core/Select';
+import { MenuItem } from '@material-ui/core/Menu';
+import { FormControl, FormHelperText } from '@material-ui/core/';
 import _ from 'lodash';
-import Input, { InputLabel } from 'material-ui/Input';
-import Collapse from 'material-ui/transitions/Collapse';
-import { RadioGroup, Radio, FormLabel, FormControlLabel } from 'material-ui';
-import List, { ListItem, ListItemIcon, ListItemText } from 'material-ui/List';
+import {Input, InputLabel } from '@material-ui/core/';
+import Collapse from '@material-ui/core/Collapse';
+import { RadioGroup, Radio, FormLabel, FormControlLabel } from '@material-ui/core';
+import { List, ListItem, ListItemIcon, ListItemText } from '@material-ui/core/';
 import ExpandLess from '@material-ui/icons/ExpandLess';
 import ExpandMore from '@material-ui/icons/ExpandMore';
 import { SketchPicker } from 'react-color';
@@ -20,10 +22,10 @@ import { getMapStyle } from './../utils/mapUtils';
 import HydrantList from './HydrantList';
 import ColorPicker from './ColorPicker';
 import Close from '@material-ui/icons/Close';
-import Dialog, { DialogTitle,
+import { Dialog, DialogTitle,
   DialogActions,
   DialogContent,
-  DialogContentText } from 'material-ui/Dialog';
+  DialogContentText } from '@material-ui/core/';
 
 const styles = theme => ({
   root: {

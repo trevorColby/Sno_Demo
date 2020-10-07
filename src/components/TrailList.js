@@ -3,7 +3,7 @@ import _ from 'lodash';
 import {
   Icon, Table, TableBody,
   TableHead, TableCell,
-  TableRow, withStyles, Button } from 'material-ui';
+  TableRow, withStyles, Button } from '@material-ui/core';
 import TrailNameForm from './TrailNameForm';
 import ModeEdit from '@material-ui/icons/ModeEdit';
 import AutoAssociate from './AutoAssociate';

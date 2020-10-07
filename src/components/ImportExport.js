@@ -12,7 +12,7 @@ import { Trail, Hydrant } from '../utils/records';
 import OperationMessage from './OperationMessage';
 
 //Material-Ui
-import { withStyles } from '@material-ui/core/styles';
+import { withStyles } from '@material-ui/core/';
 import Dialog from '@material-ui/core/Dialog';
 import DialogTitle from '@material-ui/core/DialogTitle';
 import { FormGroup, FormControl, FormControlLabel,FormLabel, FormHelperText } from '@material-ui/core';
@@ -27,12 +27,13 @@ import Checkbox from '@material-ui/core/Checkbox';
 import Grid from '@material-ui/core/Grid';
 import TextField from '@material-ui/core/TextField';
 import Button from '@material-ui/core/Button';
-import {Tooltip} from 'material-ui';
+import {Tooltip} from '@material-ui/core/';
 
 const csvHeaders = ['Trail_Name', 'Hyd_ID', 'Hyd_Elevation', 'Hyd_Longitude', 'Hyd_Latitude'];
 const legacyCsvHeaders = ['Trail_Name', 'Hyd_Index', 'Hyd_ID', 'Hyd_State', 'Hyd_Hours',
   'Hyd_Gun', 'Hyd_Gpm', 'Hyd_Notes', 'Hyd_Elevation',
   'Hyd_Target_Gallons', 'Hyd_Total_Gallons', 'Hyd_Cfm', 'Hyd_Pressure_Zone', 'Hyd_Longitude', 'Hyd_Latitude'];
+const trailCsvHeaders = ['Trail_Name', 'Trail_Geo'];
 
 const styles = theme => ({
   formControl: {
@@ -284,20 +285,30 @@ class ImportExport extends React.Component {
   }
 
   generateCSV = () => {
+    const trailGeo = {}
     const { hydrants, trails } = this.props;
-    console.log(trails);
+    // console.log('Trails...');
+    // console.log(trails);
+    // console.log('Hydrants...');
+    // console.log(hydrants);
     const hydrantsRows = [];
+    const trailsRows = [];
     // Header Row Depends on whether we're exporting in legacy format or not
     hydrantsRows.push(this.state.useLegacyCSV ? [legacyCsvHeaders] : [csvHeaders]);
+    trailsRows.push([trailCsvHeaders]);
 
     trails.keySeq().forEach((trailId) => {
       const trail = trails.get(trailId)
-
       let trailName = trail.get('name').split(' ').join('_')
 
       if (trail.get('features')[0]) {
         trailName = trail.get('features')[0].get('originalTrailName') ? trail.get('features')[0].get('originalTrailName') : trailName
       }
+
+      // Build GeoJSON for trials - convert to Lat Lon
+      const trailCoords = trail.get('features')[0].getGeometry().transform('EPSG:3857', 'EPSG:4326');
+      trailGeo[trailName] = trailCoords.getCoordinates();
+      // End Build GeoJSON for Trails
 
       const trailHydrants = _
         .chain(hydrants.toJS())
@@ -323,13 +334,14 @@ class ImportExport extends React.Component {
               latitude = JSON.stringify(trailHydrants[i].coords[1] || 0);
             }
             hydrantsRows.push([
-              trailName, i + 1, hydId, 0, 0,
+              trailName, i + 1, hydId, 0, 0,  
               'None', 0, 'None', elevation, 0,
               0, 0, 'None', longitude, latitude
             ]);
           }
         } else {
           trailHydrants.forEach((hydrant) => {
+            //console.log(hydrant.coords);
             hydrantsRows.push([
               trailName, 
               hydrant.name, 
@@ -339,8 +351,13 @@ class ImportExport extends React.Component {
             ])
           })
         }
+      trailsRows.push([trailName, trailGeo[trailName]]);
+    //  console.log(trailGeo[trailName]);
+    //console.log(hydrantsRows);
+    //console.log(trailGeo);
     });
 
+    // Download the Hydrant CSV
     const lineArray = []
     hydrantsRows.forEach((r, i) => {
       const line = r.join(",")
@@ -348,8 +365,18 @@ class ImportExport extends React.Component {
     });
     const csvContent = lineArray.join("\n")
     const encodedUri = encodeURI(csvContent);
-    // window.location.assign(encodedUri);
     downloadjs(encodedUri, `Hydrants_Table.csv`);
+
+    // Download Trail CSV
+    const trailLineArray = ["data:text/csv;charset=utf-8,", trailCsvHeaders];
+    Object.keys(trailGeo).forEach(key => {
+      // quotes are to prevent csv parser from separating values into new columns
+      trailLineArray.push([key, '"' + JSON.stringify(trailGeo[key]) + '"']); 
+    });
+
+    const trailCsvContent = trailLineArray.join("\n");
+    const trailEncodedUri = encodeURI(trailCsvContent);
+    downloadjs(trailEncodedUri, `Trails_Table.csv`);
   }
 
   handleSelect = (event) => {

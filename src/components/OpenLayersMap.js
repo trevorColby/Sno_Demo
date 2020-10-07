@@ -19,7 +19,7 @@ import { getMapStyle } from '../utils/mapUtils';
 import RotationSlider from './RotationSlider';
 import extent from 'ol/extent';
 import Select from 'react-select';
-import { FormControl, RadioGroup, Radio, FormControlLabel, Typography} from 'material-ui';
+import { FormControl, RadioGroup, Radio, FormControlLabel, Typography} from '@material-ui/core';
 
 const layerOptions = ['Road',
   'Aerial',
