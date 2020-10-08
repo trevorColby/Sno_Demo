@@ -17,19 +17,16 @@ class Geocoder extends React.Component {
     params.q = input;
     axios.get('https://nominatim.openstreetmap.org/search/', { params })
       .then(resp => callback(null, {
-        options: _.map(resp.data, (d) => {
-          return {
-            value: `${d.lon},${d.lat}`,
-            label: d.display_name,
-          };
-        }),
-      })
-    );
+        options: _.map(resp.data, d => ({
+          value: `${d.lon},${d.lat}`,
+          label: d.display_name,
+        })),
+      }));
   }, 250);
 
   handleChange = (option) => {
     const { locationSelected } = this.props;
-    const coords = _.map(option.value.split(','), (p) => parseFloat((p)));
+    const coords = _.map(option.value.split(','), p => parseFloat((p)));
     locationSelected(coords);
   }
 

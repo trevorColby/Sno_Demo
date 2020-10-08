@@ -1,5 +1,5 @@
 import React from 'react';
-import {Input} from '@material-ui/core/';
+import { Input } from '@material-ui/core/';
 
 class TrailNameForm extends React.Component {
   constructor(props) {
@@ -24,12 +24,12 @@ class TrailNameForm extends React.Component {
 
   render() {
     return (
-        <Input
-          type="text"
-          onChange={this.handleChange}
-          value={this.state.value}
-          onBlur={this.handleSubmit}
-        />
+      <Input
+        type="text"
+        onChange={this.handleChange}
+        value={this.state.value}
+        onBlur={this.handleSubmit}
+      />
     );
   }
 }

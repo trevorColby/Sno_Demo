@@ -6,11 +6,15 @@ import _ from 'lodash';
 import {
   withStyles,
   IconButton, Drawer, Button, Typography,
-  Toolbar, AppBar, InputLabel, Grid
+  Toolbar, AppBar, Grid, Card, CardContent, CardHeader,
 } from '@material-ui/core';
 import MenuIcon from '@material-ui/icons/Menu';
 import ChevronLeftIcon from '@material-ui/icons/ChevronLeft';
-import ChevronRightIcon from '@material-ui/icons/ChevronRight';
+import TimeLine from '@material-ui/icons/Timeline';
+import Tooltip from '@material-ui/core/Tooltip';
+import AddLocation from '@material-ui/icons/AddLocation';
+import ImportExportIcon from '@material-ui/icons/ImportExport';
+import Refresh from '@material-ui/icons/Refresh';
 import Projection from 'ol/proj';
 import { Trail, Hydrant } from '../utils/records';
 import appStyles from '../styles/drawer';
@@ -19,16 +23,9 @@ import TrailList from './TrailList';
 import OpenLayersMap from './OpenLayersMap';
 import ImportExport from './ImportExport';
 import TrailForm from './TrailForm';
-import AutoAssociate from './AutoAssociate';
 import ManualAssociateHydrantsForm from './ManualAssociateHydrantsForm';
 import OperationMessage from './OperationMessage';
-import TimeLine from '@material-ui/icons/Timeline';
-import Tooltip from '@material-ui/core/Tooltip';
-import AddLocation from '@material-ui/icons/AddLocation';
-import { Card, CardContent, CardHeader } from '@material-ui/core/';
-import ImportExportIcon from '@material-ui/icons/ImportExport';
-import Refresh from '@material-ui/icons/Refresh';
-import { getElevations } from '../utils/bulkUpdateUtils'
+import { getElevations } from '../utils/bulkUpdateUtils';
 
 import ActionTypes from '../redux/ActionTypes';
 
@@ -48,10 +45,9 @@ const {
   MANUAL_ASSIGNMENT_OPENED,
   MANUAL_ASSIGNMENT_CLOSED,
   MANUAL_ASSIGNMENT_HYDRANT_FOCUSED,
-  UPDATE_MANUAL_TRAIL_ASSOCIATION,
+  // UPDATE_MANUAL_TRAIL_ASSOCIATION,
   ORPHANS_SELECTED,
 } = ActionTypes;
-
 
 
 class Container extends React.Component {
@@ -67,45 +63,50 @@ class Container extends React.Component {
     };
   }
 
-  toggleOrphanSelect = () => {
-    const {orphansSelected } = this.props
-    this.setState({
-      orphanRowSelected: !this.state.orphanRowSelected
-    })
-    orphansSelected(!this.state.orphanRowSelected)
-  }
 
   setMessageToNull = () => {
     this.setState({
-        message: null
-    })
+      message: null,
+    });
   }
 
   setImportExportOpen = (bool) => {
-      this.setState({
-        importExportOpen: bool
-      });
-    }
+    this.setState({
+      importExportOpen: bool,
+    });
+  }
+
+  toggleOrphanSelect = () => {
+    const { orphansSelected } = this.props;
+    this.setState({
+      orphanRowSelected: !this.state.orphanRowSelected,
+    });
+    orphansSelected(!this.state.orphanRowSelected);
+  }
 
   newTrailClicked = () => {
-    const { addTrail, trailSelected, selectedTrail,toggledEditing } = this.props;
+    const {
+      addTrail, trailSelected, selectedTrail, toggledEditing,
+    } = this.props;
     let id = new Date().getTime();
     id = id.toString();
     const name = 'New Trail';
     const trail = new Trail({ id, name, features: [] });
     addTrail(trail);
-    trailSelected(selectedTrail, trail.get('id'))
-    toggledEditing(true)
+    trailSelected(selectedTrail, trail.get('id'));
+    toggledEditing(true);
 
     this.setState({
       message: 'New Trail Added',
-      drawerOpen: true
+      drawerOpen: true,
     });
   }
 
   drawEnd(e) {
     const { feature } = e;
-    const { interaction, selectedTrail, editableTrail, trails, addTrail, addHydrant, modifyTrail, hydrants } = this.props;
+    const {
+      interaction, selectedTrail, editableTrail, trails, addTrail, addHydrant, modifyTrail, hydrants,
+    } = this.props;
     if (interaction === 'DRAW_MODIFY_TRAIL') {
       const trail = trails.get(selectedTrail);
       // set attributes on the feature, create a unique feature id
@@ -165,7 +166,7 @@ class Container extends React.Component {
 
   renderDrawerContents = () => {
     const {
-      hydrants, trails,editableTrail,toggledEditing,
+      hydrants, trails, editableTrail, toggledEditing,
       selectedTrail, trailSelected,
       modifyTrail, modifyHydrant,
       dataImported, interaction, interactionChanged,
@@ -176,11 +177,11 @@ class Container extends React.Component {
       openManualAssignment,
     } = this.props;
 
-    const {orphanRowSelected} = this.state;
+    const { orphanRowSelected } = this.state;
 
-    const orphanCount = hydrants.filter((h) => h.get('trail') === null).size;
+    const orphanCount = hydrants.filter(h => h.get('trail') === null).size;
 
-    //Displays the Assignment Forms
+    // Displays the Assignment Forms
     if (manualAssignmentOpen) {
       return (
         <ManualAssociateHydrantsForm
@@ -193,7 +194,7 @@ class Container extends React.Component {
         />
       );
     }
-    //Displays The Edit Form For a Given Trail
+    // Displays The Edit Form For a Given Trail
     if (editableTrail) {
       return (
         <TrailForm
@@ -208,15 +209,15 @@ class Container extends React.Component {
           hydrantDeleted={hydrantDeleted}
           modifyHydrant={modifyHydrant}
         />
-      )
+      );
     }
     // Displays Intro Card If Nothing has Been Added
     if (trails.size === 0 && orphanCount === 0) {
       return (
 
-        <Card raised={true} >
+        <Card raised >
           <CardHeader
-          title="Getting Started"
+            title="Getting Started"
 
           />
           <CardContent>
@@ -225,15 +226,15 @@ class Container extends React.Component {
               or adding features manually.
             </Typography>
 
-            <Button color='primary' variant='raised' onClick={this.newTrailClicked} fullWidth>
+            <Button color="primary" variant="raised" onClick={this.newTrailClicked} fullWidth>
             Create A Trail
             </Button>
 
-            <Button color='primary' variant='raised' onClick={() => { interactionChanged('DRAW_MODIFY_HYDRANTS')}} fullWidth>
+            <Button color="primary" variant="raised" onClick={() => { interactionChanged('DRAW_MODIFY_HYDRANTS'); }} fullWidth>
             Drop Hydrants
             </Button>
 
-            <Button color='primary' variant='raised' onClick={() => this.setImportExportOpen(true)} fullWidth>
+            <Button color="primary" variant="raised" onClick={() => this.setImportExportOpen(true)} fullWidth>
               Import Features
             </Button>
 
@@ -241,11 +242,10 @@ class Container extends React.Component {
         </Card>
 
 
-      )
-
+      );
     }
 
-    //Displays the Default Trail List.
+    // Displays the Default Trail List.
     return (
       <div>
         <TrailList
@@ -259,7 +259,7 @@ class Container extends React.Component {
           newTrailClicked={this.newTrailClicked}
           modifyTrail={modifyTrail}
           trails={trails}
-          trailSelected={(id) => trailSelected(selectedTrail, id)}
+          trailSelected={id => trailSelected(selectedTrail, id)}
           hydrants={hydrants}
           selected={selectedTrail}
           interactionChanged={interactionChanged}
@@ -282,29 +282,28 @@ class Container extends React.Component {
     } = this.props;
 
 
-
     const { drawerOpen, message, importExportOpen } = this.state;
     return (
       <div className={classes.root}>
         <div className={classes.appFrame}>
           <AppBar
-            color='primary'
+            color="primary"
             className={classNames(classes.appBar, {
               [classes.appBarShift]: drawerOpen,
-              [classes[`appBarShift-left`]]: drawerOpen,
+              [classes['appBarShift-left']]: drawerOpen,
             })}
           >
 
             <Toolbar disableGutters={!drawerOpen}>
-            {drawerOpen? (
-              <IconButton style={{color:'white'}} onClick={()=> { this.setState({drawerOpen:false})} }>
-                {<ChevronLeftIcon />}
-              </IconButton>
+              {drawerOpen ? (
+                <IconButton style={{ color: 'white' }} onClick={() => { this.setState({ drawerOpen: false }); }}>
+                  {<ChevronLeftIcon />}
+                </IconButton>
             ) : (
               <IconButton
                 color="inherit"
                 aria-label="open drawer"
-                onClick={() => this.setState({drawerOpen: true})}
+                onClick={() => this.setState({ drawerOpen: true })}
                 className={classNames(classes.menuButton, drawerOpen && classes.hide)}
               >
                 <MenuIcon />
@@ -317,122 +316,121 @@ class Container extends React.Component {
               </Typography>
 
               <div>
-                <Grid style={{marginLeft: 50}} container spacing={40}>
+                <Grid style={{ marginLeft: 50 }} container spacing={40}>
                   <Grid item>
-                    <Tooltip title="New Trail"
-                    >
+                    <Tooltip title="New Trail">
                       <IconButton
-                        color='secondary'
+                        color="secondary"
                         onClick={this.newTrailClicked}
                       >
-                      <TimeLine />
-                      <Typography color='secondary' variant="caption">
+                        <TimeLine />
+                        <Typography color="secondary" variant="caption">
                       New Trail
-                      </Typography>
-                    </IconButton>
-                  </Tooltip>
+                        </Typography>
+                      </IconButton>
+                    </Tooltip>
                   </Grid>
 
                   <Grid item>
-                  <Tooltip title="Add Hydrants"
-                  >
-                    <IconButton
-                      color='secondary'
-                      onClick={() => { interactionChanged('DRAW_MODIFY_HYDRANTS')}}
-                    >
-                      <AddLocation />
-                      <Typography color='secondary' variant="caption">
+                    <Tooltip title="Add Hydrants">
+                      <IconButton
+                        color="secondary"
+                        onClick={() => { interactionChanged('DRAW_MODIFY_HYDRANTS'); }}
+                      >
+                        <AddLocation />
+                        <Typography color="secondary" variant="caption">
                       New Hydrant
-                      </Typography>
-                    </IconButton>
-                  </Tooltip>
+                        </Typography>
+                      </IconButton>
+                    </Tooltip>
 
                   </Grid>
                   <Grid item>
-                  <Tooltip  title="Import/Export" >
-                    <IconButton
-                      onClick={()=> this.setImportExportOpen(true)}
-                      variant='raised'
-                      color='secondary'
-                    >
-                      <ImportExportIcon />
-                      <Typography color='secondary' variant="caption">
+                    <Tooltip title="Import/Export" >
+                      <IconButton
+                        onClick={() => this.setImportExportOpen(true)}
+                        variant="raised"
+                        color="secondary"
+                      >
+                        <ImportExportIcon />
+                        <Typography color="secondary" variant="caption">
                       Import Export
-                      </Typography>
-                    </IconButton>
-                  </Tooltip>
+                        </Typography>
+                      </IconButton>
+                    </Tooltip>
                   </Grid>
 
                   <Grid item>
 
-                  <Tooltip  title="Import/Export" >
-                    <IconButton
-                      onClick={() => {
+                    <Tooltip title="Import/Export" >
+                      <IconButton
+                        onClick={() => {
                         getElevations()
-                        .then(elevMessage => this.setState({ message: elevMessage }))}}
-                      variant='raised'
-                      color='secondary'
-                    >
-                      <Refresh />
-                      <Typography color='secondary' variant="caption">
+                        .then(elevMessage => this.setState({ message: elevMessage }));
+}}
+                        variant="raised"
+                        color="secondary"
+                      >
+                        <Refresh />
+                        <Typography color="secondary" variant="caption">
                       Fetch Elevation Data
-                      </Typography>
-                    </IconButton>
-                  </Tooltip>
+                        </Typography>
+                      </IconButton>
+                    </Tooltip>
                   </Grid>
                 </Grid>
               </div>
 
             </Toolbar>
-            <div id="searchLocations"></div>
+            <div id="searchLocations" />
           </AppBar>
           <Drawer
             variant="persistent"
-            anchor='left'
+            anchor="left"
             open={drawerOpen}
             classes={{
               paper: classes.drawerPaper,
             }}
           >
 
-          {this.renderDrawerContents()}
+            {this.renderDrawerContents()}
           </Drawer>
           <main
-            className={classNames(classes.content, classes[`content-left`], {
+            className={classNames(classes.content, classes['content-left'], {
               [classes.contentShift]: drawerOpen,
-              [classes[`contentShift-left`]]: drawerOpen,
+              [classes['contentShift-left']]: drawerOpen,
             })}
           >
-          <div className={classes.drawerHeader} />
+            <div className={classes.drawerHeader} />
 
-          <OpenLayersMap
-            interaction={interaction}
-            drawEnd={this.drawEnd}
-            modifyEnd={this.modifyEnd}
-            trails={trails}
-            hydrants={hydrants}
-            editableTrail={editableTrail}
-            selectedTrail={selectedTrail}
-            hydrantSelected={hydrantSelected}
-            focusedHydrant={focusedHydrant}
-          />
+            <OpenLayersMap
+              interaction={interaction}
+              drawEnd={this.drawEnd}
+              modifyEnd={this.modifyEnd}
+              trails={trails}
+              hydrants={hydrants}
+              editableTrail={editableTrail}
+              selectedTrail={selectedTrail}
+              hydrantSelected={hydrantSelected}
+              focusedHydrant={focusedHydrant}
+            />
 
-          <OperationMessage
-            setMessageToNull={this.setMessageToNull}
-            message={message}
-           />
+            <OperationMessage
+              setMessageToNull={this.setMessageToNull}
+              message={message}
+            />
 
-           <ImportExport
-             setImportExportOpen={this.setImportExportOpen}
-             importExportOpen={importExportOpen}
-             importKMLClicked={dataImported}
-             trails={trails}
-             hydrants={hydrants}
-           />
+            <ImportExport
+              setImportExportOpen={this.setImportExportOpen}
+              importExportOpen={importExportOpen}
+              importKMLClicked={dataImported}
+              trails={trails}
+              hydrants={hydrants}
+            />
 
-        </main>
+          </main>
+        </div>
       </div>
-    </div>
     );
   }
 }
@@ -490,14 +488,14 @@ const mapDispatchToProps = dispatch => ({
     type: MANUAL_ASSIGNMENT_HYDRANT_FOCUSED, data: id,
   }),
   toggledEditing: state => dispatch({
-    type: EDIT_TRAIL, data: state
+    type: EDIT_TRAIL, data: state,
   }),
   trailDeleted: id => dispatch({
-    type: TRAIL_DELETED, data: id
+    type: TRAIL_DELETED, data: id,
   }),
   orphansSelected: bool => dispatch({
-    type: ORPHANS_SELECTED, data: bool
-  })
+    type: ORPHANS_SELECTED, data: bool,
+  }),
 });
 
 export default compose(

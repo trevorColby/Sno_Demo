@@ -1,15 +1,14 @@
 import React from 'react';
-import Immutable from 'immutable';
-import _ from 'lodash';
+// import Immutable from 'immutable';
+// import _ from 'lodash';
 import {
   Button, Dialog,
   DialogTitle, DialogContent, DialogActions, DialogContentText,
   Tooltip,
   IconButton,
-  Typography
 } from '@material-ui/core';
-import { getElevations, assignHydrantsToTrails, autonameHydrants } from '../utils/bulkUpdateUtils';
 import MergeType from '@material-ui/icons/MergeType';
+import { assignHydrantsToTrails, autonameHydrants } from '../utils/bulkUpdateUtils';
 
 class AutoAssociate extends React.Component {
   constructor(props) {
@@ -21,18 +20,16 @@ class AutoAssociate extends React.Component {
   }
 
   assignHydrants = () => {
-    const { dataImported, hydrants, trails, manualAssignmentItemsAdded } = this.props;
+    const {
+      dataImported, hydrants, trails, manualAssignmentItemsAdded,
+    } = this.props;
     const orphans = hydrants.filter(h => h.get('trail') === null);
     const [newHydrants, matchedIds] = assignHydrantsToTrails(orphans, trails);
 
-    const instantAssign = newHydrants.filter((h) => {
-      return matchedIds.indexOf(h.get('id')) !== -1;
-    });
+    const instantAssign = newHydrants.filter(h => matchedIds.indexOf(h.get('id')) !== -1);
 
 
-    const manualAssignmentNeeded = newHydrants.filter((h) => {
-      return matchedIds.indexOf(h.get('id')) === -1;
-    });
+    const manualAssignmentNeeded = newHydrants.filter(h => matchedIds.indexOf(h.get('id')) === -1);
 
 
     this.setState({ assigned: instantAssign.size });
@@ -41,7 +38,7 @@ class AutoAssociate extends React.Component {
   }
 
   openDialog = (e) => {
-    e.stopPropagation()
+    e.stopPropagation();
 
     this.assignHydrants();
     this.setState({ dialogOpen: true });
@@ -57,7 +54,7 @@ class AutoAssociate extends React.Component {
     const { hydrants, manualAssignmentItems } = this.props;
     const { assigned } = this.state;
     const orphans = hydrants.filter(h => h.get('trail') === null);
-    if (!assigned && !orphans.size ) {
+    if (!assigned && !orphans.size) {
       return <DialogContentText>All hydrants are aready assigned to trails</DialogContentText>;
     }
 
@@ -79,15 +76,17 @@ class AutoAssociate extends React.Component {
 
   render() {
     const { dialogOpen } = this.state;
-    const { hydrants, trails, dataImported, manualAssignmentItems, openManualAssignment, orphanRowSelected, toggleOrphanSelect  } = this.props;
-    const orphans = hydrants.filter(h => h.get('trail') === null);
-    const noElevation = hydrants.filter(h => !h.get('elevation'));
+    const {
+      hydrants, trails, dataImported, manualAssignmentItems, openManualAssignment, orphanRowSelected, toggleOrphanSelect,
+    } = this.props;
+    // const orphans = hydrants.filter(h => h.get('trail') === null);
+    // const noElevation = hydrants.filter(h => !h.get('elevation'));
     return (
       <div style={{ display: 'inline' }}>
         <Tooltip title="AutoAssociate" placement="left-end">
           <IconButton
             onClick={this.openDialog}
-            color='primary'
+            color="primary"
           >
             <MergeType />
           </IconButton>
@@ -100,10 +99,14 @@ class AutoAssociate extends React.Component {
 
           {manualAssignmentItems.size ? (
             <DialogActions>
-              <Button color="primary" onClick={(e) => {
-                e.stopPropagation()
-                if (orphanRowSelected){toggleOrphanSelect()}
-                 openManualAssignment(); this.setState({ dialogOpen: false });}}>
+              <Button
+                color="primary"
+                onClick={(e) => {
+                e.stopPropagation();
+                if (orphanRowSelected) { toggleOrphanSelect(); }
+                 openManualAssignment(); this.setState({ dialogOpen: false });
+}}
+              >
                 Assign now
               </Button>
             </DialogActions>

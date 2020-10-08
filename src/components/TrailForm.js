@@ -1,31 +1,27 @@
 import React from 'react';
 import { withStyles } from '@material-ui/core/styles';
 import Card from '@material-ui/core/Card';
-import CardActions from '@material-ui/core/CardActions';
+// import CardActions from '@material-ui/core/CardActions';
 import CardContent from '@material-ui/core/CardContent';
 import Button from '@material-ui/core/Button';
 import Typography from '@material-ui/core/Typography';
-import TextField from '@material-ui/core/TextField';
+// import TextField from '@material-ui/core/TextField';
 import Delete from '@material-ui/icons/Delete';
-import Select from '@material-ui/core/Select';
-import { MenuItem } from '@material-ui/core/Menu';
-import { FormControl, FormHelperText } from '@material-ui/core/';
+// import Select from '@material-ui/core/Select';
+// import { MenuItem } from '@material-ui/core/Menu';
+import {
+  FormControl, Input, RadioGroup, Radio, FormControlLabel, List, ListItem, ListItemText,
+  DialogActions, DialogContent, DialogContentText, Dialog, DialogTitle,
+} from '@material-ui/core/';
 import _ from 'lodash';
-import {Input, InputLabel } from '@material-ui/core/';
 import Collapse from '@material-ui/core/Collapse';
-import { RadioGroup, Radio, FormLabel, FormControlLabel } from '@material-ui/core';
-import { List, ListItem, ListItemIcon, ListItemText } from '@material-ui/core/';
 import ExpandLess from '@material-ui/icons/ExpandLess';
 import ExpandMore from '@material-ui/icons/ExpandMore';
-import { SketchPicker } from 'react-color';
-import { getMapStyle } from './../utils/mapUtils';
+import Close from '@material-ui/icons/Close';
+// import { SketchPicker } from 'react-color';
+// import { getMapStyle } from './../utils/mapUtils';
 import HydrantList from './HydrantList';
 import ColorPicker from './ColorPicker';
-import Close from '@material-ui/icons/Close';
-import { Dialog, DialogTitle,
-  DialogActions,
-  DialogContent,
-  DialogContentText } from '@material-ui/core/';
 
 const styles = theme => ({
   root: {
@@ -41,7 +37,7 @@ const styles = theme => ({
     display: 'block',
   },
   inset: {
-    paddingLeft: 0
+    paddingLeft: 0,
   },
   pos: {
     marginBottom: 12,
@@ -50,36 +46,35 @@ const styles = theme => ({
     paddingLeft: theme.spacing.unit * 4,
   },
   mini: {
-    boxShadow: '0px -1px 6px 6px rgba(0, 0, 0, 0.29), 0px 6px 10px 0px rgba(0, 0, 0, 0.14), 0px 1px 18px 0px rgba(0, 0, 0, 0.12)'
+    boxShadow: '0px -1px 6px 6px rgba(0, 0, 0, 0.29), 0px 6px 10px 0px rgba(0, 0, 0, 0.14), 0px 1px 18px 0px rgba(0, 0, 0, 0.12)',
   },
   raisedPrimary: {
     backgroundColor: '#ff0000',
-    color: '#fff'
-  }
+    color: '#fff',
+  },
 });
 
 
 class TrailForm extends React.Component {
-
   state = {
     trailSectionsOpen: true,
-    pickerOpen: false,
-    dialogOpen: false
-    }
+    // pickerOpen: false,
+    dialogOpen: false,
+  }
 
 
   toggleConfirmation(onOff) {
     this.setState({
-      dialogOpen: onOff
-    })
+      dialogOpen: onOff,
+    });
   }
 
   toggleEditMode = () => {
-    const { interaction, interactionChanged} = this.props;
-    if(interaction === "DRAW_MODIFY_TRAIL" ){
-      interactionChanged("DRAW_MODIFY_HYDRANTS")
+    const { interaction, interactionChanged } = this.props;
+    if (interaction === 'DRAW_MODIFY_TRAIL') {
+      interactionChanged('DRAW_MODIFY_HYDRANTS');
     } else {
-      interactionChanged("DRAW_MODIFY_TRAIL")
+      interactionChanged('DRAW_MODIFY_TRAIL');
     }
   }
 
@@ -97,69 +92,75 @@ class TrailForm extends React.Component {
       trail,
       selectedTrail,
       trailDeleted,
-      dataImported
+      dataImported,
     } = this.props;
 
-    const {  dialogOpen } = this.state
+    const { dialogOpen } = this.state;
 
-    const isTrailMode = interaction === 'DRAW_MODIFY_TRAIL'
+    // const isTrailMode = interaction === 'DRAW_MODIFY_TRAIL';
 
     const trailHydrants = hydrants
       .filter(h => h.get('trail') === trail.get('id'))
       .sort((a, b) => a.get('name').localeCompare(b.get('name'), undefined, { numeric: true }))
-      .valueSeq()
+      .valueSeq();
 
     const highlightFeature = (feature) => {
-      feature.set('highlighted', true)
-      feature.changed()
-    }
+      feature.set('highlighted', true);
+      feature.changed();
+    };
 
     const unhighlightFeature = (feature) => {
-      feature.unset('highlighted')
-      feature.changed()
-    }
+      feature.unset('highlighted');
+      feature.changed();
+    };
+
+    const deletePoly = (featureIndex) => {
+      const newFeatures = _.clone(trail.get('features'));
+      newFeatures.splice(featureIndex, 1);
+      modifyTrail(trail.get('id'), { features: newFeatures });
+    };
 
     const trailsSectionsList = trail.get('features').map((feature, index) => {
-      unhighlightFeature(feature)
+      unhighlightFeature(feature);
       return (
-        <ListItem className={classes.nested} key={feature.getId()} onMouseEnter={() => highlightFeature(feature)} onMouseLeave={()=> unhighlightFeature(feature)}>
+        <ListItem
+          className={classes.nested}
+          key={feature.getId()}
+          onMouseEnter={() => highlightFeature(feature)}
+          onMouseLeave={() => unhighlightFeature(feature)}
+        >
           {`Trail Section ${index + 1}`}
-          <Delete onClick={ () => {deletePoly(index)}} />
+          <Delete onClick={() => { deletePoly(index); }} />
         </ListItem>
-      )
-    })
-    const deletePoly = (featureIndex) => {
-      const newFeatures = _.clone(trail.get('features'))
-      newFeatures.splice(featureIndex,1)
-      modifyTrail(trail.get('id'), {features: newFeatures})
-    }
+      );
+    });
 
     return (
       <div>
         <Card className={classes.card}>
           <CardContent>
             <Close
-              style={{ float: 'right'}}
-              onClick={()=> {toggledEditing(false)}}
+              style={{ float: 'right' }}
+              onClick={() => { toggledEditing(false); }}
             />
             <Input
               className={classes.input}
               value={trail.get('name')}
-              onChange={(e)=>{ modifyTrail(trail.get('id'), { name: e.target.value })}}
+              onChange={(e) => { modifyTrail(trail.get('id'), { name: e.target.value }); }}
             />
 
 
             <List className={classes.root}>
               <ListItem disableGutters >
                 <FormControl>
-                  <Typography variant='subheading'> Edit Mode: </Typography>
+                  <Typography variant="subheading"> Edit Mode: </Typography>
                   <RadioGroup
-                    style={{flexDirection: "row"}}
+                    style={{ flexDirection: 'row' }}
                     value={interaction}
                     onChange={this.toggleEditMode}
                   >
-                    <FormControlLabel value="DRAW_MODIFY_TRAIL" control={<Radio color='primary' />} label="Trails" />
-                    <FormControlLabel value="DRAW_MODIFY_HYDRANTS" control={<Radio color='primary' />} label="Hydrants" />
+                    <FormControlLabel value="DRAW_MODIFY_TRAIL" control={<Radio color="primary" />} label="Trails" />
+                    <FormControlLabel value="DRAW_MODIFY_HYDRANTS" control={<Radio color="primary" />} label="Hydrants" />
                   </RadioGroup>
                 </FormControl>
               </ListItem>
@@ -169,13 +170,18 @@ class TrailForm extends React.Component {
                 modifyTrail={modifyTrail}
               />
 
-              <ListItem disableGutters onClick={()=> { this.setState({ trailSectionsOpen: !this.state.trailSectionsOpen })} }>
+              <ListItem
+                disableGutters
+                onClick={() => {
+                  this.setState({ trailSectionsOpen: !this.state.trailSectionsOpen });
+                }}
+              >
                 <ListItemText className={classes.inset} primary="Trail Sections" />
                 {this.state.trailSectionsOpen ? <ExpandLess /> : <ExpandMore />}
               </ListItem>
               <Collapse in={this.state.trailSectionsOpen} timeout="auto" unmountOnExit>
                 <List component="div" disablePadding>
-                {trailsSectionsList}
+                  {trailsSectionsList}
                 </List>
               </Collapse>
 
@@ -194,7 +200,7 @@ class TrailForm extends React.Component {
               fullWidth
               style={{ marginTop: 10 }}
               variant="raised"
-              onClick={() => { this.toggleConfirmation(true)}}
+              onClick={() => { this.toggleConfirmation(true); }}
             > Delete Trail
             </Button>
 
@@ -215,7 +221,7 @@ class TrailForm extends React.Component {
           <DialogActions>
             <Button
               color="primary"
-              onClick={() => { trailDeleted(trail.get('id'))}}
+              onClick={() => { trailDeleted(trail.get('id')); }}
             > Confirm Delete
             </Button>
 

@@ -14,18 +14,18 @@ import SourceVector from 'ol/source/vector';
 import Draw from 'ol/interaction/draw';
 import Modify from 'ol/interaction/modify';
 import Snap from 'ol/interaction/snap';
+import { FormControl, RadioGroup, Radio, FormControlLabel } from '@material-ui/core';
+import extent from 'ol/extent';
+// import Select from 'react-select';
 import createGeocoder from './Geocoder';
 import { getMapStyle } from '../utils/mapUtils';
 import RotationSlider from './RotationSlider';
-import extent from 'ol/extent';
-import Select from 'react-select';
-import { FormControl, RadioGroup, Radio, FormControlLabel, Typography} from '@material-ui/core';
 
 const layerOptions = ['Road',
   'Aerial',
   'AerialWithLabels',
-  'Google'
-]
+  'Google',
+];
 
 const controlBoxStyle = {
   position: 'absolute',
@@ -36,7 +36,7 @@ const controlBoxStyle = {
   padding: 20,
   bottom: '10%',
   right: '5%',
-}
+};
 
 
 class OpenLayersMap extends React.Component {
@@ -49,60 +49,28 @@ class OpenLayersMap extends React.Component {
       map: null,
       mapInteractions: [],
       currentLayer: 'Aerial',
-      mapLayers: null
+      mapLayers: null,
     };
-  }
-
-  switchLayers = (e) => {
-    const {mapLayers} = this.state;
-    const selected = e.target.value;
-
-    _.each(mapLayers, (layer, index) => {
-      // Set True if selected == layeroptions index
-      console.log(selected === layerOptions[index], layer)
-      layer.setVisible(selected === layerOptions[index] || layer.type === "VECTOR")
-    })
-
-
-    this.setState({
-      currentLayer: selected
-    });
-  }
-
-  deleteLastLine = ()=> {
-    const {mapInteractions, map } = this.state;
-    _.each(mapInteractions, i => {
-      if(i.geometryName_ === 'Polygon'){
-        i.removeLastPoint()
-      }
-    })
-  }
-
-  escapeInteractions = ()=> {
-    const {map, mapInteractions } = this.state;
-    _.each(mapInteractions, i => map.removeInteraction(i))
-    this.setState({ mapInteractions: []})
   }
 
   componentDidMount() {
     this.setupMap();
 
-    const triggerEscape = ()=> {
-      this.escapeInteractions()
-    }
-    const triggerDeleteLast = ()=> {
-      this.deleteLastLine()
-    }
-    document.onkeydown = function(evt) {
-        evt = evt || window.event;
-        if (evt.keyCode == 27) {
-          triggerEscape()
-        }
+    const triggerEscape = () => {
+      this.escapeInteractions();
+    };
+    const triggerDeleteLast = () => {
+      this.deleteLastLine();
+    };
+    document.onkeydown = function (evt) {
+      evt = evt || window.event;
+      if (evt.keyCode == 27) {
+        triggerEscape();
+      }
 
-        if (evt.keyCode == 8){
-          triggerDeleteLast()
-        }
-
+      if (evt.keyCode == 8) {
+        triggerDeleteLast();
+      }
     };
   }
 
@@ -115,39 +83,38 @@ class OpenLayersMap extends React.Component {
   }
 
   componentDidUpdate(prevProps) {
-    const { selectedTrail, trails, interaction, hydrants, focusedHydrant } = this.props;
+    const {
+      selectedTrail, trails, interaction, hydrants, focusedHydrant,
+    } = this.props;
     const { map } = this.state;
 
     // pan to new selectedTrail
     if (selectedTrail !== prevProps.selectedTrail && selectedTrail) {
-
       try {
-
-        const trailFeatures = trails.getIn([selectedTrail, 'features'])
+        const trailFeatures = trails.getIn([selectedTrail, 'features']);
 
         if (trailFeatures.length > 0) {
+          const geomCollection = new GeometryCollection();
+          const geometries = _.flatMap(trailFeatures, f => f.getGeometry());
+          geomCollection.setGeometries(geometries);
+          const newExtent = geomCollection.getExtent();
 
-        const geomCollection = new GeometryCollection()
-        const geometries = _.flatMap(trailFeatures, f => f.getGeometry())
-        geomCollection.setGeometries(geometries)
-        const newExtent = geomCollection.getExtent()
+          const view = map.getView();
+          const zoomResolution = view.getResolutionForExtent(newExtent);
+          const zoomLevel = view.getZoomForResolution(zoomResolution);
 
-        const view = map.getView();
-        const zoomResolution = view.getResolutionForExtent(newExtent);
-        const zoomLevel = view.getZoomForResolution(zoomResolution);
+          map.getView().animate({
+            center: extent.getCenter(newExtent),
+            duration: 500,
+            zoom: zoomLevel,
+          });
 
-        map.getView().animate({
-          center: extent.getCenter(newExtent),
-          duration: 500,
-          zoom: zoomLevel,
-        });
-
-        map.getView().animate({
-          center: extent.getCenter(newExtent),
-          duration: 500,
-          zoom: zoomLevel,
-        });
-      }
+          map.getView().animate({
+            center: extent.getCenter(newExtent),
+            duration: 500,
+            zoom: zoomLevel,
+          });
+        }
 
         // Instead of Panning the below code will jerk to the trail
         // and will fit the trail but is not as smooth.
@@ -164,11 +131,6 @@ class OpenLayersMap extends React.Component {
     }
   }
 
-  onRotationChange = (value) => {
-    const {map} = this.state
-    map.getView().setRotation(value)
-  }
-
   onMapClick = (e) => {
     const { interaction, hydrantSelected } = this.props;
     const { map } = this.state;
@@ -181,31 +143,35 @@ class OpenLayersMap extends React.Component {
     }
   }
 
+  onRotationChange = (value) => {
+    const { map } = this.state;
+    map.getView().setRotation(value);
+  }
+
   setupMap() {
     const { source } = this.state;
     const { hydrantSelected } = this.props;
 
-    const layers = _.map(layerOptions, l => {
-        if (l !== 'Google') {
-          return new TileLayer({
+    const layers = _.map(layerOptions, (l) => {
+      if (l !== 'Google') {
+        return new TileLayer({
+          visible: false,
+          preload: Infinity,
+          source: new BingMaps({
             visible: false,
-            preload: Infinity,
-            source: new BingMaps({
-              visible: false,
-              hidpi: false,
-              key: 'ApcR8_wnFxnsXwuY_W2mPQuMb-QB0Kg-My65RJYZL2g9fN6NCFA8-s0lsvxTTs2G',
-              imagerySet: l,
-              maxZoom: 19,
-            }),
-          })
-        } else {
-          return new TileLayer({
-                visible: false,
-                preload: Infinity,
-                source: new TileImage({url: 'http://mt1.google.com/vt/lyrs=s&hl=pl&&x={x}&y={y}&z={z}'})
-              });
-        }
-      })
+            hidpi: false,
+            key: 'ApcR8_wnFxnsXwuY_W2mPQuMb-QB0Kg-My65RJYZL2g9fN6NCFA8-s0lsvxTTs2G',
+            imagerySet: l,
+            maxZoom: 19,
+          }),
+        });
+      }
+      return new TileLayer({
+        visible: false,
+        preload: Infinity,
+        source: new TileImage({ url: 'http://mt1.google.com/vt/lyrs=s&hl=pl&&x={x}&y={y}&z={z}' }),
+      });
+    });
 
 
     const resortLayer = new LayerVector({
@@ -213,7 +179,7 @@ class OpenLayersMap extends React.Component {
       style: getMapStyle,
     });
 
-    layers.push(resortLayer)
+    layers.push(resortLayer);
 
     // Orientation
     const projection = Projection.get('EPSG:3857');
@@ -223,7 +189,7 @@ class OpenLayersMap extends React.Component {
     const map = new Map({
       loadTilesWhileInteracting: false,
       target: 'map-container',
-      layers: layers,
+      layers,
       view: new View({
         projection,
         center: Projection.fromLonLat(centerCoords),
@@ -238,26 +204,56 @@ class OpenLayersMap extends React.Component {
       map.getView().animate({
         center: mapCoords,
         duration: 100,
-        zoom: 15
+        zoom: 15,
       });
     };
     createGeocoder('searchLocations', onGeocoderChange);
 
-    layers[1].setVisible(true)
+    layers[1].setVisible(true);
 
     map.on('click', this.onMapClick);
     this.setState({
       mapLayers: layers,
-      map
+      map,
+    });
+  }
+
+  switchLayers = (e) => {
+    const { mapLayers } = this.state;
+    const selected = e.target.value;
+
+    _.each(mapLayers, (layer, index) => {
+      // Set True if selected == layeroptions index
+      console.log(selected === layerOptions[index], layer);
+      layer.setVisible(selected === layerOptions[index] || layer.type === 'VECTOR');
     });
 
+
+    this.setState({
+      currentLayer: selected,
+    });
+  }
+
+  deleteLastLine = () => {
+    const { mapInteractions, map } = this.state;
+    _.each(mapInteractions, (i) => {
+      if (i.geometryName_ === 'Polygon') {
+        i.removeLastPoint();
+      }
+    });
+  }
+
+  escapeInteractions = () => {
+    const { map, mapInteractions } = this.state;
+    _.each(mapInteractions, i => map.removeInteraction(i));
+    this.setState({ mapInteractions: [] });
   }
 
   updateInteractions(nextProps) {
     const {
       trails, hydrants,
       interaction, modifyEnd,
-      drawEnd, editableTrail, selectedTrail
+      drawEnd, editableTrail, selectedTrail,
     } = nextProps;
 
     const { source, map, mapInteractions } = this.state;
@@ -305,9 +301,7 @@ class OpenLayersMap extends React.Component {
 
   syncFeatures(trails, hydrants) {
     const { source } = this.state;
-    const totalFeatures = trails.reduce((features, t) => {
-      return features + t.get('features').length;
-    }, 0) + hydrants.size;
+    const totalFeatures = trails.reduce((features, t) => features + t.get('features').length, 0) + hydrants.size;
     if (source.getFeatures().length !== totalFeatures) {
       // add new features if needed
       const newFeatures = [];
@@ -335,8 +329,7 @@ class OpenLayersMap extends React.Component {
           if (!trails.has(id) || !_.find(trails.get(id).features, f => f.getId() === featureId)) {
             source.removeFeature(feature);
           }
-        }
-        else if (type === 'h' && !hydrants.has(id)) {
+        } else if (type === 'h' && !hydrants.has(id)) {
           source.removeFeature(feature);
         }
       });
@@ -344,12 +337,13 @@ class OpenLayersMap extends React.Component {
   }
 
   render() {
-    const { rotation } = this.state
+    const { rotation } = this.state;
 
     return (
-    <div id="map-container"
-    style={{ position: "fixed", height: "100%", width: "100%"}}
-    >
+      <div
+        id="map-container"
+        style={{ position: 'fixed', height: '100%', width: '100%' }}
+      >
 
         <FormControl
           style={controlBoxStyle}
@@ -360,22 +354,19 @@ class OpenLayersMap extends React.Component {
           />
 
           <RadioGroup
-            style={{flexDirection: "row"}}
+            style={{ flexDirection: 'row' }}
             value={this.state.currentLayer}
             onChange={this.switchLayers}
           >
-            {_.map(layerOptions, l => {
-
-              return (
-                  <FormControlLabel key={l} value={l} control={<Radio color='primary' />} label={l}/>
-              )
-            })
+            {_.map(layerOptions, l => (
+              <FormControlLabel key={l} value={l} control={<Radio color="primary" />} label={l} />
+              ))
           }
           </RadioGroup>
         </FormControl>
 
       </div>
-    )
+    );
   }
 }
 

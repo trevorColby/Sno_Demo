@@ -6,54 +6,53 @@ import Delete from '@material-ui/icons/Delete';
 import Collapse from '@material-ui/core/Collapse';
 import { FormControl, FormHelperText } from '@material-ui/core';
 import { withStyles } from '@material-ui/core/styles';
+import { Button } from '@material-ui/core/Button';
+import Grid from '@material-ui/core/Grid';
 import _ from 'lodash';
 import { getElevations } from '../utils/bulkUpdateUtils';
-import {Button} from '@material-ui/core/Button';
 import OperationMessage from './OperationMessage';
-import Grid from '@material-ui/core/Grid';
 
 
 const styles = theme => ({
   root: {
-    flexWrap: 'wrap'
+    flexWrap: 'wrap',
   },
   inset: {
-    paddingLeft: 0
-  }
+    paddingLeft: 0,
+  },
 });
 
 
 class HydrantListItem extends React.Component {
-
   constructor(props) {
     super(props);
     this.state = {
       showDetails: false,
       name: props.hydrant.get('name'),
       message: null,
-    }
+    };
   }
 
-  toggleHighLight = (feature, state) => {
-    feature.set('highlighted', state)
-    feature.changed();
+  componentWillReceiveProps(nextProps) {
+    if (this.props.hydrant !== nextProps.hydrant) {
+      this.setState({
+        name: nextProps.hydrant.get('name'),
+      });
+    }
   }
 
   updateCoords = (e, h, coordIndex) => {
-    const { modifyHydrant, hydrant } = this.props
+    const { modifyHydrant, hydrant } = this.props;
     const newCoords = _.clone(hydrant.get('coords'));
-    newCoords.splice(coordIndex, 1, Number(e.target.value))
-    modifyHydrant(hydrant.get('id'), { coords: newCoords })
+    newCoords.splice(coordIndex, 1, Number(e.target.value));
+    modifyHydrant(hydrant.get('id'), { coords: newCoords });
   };
 
-
-  componentWillReceiveProps(nextProps){
-    if (this.props.hydrant !== nextProps.hydrant) {
-      this.setState({
-        name: nextProps.hydrant.get('name')
-      })
-    }
+  toggleHighLight = (feature, state) => {
+    feature.set('highlighted', state);
+    feature.changed();
   }
+
 
   render() {
     const {
@@ -63,15 +62,15 @@ class HydrantListItem extends React.Component {
       hydrant,
     } = this.props;
 
-    const { name, showDetails, message } = this.state
-    const hydrantElevation = hydrant.get('elevation')
+    const { name, showDetails, message } = this.state;
+    const hydrantElevation = hydrant.get('elevation');
 
     return (
       <div>
         <OperationMessage
-          setMessageToNull={()=> this.setState({ message:null })}
+          setMessageToNull={() => this.setState({ message: null })}
           message={message}
-         />
+        />
 
         <ListItem
           onMouseLeave={() => this.toggleHighLight(hydrant.get('feature'), false)}
@@ -82,7 +81,7 @@ class HydrantListItem extends React.Component {
             <Grid item xs={8}>
               <FormControl fullWidth>
                 <Input
-                  onBlur={(e) => { modifyHydrant(hydrant.get('id'), { name: e.target.value })}}
+                  onBlur={(e) => { modifyHydrant(hydrant.get('id'), { name: e.target.value }); }}
                   onChange={(e) => { this.setState({ name: e.target.value }); }}
                   value={name}
                   placeholder="Enter Hydrant Name"
@@ -100,7 +99,8 @@ class HydrantListItem extends React.Component {
             style={{ padding: 20 }}
             in={showDetails}
             timeout="auto"
-            unmountOnExit>
+            unmountOnExit
+          >
 
             <FormControl>
               <Input
@@ -115,19 +115,20 @@ class HydrantListItem extends React.Component {
                 onChange={(e) => { this.updateCoords(e, hydrant, 0); }}
               />
               <FormHelperText>Lng.</FormHelperText>
-               { hydrantElevation ? (
-                 <Input
-                   type="number"
-                   onChange={(e) => { modifyHydrant(hydrant.get('id'), { elevation: e.target.value }); }}
-                   value={hydrant.get('elevation') || 'Null'}
-                 />
+              { hydrantElevation ? (
+                <Input
+                  type="number"
+                  onChange={(e) => { modifyHydrant(hydrant.get('id'), { elevation: e.target.value }); }}
+                  value={hydrant.get('elevation') || 'Null'}
+                />
                ) : (
                  <Button
-                 style={{borderBottom: '1px solid'}}
-                 variant='flat'
-                 onClick={() => {
+                   style={{ borderBottom: '1px solid' }}
+                   variant="flat"
+                   onClick={() => {
                    getElevations()
-                   .then(elevMessage => this.setState({ message: elevMessage }))}}
+                   .then(elevMessage => this.setState({ message: elevMessage }));
+}}
                  >
                  Fetch
                  </Button>
@@ -137,7 +138,7 @@ class HydrantListItem extends React.Component {
           </Collapse>
         </ListItem>
       </div>
-    )
+    );
   }
 }
 

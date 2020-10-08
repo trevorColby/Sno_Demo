@@ -4,18 +4,18 @@ import GeoJSON from 'ol/format/geojson';
 import _ from 'lodash';
 import Immutable from 'immutable';
 import Projection from 'ol/proj';
-import MultiPolygon from 'ol/geom/multipolygon';
+// import MultiPolygon from 'ol/geom/multipolygon';
 import downloadjs from 'downloadjs';
 import { getMapStyle, convertTrailFeaturesToDonuts } from '../utils/mapUtils';
-import { hexToRgb } from '../utils/convertToRGB'
+import { hexToRgb } from '../utils/convertToRGB';
 import { Trail, Hydrant } from '../utils/records';
 import OperationMessage from './OperationMessage';
 
-//Material-Ui
-import { withStyles } from '@material-ui/core/';
+// Material-Ui
 import Dialog from '@material-ui/core/Dialog';
+import { withStyles } from '@material-ui/core/styles';
 import DialogTitle from '@material-ui/core/DialogTitle';
-import { FormGroup, FormControl, FormControlLabel,FormLabel, FormHelperText } from '@material-ui/core';
+import { FormGroup, FormControl, FormControlLabel, FormLabel, FormHelperText } from '@material-ui/core';
 import Select from '@material-ui/core/Select';
 import MenuItem from '@material-ui/core/MenuItem';
 import Typography from '@material-ui/core/Typography';
@@ -27,7 +27,7 @@ import Checkbox from '@material-ui/core/Checkbox';
 import Grid from '@material-ui/core/Grid';
 import TextField from '@material-ui/core/TextField';
 import Button from '@material-ui/core/Button';
-import {Tooltip} from '@material-ui/core/';
+import { Tooltip } from '@material-ui/core/';
 
 const csvHeaders = ['Trail_Name', 'Hyd_ID', 'Hyd_Elevation', 'Hyd_Longitude', 'Hyd_Latitude'];
 const legacyCsvHeaders = ['Trail_Name', 'Hyd_Index', 'Hyd_ID', 'Hyd_State', 'Hyd_Hours',
@@ -78,9 +78,9 @@ class ImportExport extends React.Component {
       // if the feature already has a name, use that if not/derive it from description
 
       if (feature.get('name')) {
-        name = feature.get('name')
+        name = feature.get('name');
       } else {
-        name = feature.get('description').split(',')[0] ;
+        name = feature.get('description').split(',')[0];
       }
       // if (feature.get('description')){
       //   name = feature.get('description').split(',')[0] ;
@@ -88,62 +88,67 @@ class ImportExport extends React.Component {
       //   name = feature.get('name')
       // }
 
-      const originalTrailName = name
+      const originalTrailName = name;
       name = _.words(name).join(' ');
       const coords = feature.getGeometry().getCoordinates()[0];
       const lonLatCoords = _.map(coords, pt => Projection.fromLonLat(pt.slice(0, 2)));
 
-      const featureFill = feature.getStyle().call(feature)[0].getFill()
+      const featureFill = feature.getStyle().call(feature)[0].getFill();
 
       let fillColor = '255,255,255';
       if (featureFill) {
-        fillColor = hexToRgb(featureFill.getColor()) || featureFill.getColor().slice(0, 3).join(',')
+        fillColor = hexToRgb(featureFill.getColor()) || featureFill.getColor().slice(0, 3).join(',');
       }
 
       feature.getGeometry().setCoordinates([lonLatCoords]);
       feature.setId(`t-${name}-${index}`);
-      feature.set('originalTrailName', originalTrailName)
+      feature.set('originalTrailName', originalTrailName);
       feature.set('name', name);
-      feature.set('fillColor', fillColor)
-      feature.unset('selected')
-      feature.changed()
+      feature.set('fillColor', fillColor);
+      feature.unset('selected');
+      feature.changed();
       feature.setStyle(getMapStyle);
 
       return new Trail({ name, features: [feature], fillColor });
     }
 
     function processHydrant(feature, index) {
-    let trailName, hydrantIndex, name, id
-    //Format is TrailName, hydrantIndex, hydrantName
-     if (feature.get('description') && feature.get('description').split(',').length == 3){
-       [trailName, hydrantIndex, name]  = feature.get('description').split(',');
-       //Make Sure there are no hyphens in the name that gets included w/ the ID
-        name = name.split('-').join('_')
+      let trailName,
+        hydrantIndex,
+        name,
+        id;
+      // Format is TrailName, hydrantIndex, hydrantName
+      if (feature.get('description') && feature.get('description').split(',').length == 3) {
+        [trailName, hydrantIndex, name] = feature.get('description').split(',');
+        // Make Sure there are no hyphens in the name that gets included w/ the ID
+        name = name.split('-').join('_');
         id = index + name;
-     } else {
-        id = new Date().getTime() + index
-        id = id.toString()
-        name = `${index + 1}`
-     }
+      } else {
+        id = new Date().getTime() + index;
+        id = id.toString();
+        name = `${index + 1}`;
+      }
 
-     if (feature.get('name')){
-       name = feature.get('name')
-     }
+      if (feature.get('name')) {
+        name = feature.get('name');
+      }
 
-      const originalTrailName = name
-    trailName = _.words(trailName).join(' ');
+      const originalTrailName = name;
+      trailName = _.words(trailName).join(' ');
       const trailObj = trails.find(t => t.get('name') === trailName);
       const trailId = trailObj ? trailObj.get('id') : null;
       const geometry = feature.getGeometry().getType() === 'Point' ?
         feature.getGeometry() : feature.getGeometry().getGeometries()[0];
       feature.setGeometry(geometry);
-      const coords = geometry.getCoordinates().slice(0,2);
-      feature.getGeometry().setCoordinates(Projection.fromLonLat(coords.slice(0,2)));
+      const coords = geometry.getCoordinates().slice(0, 2);
+      feature.getGeometry().setCoordinates(Projection.fromLonLat(coords.slice(0, 2)));
       feature.setId(`h-${id}-${index}`);
-      feature.set('originalTrailName', originalTrailName)
+      feature.set('originalTrailName', originalTrailName);
       feature.set('trailName', trailName);
       feature.setStyle(getMapStyle);
-      return new Hydrant({ id, name, coords, feature, trail: trailId });
+      return new Hydrant({
+        id, name, coords, feature, trail: trailId,
+      });
     }
 
     const reader = new FileReader();
@@ -177,11 +182,10 @@ class ImportExport extends React.Component {
           } else {
             const hydrant = processHydrant(feature, index);
 
-            //Only Allow Hydrants With ids
-            if (hydrant.get('id')){
+            // Only Allow Hydrants With ids
+            if (hydrant.get('id')) {
               newHydrants[hydrant.get('id')] = hydrant;
             }
-
           }
         });
 
@@ -190,22 +194,22 @@ class ImportExport extends React.Component {
 
         if (type == 'trail') {
           this.setState({
-            message: `${newTrailSize} new Trails imported!`
-          })
+            message: `${newTrailSize} new Trails imported!`,
+          });
         }
 
         if (type == 'hydrant') {
           this.setState({
-            message: `${newHydrantSize} new Hydrants imported!`
-          })
+            message: `${newHydrantSize} new Hydrants imported!`,
+          });
         }
 
         importKMLClicked({
           trails: Immutable.Map(newTrails).map(t => convertTrailFeaturesToDonuts(t)),
-          hydrants:  Immutable.Map(newHydrants),
+          hydrants: Immutable.Map(newHydrants),
         });
 
-        this.setState({selectedFiles: null})
+        this.setState({ selectedFiles: null });
       } catch (err) {
         // Put error wherever we want to display error msgs.
         console.log(err);
@@ -220,54 +224,54 @@ class ImportExport extends React.Component {
     const { trails, hydrants } = this.props;
     const { selectedExport, exportType, excludeOrphans } = this.state;
 
-    const trailFeatures = []
-    const hydrantFeatures = []
+    const trailFeatures = [];
+    const hydrantFeatures = [];
 
 
-    if(!excludeOrphans){
+    if (!excludeOrphans) {
       _.chain(hydrants.toJS())
         .values()
-        .filter({trail: null})
+        .filter({ trail: null })
         .value()
-        .forEach((h)=>{
-           const feature = h.feature
-           feature.unset('selected')
-           hydrantFeatures.push(feature)
-        })
+        .forEach((h) => {
+          const feature = h.feature;
+          feature.unset('selected');
+          hydrantFeatures.push(feature);
+        });
     }
     trails
-      .sortBy((a) => a.get('name'))
+      .sortBy(a => a.get('name'))
       .valueSeq()
       .forEach((v, trailIndex) => {
-      let trailName = v.get('name').split(' ').join('_')
-      // Iterate through Trail's Features
-      v.get('features').forEach((f, fIndex) => {
-        if (f.get('originalTrailName') && !trailName) {
-          trailName = f.get('originalTrailName')
-        }
-        const description = `${trailName},${trailIndex + fIndex + 1}`
-        f.unset('features')
-        f.set('description', description)
-        f.setStyle(getMapStyle)
-        trailFeatures.push(f)
-      })
-      // Iterate through Trail's Hydrants
-      _.chain(hydrants.toJS())
-        .values()
-        .filter({ trail: v.get('id') })
-        .sort((a, b) => {
-          if(a.name && b.name) {
-            return a.name.localeCompare(b.name, undefined, { numeric: true })
+        let trailName = v.get('name').split(' ').join('_');
+        // Iterate through Trail's Features
+        v.get('features').forEach((f, fIndex) => {
+          if (f.get('originalTrailName') && !trailName) {
+            trailName = f.get('originalTrailName');
           }
-        })
-        .value()
-        .forEach((h, index) => {
-           const feature = h.feature
-           feature.set('description', `${trailName},${index + 1},${feature.get('name')}`)
-           feature.unset('selected')
-           hydrantFeatures.push(feature)
-         })
-    })
+          const description = `${trailName},${trailIndex + fIndex + 1}`;
+          f.unset('features');
+          f.set('description', description);
+          f.setStyle(getMapStyle);
+          trailFeatures.push(f);
+        });
+        // Iterate through Trail's Hydrants
+        _.chain(hydrants.toJS())
+          .values()
+          .filter({ trail: v.get('id') })
+          .sort((a, b) => {
+            if (a.name && b.name) {
+              return a.name.localeCompare(b.name, undefined, { numeric: true });
+            }
+          })
+          .value()
+          .forEach((h, index) => {
+            const feature = h.feature;
+            feature.set('description', `${trailName},${index + 1},${feature.get('name')}`);
+            feature.unset('selected');
+            hydrantFeatures.push(feature);
+          });
+      });
 
     const ext = exportType === 'GJ' ? 'json' : 'kml';
 
@@ -285,7 +289,7 @@ class ImportExport extends React.Component {
   }
 
   generateCSV = () => {
-    const trailGeo = {}
+    const trailGeo = {};
     const { hydrants, trails } = this.props;
     // console.log('Trails...');
     // console.log(trails);
@@ -298,11 +302,11 @@ class ImportExport extends React.Component {
     trailsRows.push([trailCsvHeaders]);
 
     trails.keySeq().forEach((trailId) => {
-      const trail = trails.get(trailId)
-      let trailName = trail.get('name').split(' ').join('_')
+      const trail = trails.get(trailId);
+      let trailName = trail.get('name').split(' ').join('_');
 
       if (trail.get('features')[0]) {
-        trailName = trail.get('features')[0].get('originalTrailName') ? trail.get('features')[0].get('originalTrailName') : trailName
+        trailName = trail.get('features')[0].get('originalTrailName') ? trail.get('features')[0].get('originalTrailName') : trailName;
       }
 
       // Build GeoJSON for trials - convert to Lat Lon
@@ -315,107 +319,108 @@ class ImportExport extends React.Component {
         .values()
         .filter({ trail: trailId })
         .sort((a, b) => {
-          if(a.name && b.name) {
-            return a.name.localeCompare(b.name, undefined, { numeric: true })
+          if (a.name && b.name) {
+            return a.name.localeCompare(b.name, undefined, { numeric: true });
           }
         })
         .value();
 
-        if (this.state.useLegacyCSV) {
-          for (let i = 0; i < 100; i += 1) {
-            let hydId = i + 1
-            let elevation = 0
-            let longitude = 0;
-            let latitude = 0;
-            if (trailHydrants[i]) {
-              hydId = trailHydrants[i].name
-              elevation = trailHydrants[i].elevation
-              longitude = JSON.stringify(trailHydrants[i].coords[0] || 0);
-              latitude = JSON.stringify(trailHydrants[i].coords[1] || 0);
-            }
-            hydrantsRows.push([
-              trailName, i + 1, hydId, 0, 0,  
-              'None', 0, 'None', elevation, 0,
-              0, 0, 'None', longitude, latitude
-            ]);
+      if (this.state.useLegacyCSV) {
+        for (let i = 0; i < 100; i += 1) {
+          let hydId = i + 1;
+          let elevation = 0;
+          let longitude = 0;
+          let latitude = 0;
+          if (trailHydrants[i]) {
+            hydId = trailHydrants[i].name;
+            elevation = trailHydrants[i].elevation;
+            longitude = JSON.stringify(trailHydrants[i].coords[0] || 0);
+            latitude = JSON.stringify(trailHydrants[i].coords[1] || 0);
           }
-        } else {
-          trailHydrants.forEach((hydrant) => {
-            //console.log(hydrant.coords);
-            hydrantsRows.push([
-              trailName, 
-              hydrant.name, 
-              hydrant.elevation || 0,
-              JSON.stringify(hydrant.coords[0] || 0),
-              JSON.stringify(hydrant.coords[1] || 0)  
-            ])
-          })
+          hydrantsRows.push([
+            trailName, i + 1, hydId, 0, 0,
+            'None', 0, 'None', elevation, 0,
+            0, 0, 'None', longitude, latitude,
+          ]);
         }
+      } else {
+        trailHydrants.forEach((hydrant) => {
+          // console.log(hydrant.coords);
+          hydrantsRows.push([
+            trailName,
+            hydrant.name,
+            hydrant.elevation || 0,
+            JSON.stringify(hydrant.coords[0] || 0),
+            JSON.stringify(hydrant.coords[1] || 0),
+          ]);
+        });
+      }
       trailsRows.push([trailName, trailGeo[trailName]]);
     //  console.log(trailGeo[trailName]);
-    //console.log(hydrantsRows);
-    //console.log(trailGeo);
+    // console.log(hydrantsRows);
+    // console.log(trailGeo);
     });
 
     // Download the Hydrant CSV
-    const lineArray = []
+    const lineArray = [];
     hydrantsRows.forEach((r, i) => {
-      const line = r.join(",")
-      lineArray.push(i === 0 ? "data:text/csv;charset=utf-8," + line : line)
+      const line = r.join(',');
+      lineArray.push(i === 0 ? `data:text/csv;charset=utf-8,${line}` : line);
     });
-    const csvContent = lineArray.join("\n")
+    const csvContent = lineArray.join('\n');
     const encodedUri = encodeURI(csvContent);
-    downloadjs(encodedUri, `Hydrants_Table.csv`);
+    downloadjs(encodedUri, 'Hydrants_Table.csv');
 
     // Download Trail CSV
-    const trailLineArray = ["data:text/csv;charset=utf-8,", trailCsvHeaders];
-    Object.keys(trailGeo).forEach(key => {
+    const trailLineArray = ['data:text/csv;charset=utf-8,', trailCsvHeaders];
+    Object.keys(trailGeo).forEach((key) => {
       // quotes are to prevent csv parser from separating values into new columns
-      trailLineArray.push([key, '"' + JSON.stringify(trailGeo[key]) + '"']); 
+      trailLineArray.push([key, `"${JSON.stringify(trailGeo[key])}"`]);
     });
 
-    const trailCsvContent = trailLineArray.join("\n");
+    const trailCsvContent = trailLineArray.join('\n');
     const trailEncodedUri = encodeURI(trailCsvContent);
-    downloadjs(trailEncodedUri, `Trails_Table.csv`);
+    downloadjs(trailEncodedUri, 'Trails_Table.csv');
   }
 
   handleSelect = (event) => {
     this.setState({
-      selectedExport: event.target.value
-    })
+      selectedExport: event.target.value,
+    });
   }
 
   render() {
     const { classes, setImportExportOpen, importExportOpen } = this.props;
 
-    const { selectedExport, selectedFiles, message  } = this.state;
+    const { selectedExport, selectedFiles, message } = this.state;
 
 
     return (
-      <div style={{display: 'inline'}}>
+      <div style={{ display: 'inline' }}>
 
         <OperationMessage
           setMessageToNull={() => { this.setState({ message: null }); }}
           message={message}
-         />
+        />
 
         <Dialog onBackdropClick={() => setImportExportOpen(false)} open={importExportOpen} >
           <DialogTitle >Import Export</DialogTitle>
 
-          <Grid container style={{padding:15}}>
+          <Grid container style={{ padding: 15 }}>
             <Grid item xs={6}>
               <FormControl className={classes.formControl}>
                 <FormLabel>Import</FormLabel>
                 <FormGroup>
-                  <div style={{width: '100%', paddingLeft: 10}}>
+                  <div style={{ width: '100%', paddingLeft: 10 }}>
                     <input
                       className={classes.input}
                       onChange={this.changeFile}
-                      type="file" accept=".kml"
+                      type="file"
+                      accept=".kml"
                       id="file-upload"
                     />
                     <Input
-                      value={ selectedFiles && selectedFiles[0] ? selectedFiles[0].name : "" }
+                      value={selectedFiles && selectedFiles[0] ? selectedFiles[0].name : ''}
                     />
                     <label htmlFor="file-upload">
                       <Button
@@ -430,8 +435,9 @@ class ImportExport extends React.Component {
                     </label>
                     <Button
                       onClick={this.importFile}
-                      color='primary'
-                    > Import </Button>
+                      color="primary"
+                    > Import
+                    </Button>
                   </div>
                 </FormGroup>
               </FormControl>
@@ -439,72 +445,73 @@ class ImportExport extends React.Component {
 
             <Grid item xs={6}>
 
-            <FormLabel> Export </FormLabel>
-            <FormControl fullWidth className={classes.formControl}>
-                  <Select
-                    value={this.state.selectedExport}
-                    onChange={(e)=> { this.setState({
+              <FormLabel> Export </FormLabel>
+              <FormControl fullWidth className={classes.formControl}>
+                <Select
+                  value={this.state.selectedExport}
+                  onChange={(e) => {
+ this.setState({
                       selectedExport: e.target.value,
-                      exportName: e.target.value
-                    })}}
-                  >
-                    <MenuItem value={'trails'}>Trails</MenuItem>
-                    <MenuItem value={'hydrants'}>Hydrants</MenuItem>
-                  </Select>
-                  <FormHelperText> Layer </FormHelperText>
+                      exportName: e.target.value,
+                    });
+}}
+                >
+                  <MenuItem value="trails">Trails</MenuItem>
+                  <MenuItem value="hydrants">Hydrants</MenuItem>
+                </Select>
+                <FormHelperText> Layer </FormHelperText>
 
-                  <Select
-                    value={this.state.exportType}
-                    onChange={(e)=> { this.setState({ exportType: e.target.value })}}
-                  >
-                    <MenuItem value={'KML'}>KML</MenuItem>
-                    <MenuItem value={'GJ'}>GeoJson</MenuItem>
-                  </Select>
-                  <FormHelperText> Format </FormHelperText>
+                <Select
+                  value={this.state.exportType}
+                  onChange={(e) => { this.setState({ exportType: e.target.value }); }}
+                >
+                  <MenuItem value="KML">KML</MenuItem>
+                  <MenuItem value="GJ">GeoJson</MenuItem>
+                </Select>
+                <FormHelperText> Format </FormHelperText>
 
-              <Grid style={{marginTop:15}} item xs={6}>
-                <FormControl>
-                  <Input
-                    id='export-name'
-                    value={this.state.exportName}
-                    onChange={(e)=> {this.setState({exportName: e.target.value})}}
-                  />
-                  <FormHelperText>File Name </FormHelperText>
-                </FormControl>
-              </Grid>
-            </FormControl>
+                <Grid style={{ marginTop: 15 }} item xs={6}>
+                  <FormControl>
+                    <Input
+                      id="export-name"
+                      value={this.state.exportName}
+                      onChange={(e) => { this.setState({ exportName: e.target.value }); }}
+                    />
+                    <FormHelperText>File Name </FormHelperText>
+                  </FormControl>
+                </Grid>
+              </FormControl>
 
-            {
+              {
               selectedExport === 'hydrants' ? (
                 <FormControlLabel
                   control={
                     <Checkbox
                       checked={this.state.excludeOrphans}
-                      onChange={()=> {this.setState({excludeOrphans: !this.state.excludeOrphans})}}
+                      onChange={() => { this.setState({ excludeOrphans: !this.state.excludeOrphans }); }}
                       color="primary"
                     />
                   }
-                  label='Exclude Orphans'
+                  label="Exclude Orphans"
                 />
               ) : (null)
             }
 
-                  <Button color='primary' onClick={this.exportFile} > Export {this.state.exportType} </Button>
-                   <Button
-                     color='primary'
-                     onClick={this.generateCSV}
-                   >
+              <Button color="primary" onClick={this.exportFile} > Export {this.state.exportType} </Button>
+              <Button
+                color="primary"
+                onClick={this.generateCSV}
+              >
                    Download Hydrants CSV
-                  </Button>
-                  <Tooltip title="Use Legacy CSV Format"
-                    >
-                    <Checkbox
-                      checked={this.state.useLegacyCSV}
-                      onChange={()=> {this.setState({useLegacyCSV: !this.state.useLegacyCSV})}}
-                      color="primary"
-                    />
-                  </Tooltip>
-                </Grid>
+              </Button>
+              <Tooltip title="Use Legacy CSV Format">
+                <Checkbox
+                  checked={this.state.useLegacyCSV}
+                  onChange={() => { this.setState({ useLegacyCSV: !this.state.useLegacyCSV }); }}
+                  color="primary"
+                />
+              </Tooltip>
+            </Grid>
           </Grid>
         </Dialog>
       </div>

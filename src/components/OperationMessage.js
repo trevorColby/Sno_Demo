@@ -2,15 +2,8 @@ import React from 'react';
 import Snackbar from '@material-ui/core/Snackbar';
 
 class OperationMessage extends React.Component {
-
   state = {
-    open: false
-  }
-
-  setOpen = (bool) => {
-    this.setState({
-      open: bool
-    });
+    open: false,
   }
 
   componentWillReceiveProps(next) {
@@ -21,19 +14,24 @@ class OperationMessage extends React.Component {
     }
   }
 
-  render() {
+  setOpen = (bool) => {
+    this.setState({
+      open: bool,
+    });
+  }
 
-    const { message, setMessageToNull } = this.props
+  render() {
+    const { message, setMessageToNull } = this.props;
 
     return (
       <Snackbar
         open={this.state.open}
         autoHideDuration={3000}
         message={message}
-        onClose={()=> { setMessageToNull(); this.setState({ open: false})}}
-        anchorOrigin={{ vertical: 'bottom', horizontal: 'left'}}
+        onClose={() => { setMessageToNull(); this.setState({ open: false }); }}
+        anchorOrigin={{ vertical: 'bottom', horizontal: 'left' }}
       />
-    )
+    );
   }
 }
 
